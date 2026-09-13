@@ -8,6 +8,7 @@ export interface Member {
   /** ISO country of origin, drives the flag in the UI (e.g. "NZ", "AU", "GB"). */
   country: string;
   avatarColor: string; // deterministic placeholder tint; real app uses a photo URL
+  avatarUrl?: string; // real photo once uploaded (Phase 5); falls back to the tint
   /** Free-form facts we can find overlaps against (city moved from, uni, gyms, interests). */
   traits: Trait[];
 }
@@ -67,6 +68,7 @@ export interface Listing {
   lat: number;
   lng: number;
   photoColor: string; // placeholder tint for the demo (no bundled photos)
+  photoUrl?: string; // real photo once uploaded (Phase 5); falls back to the tint
   tags: string[]; // filterable amenities/vibe: "Quiet", "Pet-friendly", "Near tube", ...
 }
 

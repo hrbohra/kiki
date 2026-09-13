@@ -4,10 +4,11 @@ import { WorldModule } from './world/world.module';
 import { AuthModule } from './auth/auth.module';
 import { WritesModule } from './writes/writes.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { MediaModule } from './media/media.module';
 import { HealthController } from './health.controller';
 
 @Module({
-  imports: [PrismaModule, WorldModule, AuthModule, WritesModule, MessagingModule],
+  imports: [PrismaModule, WorldModule, AuthModule, WritesModule, MessagingModule, MediaModule],
   controllers: [HealthController],
 })
 export class AppModule {}

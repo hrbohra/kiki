@@ -12,12 +12,17 @@ import { RequestsService } from './writes/requests.service';
 import { TripsService } from './writes/trips.service';
 import { GuestBookService } from './writes/guestbook.service';
 import { MessagingService } from './messaging/messaging.service';
+import { MediaService } from './media/media.service';
+import { UPLOADS_DIR } from './media/media.module';
 import { makeCreateContext, makeCreateWsContext, type ContextDeps } from './trpc/context';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.enableShutdownHooks();
+
+  // Serve locally-stored uploads (no-op when using Vercel Blob, which serves from its own CDN).
+  app.useStaticAssets(UPLOADS_DIR, { prefix: '/media/' });
 
   // Resolve the services once; share them between the HTTP and WebSocket transports.
   const deps: ContextDeps = {
@@ -27,6 +32,7 @@ async function bootstrap(): Promise<void> {
     trips: app.get(TripsService),
     guestbook: app.get(GuestBookService),
     messaging: app.get(MessagingService),
+    media: app.get(MediaService),
   };
 
   // HTTP: mount tRPC on Nest's Express instance.

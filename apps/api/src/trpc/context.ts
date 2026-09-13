@@ -6,6 +6,7 @@ import type { RequestsService } from '../writes/requests.service';
 import type { TripsService } from '../writes/trips.service';
 import type { GuestBookService } from '../writes/guestbook.service';
 import type { MessagingService } from '../messaging/messaging.service';
+import type { MediaService } from '../media/media.service';
 import type { Context } from './trpc';
 
 export interface ContextDeps {
@@ -15,6 +16,7 @@ export interface ContextDeps {
   trips: TripsService;
   guestbook: GuestBookService;
   messaging: MessagingService;
+  media: MediaService;
 }
 
 /** HTTP context: resolves the user from the Authorization header. */

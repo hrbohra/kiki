@@ -29,6 +29,7 @@ export class WorldRepository {
         name: m.name,
         country: m.country,
         avatarColor: m.avatarColor,
+        avatarUrl: m.avatarUrl ?? undefined,
         traits: m.traits.map((t) => ({
           kind: t.kind,
           key: t.key,
@@ -55,6 +56,7 @@ export class WorldRepository {
         lat: l.lat,
         lng: l.lng,
         photoColor: l.photoColor,
+        photoUrl: l.photoUrl ?? undefined,
         tags: l.tags,
       })),
       reviews: reviews.map((r) => ({

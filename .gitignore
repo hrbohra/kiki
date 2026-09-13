@@ -22,3 +22,6 @@ dist-web/
 coverage/
 .DS_Store
 *.log
+
+# local media uploads (dev storage)
+.uploads/

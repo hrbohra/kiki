@@ -40,6 +40,7 @@ model Member {
   name        String
   country     String
   avatarColor String
+  avatarUrl   String?
   createdAt   DateTime @default(now())
 
   traits        Trait[]
@@ -115,6 +116,7 @@ model Listing {
   lat           Float
   lng           Float
   photoColor    String
+  photoUrl      String?
   tags          String[]
 
   host         Member        @relation(fields: [hostId], references: [id], onDelete: Cascade)
