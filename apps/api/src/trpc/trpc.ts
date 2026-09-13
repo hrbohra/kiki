@@ -7,6 +7,7 @@ import type { TripsService } from '../writes/trips.service';
 import type { GuestBookService } from '../writes/guestbook.service';
 import type { MessagingService } from '../messaging/messaging.service';
 import type { MediaService } from '../media/media.service';
+import type { IntroService } from '../ai/intro.service';
 
 /** tRPC request context — services resolved from Nest, plus the current user (if authenticated). */
 export interface Context {
@@ -17,6 +18,7 @@ export interface Context {
   guestbook: GuestBookService;
   messaging: MessagingService;
   media: MediaService;
+  ai: IntroService;
   user: SessionUser | null;
 }
 

@@ -14,6 +14,7 @@ import { GuestBookService } from './writes/guestbook.service';
 import { MessagingService } from './messaging/messaging.service';
 import { MediaService } from './media/media.service';
 import { UPLOADS_DIR } from './media/media.module';
+import { IntroService } from './ai/intro.service';
 import { makeCreateContext, makeCreateWsContext, type ContextDeps } from './trpc/context';
 
 async function bootstrap(): Promise<void> {
@@ -33,6 +34,7 @@ async function bootstrap(): Promise<void> {
     guestbook: app.get(GuestBookService),
     messaging: app.get(MessagingService),
     media: app.get(MediaService),
+    ai: app.get(IntroService),
   };
 
   // HTTP: mount tRPC on Nest's Express instance.

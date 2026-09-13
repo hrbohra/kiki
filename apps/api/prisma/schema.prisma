@@ -382,3 +382,16 @@ model Message {
   @@index([threadId])
   @@map("messages")
 }
+
+// ─── AI (Phase 6): server-side intro generation, resilient ───────────────────
+
+/// Cache of generated intros keyed by the hash of the exact (voice + facts) prompt, so a demo
+/// survives quota exhaustion: live model → cache → baked → deterministic compose.
+model AiCache {
+  promptHash String   @id
+  text       String
+  model      String?
+  createdAt  DateTime @default(now())
+
+  @@map("ai_cache")
+}
