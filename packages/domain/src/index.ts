@@ -19,6 +19,12 @@ export * from './domain/generated';
 export * from './pipeline/nlp';
 export * from './pipeline/tiering';
 
-// `world` re-exports a few names (e.g. Contribution) that also live in ./domain/types,
-// so it is exposed as a namespace to avoid duplicate-export collisions.
+// The data-source-agnostic composition factory + its types, for building a World from any
+// source (the API feeds it Postgres rows; the apps use the fixtures-bound default).
+export { createWorld } from './world';
+export type { World, WorldData } from './world';
+
+// `world` also exposes the fixtures-bound default selectors as a namespace. It re-exports a few
+// names (e.g. Contribution) that also live in ./domain/types, so it stays namespaced to avoid
+// duplicate-export collisions.
 export * as world from './world';

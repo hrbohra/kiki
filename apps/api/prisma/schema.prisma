@@ -1,0 +1,172 @@
+// Kiki system-of-record. Models mirror @kiki/domain types (packages/domain/src/domain/types.ts)
+// 1:1, so the same schema holds the seeded demo world AND Kiki's real imported data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum TraitKind {
+  origin
+  education
+  interest
+  work
+  event
+}
+
+enum Provenance {
+  matched
+  inferred
+  self_declared
+}
+
+enum ContributionKind {
+  hosted
+  vouched
+  referred
+  reviewed
+  attended
+  stayed
+}
+
+/// A member of the Kiki trust network.
+model Member {
+  id          String   @id
+  name        String
+  country     String
+  avatarColor String
+  createdAt   DateTime @default(now())
+
+  traits        Trait[]
+  listings      Listing[]
+  contributions Contribution[]
+  generated     GeneratedContent?
+
+  vouchesGiven    Vouch[] @relation("vouchFrom")
+  vouchesReceived Vouch[] @relation("vouchTo")
+
+  reviewsAsHost   Review[] @relation("reviewHost")
+  reviewsAuthored Review[] @relation("reviewAuthor")
+
+  guestReviewsAbout    GuestReview[] @relation("guestSubject")
+  guestReviewsAuthored GuestReview[] @relation("guestAuthor")
+
+  @@map("members")
+}
+
+/// A profile fact we can find overlaps against.
+model Trait {
+  id         String     @id @default(cuid())
+  memberId   String
+  kind       TraitKind
+  key        String
+  label      String
+  provenance Provenance @default(self_declared)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([key])
+  @@map("traits")
+}
+
+/// A directed trust edge: `from` personally vouches for `to`.
+model Vouch {
+  id               String  @id @default(cuid())
+  fromId           String
+  toId             String
+  note             String?
+  noteSubject      String? // free-text display name the note is about (not a member ref)
+  consentToDisplay Boolean @default(false)
+  stays            Int?
+  sharedEvents     Int?
+
+  from Member @relation("vouchFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Member @relation("vouchTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([toId])
+  @@map("vouches")
+}
+
+/// A listing a member offers while away.
+model Listing {
+  id            String   @id
+  hostId        String
+  title         String
+  area          String
+  pricePerNight Int
+  kind          String // "Room" | "Whole place" (kept as text to match the domain literal)
+  lat           Float
+  lng           Float
+  photoColor    String
+  tags          String[]
+
+  host    Member   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  reviews Review[]
+
+  @@index([hostId])
+  @@map("listings")
+}
+
+/// A guest-book entry: what a guest wrote about a stay.
+model Review {
+  id        String @id
+  hostId    String
+  authorId  String
+  listingId String
+  text      String
+  day       Int
+
+  host    Member  @relation("reviewHost", fields: [hostId], references: [id], onDelete: Cascade)
+  author  Member  @relation("reviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([hostId])
+  @@map("reviews")
+}
+
+/// A review written about a guest by a host who hosted them (cold-state track record).
+model GuestReview {
+  id        String @id
+  subjectId String
+  authorId  String
+  text      String
+  day       Int
+
+  subject Member @relation("guestSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+  author  Member @relation("guestAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId])
+  @@map("guest_reviews")
+}
+
+/// One thing a member did for the community; drives their tier/standing.
+model Contribution {
+  id       String           @id @default(cuid())
+  memberId String
+  kind     ContributionKind
+  day      Int
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("contributions")
+}
+
+/// AI-generated content baked per member (intro / bio / guest-book summary).
+model GeneratedContent {
+  memberId  String  @id
+  intro     String?
+  bio       String?
+  guestBook Json?
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("generated_content")
+}
