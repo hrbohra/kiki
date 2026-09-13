@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Kiki Connect",
+    "slug": "kiki-connect-demo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "kikiconnect",
+    "splash": {
+      "backgroundColor": "#F7F7F5",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
