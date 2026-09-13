@@ -46,6 +46,7 @@ model Member {
   listings      Listing[]
   contributions Contribution[]
   generated     GeneratedContent?
+  user          User?
 
   vouchesGiven    Vouch[] @relation("vouchFrom")
   vouchesReceived Vouch[] @relation("vouchTo")
@@ -169,4 +170,77 @@ model GeneratedContent {
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@map("generated_content")
+}
+
+// ─── Auth (Phase 2): passwordless, invite-gated accounts ─────────────────────
+
+/// A real user account. Passwordless (email OTP), invite-gated. Maps to a Member profile.
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  memberId    String?   @unique
+  invitedById String?
+  createdAt   DateTime  @default(now())
+  lastLoginAt DateTime?
+
+  member         Member?        @relation(fields: [memberId], references: [id])
+  invitedBy      User?          @relation("InviteTree", fields: [invitedById], references: [id])
+  invitees       User[]         @relation("InviteTree")
+  invitesCreated Invite[]       @relation("InviteCreator")
+  inviteClaimed  Invite?        @relation("InviteClaimer")
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+/// An invite code — the trust gate. Everyone joins through a friend.
+model Invite {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  email       String? // optional targeted invite
+  createdById String
+  claimedById String?   @unique
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  createdBy User  @relation("InviteCreator", fields: [createdById], references: [id])
+  claimedBy User? @relation("InviteClaimer", fields: [claimedById], references: [id])
+
+  @@index([code])
+  @@map("invites")
+}
+
+/// A one-time passwordless code sent to an email (stored hashed, attempt-limited).
+model OtpToken {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    String // "login" | "signup"
+  inviteCode String? // carried through signup so verify can claim it
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@map("otp_tokens")
+}
+
+/// A refresh token (stored hashed) with rotation + family-based reuse detection.
+model RefreshToken {
+  id           String    @id @default(cuid())
+  userId       String
+  tokenHash    String    @unique
+  familyId     String
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
 }

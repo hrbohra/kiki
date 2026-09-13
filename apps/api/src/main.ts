@@ -5,21 +5,24 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { AppModule } from './app.module';
 import { appRouter } from './trpc/app.router';
 import { WorldService } from './world/world.service';
+import { AuthService } from './auth/auth.service';
+import { makeCreateContext } from './trpc/context';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.enableShutdownHooks();
 
-  // Mount the tRPC router on Nest's underlying Express instance. WorldService is resolved
-  // from the Nest container and passed into every tRPC request context.
+  // Mount the tRPC router on Nest's underlying Express instance. Services are resolved from the
+  // Nest container; the context factory also resolves the current user from the auth header.
   const world = app.get(WorldService);
+  const auth = app.get(AuthService);
   const express = app.getHttpAdapter().getInstance();
   express.use(
     '/trpc',
     createExpressMiddleware({
       router: appRouter,
-      createContext: () => ({ world }),
+      createContext: makeCreateContext(world, auth),
     }),
   );
 

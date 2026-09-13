@@ -20,7 +20,11 @@ const prisma = new PrismaClient({
 });
 
 async function main(): Promise<void> {
-  // Clear in FK-safe order.
+  // Clear in FK-safe order (auth tables first, then the world).
+  await prisma.refreshToken.deleteMany();
+  await prisma.otpToken.deleteMany();
+  await prisma.invite.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.generatedContent.deleteMany();
   await prisma.contribution.deleteMany();
   await prisma.guestReview.deleteMany();
@@ -123,6 +127,14 @@ async function main(): Promise<void> {
     }
   }
 
+  // Bootstrap: an account for the demo viewer ("you") + a root invite for testing signups.
+  const rootEmail = (process.env.SEED_ROOT_EMAIL || 'you@kiki.demo').toLowerCase();
+  const rootUser = await prisma.user.create({
+    data: { email: rootEmail, name: 'You', memberId: 'you' },
+  });
+  const rootInvite = 'KIKI-FOUNDER';
+  await prisma.invite.create({ data: { code: rootInvite, createdById: rootUser.id } });
+
   const counts = {
     members: members.length,
     listings: listings.length,
@@ -133,6 +145,8 @@ async function main(): Promise<void> {
   };
   // eslint-disable-next-line no-console
   console.log('Seed complete:', counts);
+  // eslint-disable-next-line no-console
+  console.log('Bootstrap account:', rootEmail, '| root invite code:', rootInvite);
 }
 
 main()
