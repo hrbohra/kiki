@@ -62,6 +62,10 @@ model Member {
   trips               Trip[]        @relation("tripAuthor")
   tripOffers          TripOffer[]   @relation("offerHost")
 
+  threadsA     Thread[]  @relation("threadA")
+  threadsB     Thread[]  @relation("threadB")
+  messagesSent Message[] @relation("msgSender")
+
   @@map("members")
 }
 
@@ -337,4 +341,42 @@ model IdempotencyKey {
 
   @@unique([userId, key])
   @@map("idempotency_keys")
+}
+
+// ─── Messaging (Phase 4): persisted + real-time ──────────────────────────────
+
+/// A 1:1 direct-message thread. The pair (aId,bId) is stored normalised (aId < bId) so a thread
+/// is unique regardless of who opened it. `originNote` records how it opened (e.g. a vouch route).
+model Thread {
+  id         String   @id @default(cuid())
+  aId        String
+  bId        String
+  originNote String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  a        Member    @relation("threadA", fields: [aId], references: [id], onDelete: Cascade)
+  b        Member    @relation("threadB", fields: [bId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([aId, bId])
+  @@index([aId])
+  @@index([bId])
+  @@map("threads")
+}
+
+/// A single message in a thread. `readAt` is set when the recipient reads it.
+model Message {
+  id        String    @id @default(cuid())
+  threadId  String
+  senderId  String
+  text      String
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender Member @relation("msgSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@map("messages")
 }

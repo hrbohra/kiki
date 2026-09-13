@@ -1,9 +1,11 @@
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import type { CreateWSSContextFnOptions } from '@trpc/server/adapters/ws';
 import type { WorldService } from '../world/world.service';
 import type { AuthService } from '../auth/auth.service';
 import type { RequestsService } from '../writes/requests.service';
 import type { TripsService } from '../writes/trips.service';
 import type { GuestBookService } from '../writes/guestbook.service';
+import type { MessagingService } from '../messaging/messaging.service';
 import type { Context } from './trpc';
 
 export interface ContextDeps {
@@ -12,13 +14,21 @@ export interface ContextDeps {
   requests: RequestsService;
   trips: TripsService;
   guestbook: GuestBookService;
+  messaging: MessagingService;
 }
 
-/** Builds the per-request tRPC context: injects the Nest services and resolves the user from
- *  the Authorization header. */
+/** HTTP context: resolves the user from the Authorization header. */
 export function makeCreateContext(deps: ContextDeps) {
   return ({ req }: CreateExpressContextOptions): Context => ({
     ...deps,
     user: deps.auth.userFromAuthHeader(req.headers.authorization),
   });
+}
+
+/** WebSocket context: resolves the user from connectionParams.token (WS has no auth header). */
+export function makeCreateWsContext(deps: ContextDeps) {
+  return (opts: CreateWSSContextFnOptions): Context => {
+    const params = opts.info?.connectionParams as { token?: string } | undefined;
+    return { ...deps, user: deps.auth.userFromToken(params?.token) };
+  };
 }

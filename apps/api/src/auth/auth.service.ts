@@ -161,8 +161,15 @@ export class AuthService {
   /** Resolve the current user from an Authorization: Bearer <access> header. Null if absent/invalid. */
   userFromAuthHeader(header: string | undefined): SessionUser | null {
     if (!header?.startsWith('Bearer ')) return null;
+    return this.userFromToken(header.slice(7));
+  }
+
+  /** Resolve the current user from a raw access token (used by the WebSocket transport, which
+   *  passes the token via connectionParams rather than a header). Null if invalid. */
+  userFromToken(token: string | undefined): SessionUser | null {
+    if (!token) return null;
     try {
-      const claims = verifyAccess(header.slice(7));
+      const claims = verifyAccess(token);
       return { id: claims.sub, email: claims.email };
     } catch {
       return null;

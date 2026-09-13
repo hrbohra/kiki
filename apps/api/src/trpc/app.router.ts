@@ -7,6 +7,7 @@ import { graphRouter } from './routers/graph.router';
 import { requestsRouter } from './routers/requests.router';
 import { tripsRouter } from './routers/trips.router';
 import { guestBookRouter } from './routers/guestbook.router';
+import { messagingRouter } from './routers/messaging.router';
 
 /** The root tRPC router. Its type is exported for the type-safe client (@kiki/api-client). */
 export const appRouter = router({
@@ -18,6 +19,7 @@ export const appRouter = router({
   requests: requestsRouter,
   trips: tripsRouter,
   guestbook: guestBookRouter,
+  messaging: messagingRouter,
 });
 
 export type AppRouter = typeof appRouter;
