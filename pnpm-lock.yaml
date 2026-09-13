@@ -110,6 +110,22 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.2)
 
+  packages/api-client:
+    dependencies:
+      '@trpc/client':
+        specifier: ^11.0.0
+        version: 11.18.0(@trpc/server@11.18.0(typescript@5.9.3))(typescript@5.9.3)
+      superjson:
+        specifier: ^2.2.2
+        version: 2.2.6
+    devDependencies:
+      '@kiki/api':
+        specifier: workspace:*
+        version: link:../../apps/api
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   packages/domain:
     devDependencies:
       tsup:

@@ -2,10 +2,16 @@
   "name": "@kiki/api",
   "version": "0.1.0",
   "private": true,
+  "exports": {
+    "./contract": {
+      "types": "./dist/contract.d.ts",
+      "default": "./dist/contract.js"
+    }
+  },
   "scripts": {
     "dev": "concurrently -k -n tsc,api \"tsc -w -p tsconfig.build.json\" \"dotenv -e ../../.env -- node --watch dist/main.js\"",
     "start": "dotenv -e ../../.env -- node dist/main.js",
-    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "build": "prisma generate && tsc -p tsconfig.build.json && tsc -p tsconfig.types.json",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "migrate": "dotenv -e ../../.env -- prisma migrate dev",
