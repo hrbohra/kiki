@@ -1,0 +1,24 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# env / secrets (never commit) — populate .env from .env.example
+.env
+.env.*
+!.env.example
+
+# expo / rn
+.expo/
+web-build/
+dist-web/
+
+# misc
+coverage/
+.DS_Store
+*.log

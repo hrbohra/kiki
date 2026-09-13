@@ -1,0 +1,46 @@
+{
+  "model": "gemini-3.6-flash",
+  "generatedAt": "2026-09-10T00:44:01.785Z",
+  "intros": {
+    "emma": "You and Maia share a strong set of common ground: you both moved to London from Mount Eden, studied in Paris in 2017, boulder at Blok Shoreditch, and were at the Dalston picnic in June. You are connected just two steps away through Sophie and Nina, who noted that Maia put Iris up for a week and left the place spotless. Beyond these shared experiences and mutual ties, further details about her stay history are not yet known.",
+    "katelin": "You and Katelin both studied in Paris in 2017, giving you a clear piece of shared ground. However, you are connected through two steps with no direct mutual friends listed to vouch for her, so little else is known about her hosting style yet.",
+    "danica": "You and Danica share a connection through bouldering at Blok Shoreditch. Although you are just one step away from her, there are currently no mutual friends listed who can vouch for her directly, so her personal track record in the network is not yet known.",
+    "ollie": "You and Ollie do not have any shared ground surfaced yet, and you are three steps apart on the network with no mutual friends to vouch for them. Because there are no shared connections or common traits listed, details about how you might align beyond the basic listing information are not yet known.",
+    "nate": "You and Nate both moved to London from Mount Eden, giving you a shared origin right from the start. Although you are two steps away on the network, there are currently no mutual friends to vouch for him directly, so further details about his hosting style are not yet known.",
+    "priya": "You do not have any surfaced shared ground with Priya, and there are no mutual friends available to vouch for her, though she is three steps away in your network. Because there are no direct connections or shared interests on record, not much is known yet about how you might align."
+  },
+  "bios": {
+    "emma": "I am Maia from New Zealand, now living in De Beauvoir after moving to London from Mount Eden and studying in Paris in 2017. I offer a quiet, female-only room with a WFH desk near the tube, and I regularly boulder at Blok Shoreditch.",
+    "katelin": "I am Katelin, an Australian living in London, offering a room in Finsbury Park for £38 a night. My place features a balcony, sits near the tube, and works well for long stays.",
+    "danica": "I am an Australian living in Tooting, London, where I offer a quiet, pet-friendly room with access to a garden. When I am not hosting guests, you can usually find me bouldering at Blok Shoreditch.",
+    "ollie": "I am Ollie from New Zealand, hosting my central studio in Peckham, London. My place offers the whole space to yourself, complete with an ensuite bathroom and a dedicated WFH desk.",
+    "nate": "I am from New Zealand and now rent out my whole flat in Hackney for long stays and shorter visits. The space is equipped with a dedicated WFH desk and a balcony.",
+    "priya": "I offer a female-only room in Bermondsey, London, for £46 a night. My place is central and conveniently located near the tube."
+  },
+  "guestBook": {
+    "emma": [
+      "Staying in De Beauvoir was wonderfully quiet, and the WFH desk and nearby tube made daily routines effortless.",
+      "I was hosted for a week and found the accommodation spotless, peaceful, and very convenient."
+    ],
+    "katelin": [
+      "Katelin's room in Finsbury Park was ideal for my long stay, especially with the balcony and easy access to the tube.",
+      "A comfortable and affordable spot in London at £38 a night, with Katelin being a helpful and straightforward host."
+    ],
+    "danica": [
+      "Danica's room in Tooting was wonderfully quiet, and spending time in the garden was a highlights of my trip.",
+      "A very welcoming and genuinely pet-friendly space that made my stay in London easy and comfortable."
+    ],
+    "ollie": [
+      "Staying at Ollie's studio in Peckham was straightforward and comfortable, especially with the private ensuite and the WFH desk setup.",
+      "Having the whole central studio to myself for fifty-two pounds a night made my stay in London easy and practical."
+    ],
+    "nate": [
+      "The WFH desk and setup in Hackney made my long stay at Nate's flat extremely practical.",
+      "It was great having the whole place to myself and spending time on the balcony during my stay in London."
+    ],
+    "priya": [
+      "Staying in Priya's room in Bermondsey was very convenient as it is central and right near the tube.",
+      "Priya's space provided a comfortable female-only room for my visit to London."
+    ]
+  }
+}
