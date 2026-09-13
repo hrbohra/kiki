@@ -2,6 +2,12 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '../trpc';
 
 export const authRouter = router({
+  /** Whether the frictionless demo path is available (drives the one-tap button in the UI). */
+  config: publicProcedure.query(({ ctx }) => ({ demoLogin: ctx.auth.demoEnabled() })),
+
+  /** One-tap demo sign-in (seeded member, no OTP) — only when demo mode is enabled. */
+  demoLogin: publicProcedure.mutation(({ ctx }) => ctx.auth.demoLogin()),
+
   /** Request an OTP. Existing email → login code; new email → requires a valid invite code. */
   requestOtp: publicProcedure
     .input(z.object({ email: z.string().email(), inviteCode: z.string().optional() }))

@@ -60,8 +60,34 @@ export class AuthService {
     private readonly email: EmailService,
   ) {}
 
-  /** Step 1: request a login (existing user) or signup (needs a valid invite) OTP. */
-  async requestOtp(input: { email: string; inviteCode?: string }): Promise<{ ok: true; purpose: 'login' | 'signup' }> {
+  /** Is the frictionless demo path enabled? On by default outside production; set DEMO_MODE=1 to
+   *  force it on (e.g. the public portfolio embed), DEMO_MODE=0 to force it off. */
+  demoEnabled(): boolean {
+    if (process.env.DEMO_MODE === '1') return true;
+    if (process.env.DEMO_MODE === '0') return false;
+    return process.env.NODE_ENV !== 'production';
+  }
+
+  /** One-tap demo sign-in: issues real tokens for a seeded member, no OTP. Only when demo is
+   *  enabled. Frictionless for recruiters; the real OTP flow still exists for credibility. */
+  async demoLogin(): Promise<{ user: PublicUser } & AuthTokens> {
+    if (!this.demoEnabled()) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Demo login is disabled.' });
+    }
+    const email = (process.env.DEMO_USER_EMAIL || 'you@kiki.demo').toLowerCase();
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new TRPCError({ code: 'NOT_FOUND', message: 'Demo user not seeded.' });
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    const tokens = await this.issueTokens(user, newFamilyId());
+    return { user: publicUser(user), ...tokens };
+  }
+
+  /** Step 1: request a login (existing user) or signup (needs a valid invite) OTP. In demo mode the
+   *  code is returned as `devCode` so the real flow is demoable on-screen without an inbox. */
+  async requestOtp(input: {
+    email: string;
+    inviteCode?: string;
+  }): Promise<{ ok: true; purpose: 'login' | 'signup'; devCode?: string }> {
     const email = normEmail(input.email);
     if (!this.otpLimiter.check(email)) {
       throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many codes requested. Try again later.' });
@@ -91,7 +117,7 @@ export class AuthService {
       data: { email, codeHash: hashToken(otp), purpose, inviteCode, expiresAt: minutesFromNow(OTP_TTL_MIN) },
     });
     await this.email.sendOtp(email, otp, purpose);
-    return { ok: true, purpose };
+    return { ok: true, purpose, ...(this.demoEnabled() ? { devCode: otp } : {}) };
   }
 
   /** Step 2: verify the OTP. Creates the account on first signup (claiming the invite), then issues tokens. */
