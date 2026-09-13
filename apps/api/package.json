@@ -12,7 +12,9 @@
     "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
     "db:push": "dotenv -e ../../.env -- prisma db push",
     "seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
-    "studio": "dotenv -e ../../.env -- prisma studio"
+    "import:data": "dotenv -e ../../.env -- tsx import/import.ts",
+    "studio": "dotenv -e ../../.env -- prisma studio",
+    "test": "dotenv -e ../../.env -- vitest run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -35,6 +37,7 @@
     "zod": "^3.24.1"
   },
   "optionalDependencies": {
+    "@sentry/node": "^8.47.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
@@ -48,6 +51,7 @@
     "dotenv-cli": "^7.4.4",
     "prisma": "^6.2.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
   }
 }

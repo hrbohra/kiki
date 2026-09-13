@@ -1,0 +1,43 @@
+{
+  "members": [
+    {
+      "id": "import-ada",
+      "name": "Ada",
+      "country": "GB",
+      "avatarColor": "#7A6FB0",
+      "traits": [
+        { "kind": "origin", "key": "origin:manchester", "label": "Grew up in Manchester", "provenance": "self_declared" },
+        { "kind": "work", "key": "work:design", "label": "Product designer", "provenance": "self_declared" }
+      ]
+    },
+    {
+      "id": "import-ben",
+      "name": "Ben",
+      "country": "GB",
+      "avatarColor": "#4FA0A0",
+      "traits": [
+        { "kind": "origin", "key": "origin:manchester", "label": "Grew up in Manchester", "provenance": "self_declared" }
+      ]
+    }
+  ],
+  "listings": [
+    {
+      "id": "import-ada-flat",
+      "hostId": "import-ada",
+      "title": "Bright one-bed in Hackney",
+      "area": "Hackney, London",
+      "pricePerNight": 55,
+      "kind": "Whole place",
+      "lat": 51.5453,
+      "lng": -0.0553,
+      "photoColor": "#D8CFE8",
+      "tags": ["Quiet", "Near tube"]
+    }
+  ],
+  "vouches": [
+    { "from": "import-ben", "to": "import-ada", "note": "Ben and Ada are old friends from Manchester.", "consentToDisplay": true, "stays": 1 }
+  ],
+  "reviews": [
+    { "id": "import-rev-1", "hostId": "import-ada", "authorId": "import-ben", "listingId": "import-ada-flat", "text": "Lovely flat, super easy stay.", "day": 250 }
+  ]
+}

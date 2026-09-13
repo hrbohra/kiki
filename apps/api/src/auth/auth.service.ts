@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TRPCError } from '@trpc/server';
 import type { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { RateLimiter } from '../common/rate-limit';
 import { EmailService } from './email.service';
 import {
   daysFromNow,
@@ -51,6 +52,9 @@ function publicUser(u: User): PublicUser {
 
 @Injectable()
 export class AuthService {
+  // Max 5 OTP requests per email per 15 minutes (in-memory; Redis-back for multi-instance).
+  private readonly otpLimiter = new RateLimiter(5, 15 * 60 * 1000);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly email: EmailService,
@@ -59,6 +63,9 @@ export class AuthService {
   /** Step 1: request a login (existing user) or signup (needs a valid invite) OTP. */
   async requestOtp(input: { email: string; inviteCode?: string }): Promise<{ ok: true; purpose: 'login' | 'signup' }> {
     const email = normEmail(input.email);
+    if (!this.otpLimiter.check(email)) {
+      throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many codes requested. Try again later.' });
+    }
     const existing = await this.prisma.user.findUnique({ where: { email } });
 
     let purpose: 'login' | 'signup';

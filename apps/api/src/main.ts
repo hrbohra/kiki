@@ -18,6 +18,17 @@ import { IntroService } from './ai/intro.service';
 import { makeCreateContext, makeCreateWsContext, type ContextDeps } from './trpc/context';
 
 async function bootstrap(): Promise<void> {
+  // Optional error monitoring — active only when SENTRY_DSN is set and @sentry/node is installed.
+  const dsn = process.env.SENTRY_DSN;
+  if (dsn) {
+    try {
+      const Sentry = await import('@sentry/node');
+      Sentry.init({ dsn, tracesSampleRate: 0.1, environment: process.env.NODE_ENV });
+    } catch {
+      /* @sentry/node not installed — skip */
+    }
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.enableShutdownHooks();

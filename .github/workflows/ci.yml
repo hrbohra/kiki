@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Generate the Prisma client (no DB needed).
+      - run: pnpm --filter @kiki/api exec prisma generate
+
+      # Build (turbo builds @kiki/domain + @kiki/voice, then the API) and typecheck everything.
+      - run: pnpm build
+      - run: pnpm typecheck
+
+      # Domain unit tests always run (no DB).
+      - run: pnpm --filter @kiki/domain test
+
+      # API integration tests run only when a database is configured (set these repo secrets to
+      # a disposable Postgres/Neon branch).
+      - name: API integration tests
+        if: ${{ secrets.DATABASE_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          JWT_ACCESS_SECRET: ci-access-secret
+          JWT_REFRESH_SECRET: ci-refresh-secret
+        run: |
+          pnpm --filter @kiki/api exec prisma migrate deploy
+          pnpm --filter @kiki/api exec dotenv -e /dev/null -- vitest run --dir apps/api
