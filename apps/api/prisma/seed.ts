@@ -135,6 +135,9 @@ async function main(): Promise<void> {
   const rootInvite = 'KIKI-FOUNDER';
   await prisma.invite.create({ data: { code: rootInvite, createdById: rootUser.id } });
 
+  // A host account (linked to member 'danica') so host-side writes (decide/inbox) are testable.
+  await prisma.user.create({ data: { email: 'danica@kiki.demo', name: 'Danica', memberId: 'danica' } });
+
   const counts = {
     members: members.length,
     listings: listings.length,

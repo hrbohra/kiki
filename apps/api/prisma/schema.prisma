@@ -57,6 +57,11 @@ model Member {
   guestReviewsAbout    GuestReview[] @relation("guestSubject")
   guestReviewsAuthored GuestReview[] @relation("guestAuthor")
 
+  stayRequestsAsGuest StayRequest[] @relation("reqGuest")
+  stayRequestsAsHost  StayRequest[] @relation("reqHost")
+  trips               Trip[]        @relation("tripAuthor")
+  tripOffers          TripOffer[]   @relation("offerHost")
+
   @@map("members")
 }
 
@@ -108,8 +113,9 @@ model Listing {
   photoColor    String
   tags          String[]
 
-  host    Member   @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  reviews Review[]
+  host         Member        @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  reviews      Review[]
+  stayRequests StayRequest[]
 
   @@index([hostId])
   @@map("listings")
@@ -243,4 +249,92 @@ model RefreshToken {
   @@index([userId])
   @@index([familyId])
   @@map("refresh_tokens")
+}
+
+// ─── Writes (Phase 3): persisted, user-scoped, idempotent ────────────────────
+
+enum RequestState {
+  pending
+  accepted
+  declined
+}
+
+enum TripState {
+  open
+  upcoming
+  past
+}
+
+/// A guest's request to stay at a listing. Host accepts/declines; state is persisted.
+model StayRequest {
+  id        String       @id @default(cuid())
+  listingId String
+  guestId   String
+  hostId    String
+  fromDay   Int
+  toDay     Int
+  nights    Int
+  message   String?
+  state     RequestState @default(pending)
+  createdAt DateTime     @default(now())
+  decidedAt DateTime?
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  guest   Member  @relation("reqGuest", fields: [guestId], references: [id], onDelete: Cascade)
+  host    Member  @relation("reqHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  @@index([hostId, state])
+  @@index([guestId])
+  @@map("stay_requests")
+}
+
+/// A trip a traveller posts; hosts answer with partial-coverage offers.
+model Trip {
+  id             String    @id @default(cuid())
+  authorId       String
+  title          String
+  kind           String
+  fromDay        Int
+  toDay          Int
+  nights         Int
+  budgetPerNight Int
+  state          TripState @default(open)
+  createdAt      DateTime  @default(now())
+
+  author Member      @relation("tripAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  offers TripOffer[]
+
+  @@index([authorId])
+  @@map("trips")
+}
+
+/// A host's partial offer against a trip (covers some nights, not necessarily all).
+model TripOffer {
+  id               String   @id @default(cuid())
+  tripId           String
+  hostId           String
+  nights           Int
+  total            Int
+  requestedFromDay Int
+  requestedToDay   Int
+  note             String?
+  createdAt        DateTime @default(now())
+
+  trip Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  host Member @relation("offerHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@map("trip_offers")
+}
+
+/// Stripe-style idempotency: a write with the same (user, key) returns the stored result.
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  result    Json
+  createdAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@map("idempotency_keys")
 }
