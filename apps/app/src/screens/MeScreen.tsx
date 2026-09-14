@@ -1,7 +1,12 @@
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
+import { PressableScale } from '../ui/PressableScale';
+import { useResponsive } from '../ui/useResponsive';
+import { resetOnboarded } from '../demo/onboarding';
 import { color, font, radius, space, shadow } from '../theme/tokens';
+import type { RootNav } from '../navigation';
 import * as world from '../world';
 
 /** The viewer's own profile: identity, standing, and the facts that drive their matches. */
@@ -10,6 +15,13 @@ export function MeScreen() {
   const standing = world.standingOf(me.id);
   const cohort = world.leaderboard().length;
   const similarCount = world.peopleLikeYou().length;
+  const navigation = useNavigation<RootNav>();
+  const { isWide } = useResponsive();
+
+  const replayDemo = () => {
+    resetOnboarded();
+    navigation.navigate('Onboard');
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -35,6 +47,15 @@ export function MeScreen() {
             </View>
           ))}
         </View>
+
+        {/* Demo-only affordance to replay the invite flow. Mobile only — on desktop the same action
+            lives in the floating "Reset demo" pill, so we don't show it twice. */}
+        {!isWide && (
+          <PressableScale style={styles.replay} onPress={replayDemo} accessibilityRole="button" accessibilityLabel="Replay demo">
+            <Text style={styles.replayText}>⟲  Replay the demo</Text>
+            <Text style={styles.replaySub}>Start again from Nina's invite</Text>
+          </PressableScale>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -64,4 +85,7 @@ const styles = StyleSheet.create({
   traitRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   traitIcon: { fontSize: 18 },
   traitLabel: { ...font.body, color: color.ink, fontWeight: '600' },
+  replay: { backgroundColor: color.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: color.hairline, paddingVertical: space.md, paddingHorizontal: space.card, alignItems: 'center', gap: 2, marginTop: space.sm },
+  replayText: { ...font.body, color: color.inkFaint, fontWeight: '700' },
+  replaySub: { ...font.caption, color: color.inkFaint },
 });

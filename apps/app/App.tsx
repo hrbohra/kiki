@@ -33,8 +33,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-/** A muted, demo-only affordance to replay the invite flow from the top. Not product chrome. */
+/** A muted, demo-only affordance to replay the invite flow from the top. Not product chrome.
+ *  Desktop only — on mobile it would float over the bottom tab bar. */
 function ResetDemoButton() {
+  const { isWide } = useResponsive();
+  if (!isWide) return null;
   const replay = () => {
     resetOnboarded();
     if (navigationRef.isReady()) navigationRef.navigate('Onboard');
