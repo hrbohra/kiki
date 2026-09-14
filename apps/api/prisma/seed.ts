@@ -177,6 +177,37 @@ async function main(): Promise<void> {
     await prisma.thread.update({ where: { id: thread.id }, data: { updatedAt: new Date(ts) } });
   }
 
+  // Make the demo viewer ("you") a host with a listing + a few live stay requests, so the Requests
+  // screen is real and interactive (accept/decline persists).
+  await prisma.listing.create({
+    data: {
+      id: 'l-you', hostId: 'you', title: 'Your place', area: 'De Beauvoir, London',
+      pricePerNight: 46, kind: 'Whole place', lat: 51.539, lng: -0.081, photoColor: '#D9E2DE',
+      tags: ['Quiet', 'WFH desk', 'Near tube'],
+    },
+  });
+  const stayReqs: { guest: string; fromDay: number; toDay: number; state: 'pending' | 'accepted'; message: string }[] = [
+    { guest: 'emma', fromDay: 396, toDay: 403, state: 'pending', message: 'Would love the 12th–15th if it works!' },
+    { guest: 'priya', fromDay: 402, toDay: 405, state: 'pending', message: 'Visiting for a wedding — 3 nights.' },
+    { guest: 'danica', fromDay: 380, toDay: 383, state: 'accepted', message: 'Thanks for saying yes!' },
+  ];
+  for (const r of stayReqs) {
+    await prisma.stayRequest.create({
+      data: {
+        listingId: 'l-you', hostId: 'you', guestId: r.guest,
+        fromDay: r.fromDay, toDay: r.toDay, nights: r.toDay - r.fromDay, message: r.message,
+        state: r.state, decidedAt: r.state === 'accepted' ? new Date() : null,
+      },
+    });
+  }
+
+  // A trip "you" posted, with a couple of partial offers.
+  const trip = await prisma.trip.create({
+    data: { authorId: 'you', title: 'Italy bday trip', kind: 'Beach', fromDay: 500, toDay: 513, nights: 13, budgetPerNight: 40, state: 'open' },
+  });
+  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'nate', nights: 12, total: 480, requestedFromDay: 501, requestedToDay: 513, note: '12 of your 13 nights — more than most get this season.' } });
+  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'priya', nights: 8, total: 320, requestedFromDay: 500, requestedToDay: 508, note: null } });
+
   const counts = {
     members: members.length,
     listings: listings.length,

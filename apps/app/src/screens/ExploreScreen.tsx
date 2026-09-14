@@ -34,6 +34,7 @@ export function ExploreScreen() {
 
   const listings = useMemo(() => {
     const filtered = world.allListings().filter((l) => {
+      if (l.hostId === world.viewerId) return false; // don't show your own place
       if (kind !== 'All' && l.kind !== kind) return false;
       if (connectedOnly && !Number.isFinite(world.degreeToHost(l.hostId))) return false;
       for (const t of tags) if (!l.tags.includes(t)) return false;

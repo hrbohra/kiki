@@ -41,6 +41,7 @@ export function ExploreWeb() {
 
   const listings = useMemo(() => {
     const f = world.allListings().filter((l) => {
+      if (l.hostId === world.viewerId) return false; // don't show your own place
       if (connected && !(Number.isFinite(world.degreeToHost(l.hostId)) && world.degreeToHost(l.hostId) <= 2)) return false;
       for (const t of tags) if (!l.tags.includes(t)) return false;
       for (const v of vibes) { const def = VIBES.find((x) => x.key === v); if (def && !hostHasOverlap(l.hostId, def.kind)) return false; }
