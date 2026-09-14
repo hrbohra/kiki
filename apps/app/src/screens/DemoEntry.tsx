@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Loop } from '../ui/Loop';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import { useSession } from '../api/session';
 import { tap } from '../ui/feedback';
+import { useShake } from '../ui/useShake';
 
 /** The demo's front door: one tap in (frictionless), with the real invite + OTP flow one tap away
  *  for anyone who wants to see the security. In demo mode the code is shown on screen (no inbox). */
 export function DemoEntry() {
   const { demoLogin, demoAvailable, requestOtp, verifyOtp } = useSession();
+  const { style: shakeStyle, shake } = useShake();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'landing' | 'email' | 'code'>('landing');
@@ -25,6 +28,7 @@ export function DemoEntry() {
       await fn();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
+      shake(); // tasteful flinch + haptic on failure
     } finally {
       setBusy(false);
     }
@@ -49,7 +53,7 @@ export function DemoEntry() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.center}>
+      <Animated.View style={[styles.center, shakeStyle]}>
         <Loop size={54} />
         <Text style={styles.title}>Kiki</Text>
         <Text style={styles.tagline}>Stay in the homes of friends of friends.</Text>
@@ -96,7 +100,7 @@ export function DemoEntry() {
         )}
 
         {error && <Text style={styles.error}>{error}</Text>}
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }

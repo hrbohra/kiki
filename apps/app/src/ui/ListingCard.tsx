@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar } from './Avatar';
+import { PressableScale } from './PressableScale';
 import { TrustPill } from './TrustPill';
 import { Loop } from './Loop';
 import { TRAIT_GLYPH } from './glyphs';
@@ -32,10 +33,10 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
       : `You know ${host.name} directly`;
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onOpen}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.card, shadow.card, pressed && styles.pressed]}
+      style={[styles.card, shadow.card]}
     >
       <View style={styles.header}>
         <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={46} />
@@ -76,7 +77,7 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
           </View>
         );
       })() : null}
-    </Pressable>
+    </PressableScale>
   );
 }
 
