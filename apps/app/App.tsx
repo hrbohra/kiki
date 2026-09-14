@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, Pressable, Text, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -24,9 +23,9 @@ import { color, shadow } from './src/theme/tokens';
 import { TAB_ICON } from './src/ui/TabIcons';
 import { useResponsive } from './src/ui/useResponsive';
 import { WebShell } from './src/screens/web/WebShell';
-import { InviteGate } from './src/screens/InviteGate';
+import { DemoEntry } from './src/screens/DemoEntry';
 import { hasOnboarded, resetOnboarded } from './src/demo/onboarding';
-import { needsGate } from './src/demo/gate';
+import { SessionProvider, useSession } from './src/api/session';
 import type { RootStackParamList, RootTabParamList } from './src/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -83,17 +82,23 @@ const navTheme = {
   colors: { ...DefaultTheme.colors, background: color.bg, primary: color.brand },
 };
 
-export default function App() {
-  // The deployed web demo sits behind an on-brand invite-code wall (soft gate). Native is never
-  // gated. Once unlocked, the app boots on the invite flow (Tabs seeded beneath it, so popToTop
-  // lands on Explore); once onboarding is seen or skipped, a reload goes straight to Explore.
-  const [gated, setGated] = useState(needsGate());
+/** Gates on the real session: one-tap demo login (or real OTP) before the app. */
+function AppInner() {
+  const { user, ready } = useSession();
   const seen = hasOnboarded();
-  if (gated) {
+
+  if (!ready) {
     return (
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        <InviteGate onUnlock={() => setGated(false)} />
+      </SafeAreaProvider>
+    );
+  }
+  if (!user) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <DemoEntry />
       </SafeAreaProvider>
     );
   }
@@ -115,6 +120,14 @@ export default function App() {
       </NavigationContainer>
       <ResetDemoButton />
     </SafeAreaProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <SessionProvider>
+      <AppInner />
+    </SessionProvider>
   );
 }
 

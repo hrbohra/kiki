@@ -15,4 +15,8 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.disableHierarchicalLookup = true;
 
+// Honour package "exports" maps so ESM deps (superjson → copy-anything/is-what) and our
+// workspace subpath exports (@kiki/api/contract) resolve correctly.
+config.resolver.unstable_enablePackageExports = true;
+
 module.exports = config;

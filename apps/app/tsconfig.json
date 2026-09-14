@@ -4,9 +4,11 @@
     "strict": true,
     "noUncheckedIndexedAccess": false,
     "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["react", "vitest/globals"]
+    "types": ["react"]
   },
   "include": ["App.tsx", "src/**/*.ts", "src/**/*.tsx"]
 }
