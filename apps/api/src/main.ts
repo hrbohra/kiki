@@ -52,8 +52,9 @@ async function bootstrap(): Promise<void> {
   const express = app.getHttpAdapter().getInstance();
   express.use('/trpc', createExpressMiddleware({ router: appRouter, createContext: makeCreateContext(deps) }));
 
-  const port = process.env.API_PORT ? Number(process.env.API_PORT) : 4000;
-  await app.listen(port);
+  // Render (and most hosts) inject PORT; fall back to API_PORT / 4000 for local.
+  const port = Number(process.env.PORT ?? process.env.API_PORT ?? 4000);
+  await app.listen(port, '0.0.0.0');
 
   // WebSocket: attach a tRPC WS handler to the same HTTP server for subscriptions.
   const wss = new WebSocketServer({ server: app.getHttpServer() });
