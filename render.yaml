@@ -8,7 +8,8 @@ services:
     plan: free
     # corepack activates the pinned pnpm; turbo builds @kiki/domain + @kiki/voice + the API;
     # migrate deploy applies any pending migrations to Neon (idempotent).
-    buildCommand: npm install -g pnpm@9.15.9 && pnpm install --frozen-lockfile && pnpm build && pnpm --filter @kiki/api exec prisma migrate deploy
+    # --prod=false forces dev deps (turbo, tsc, tsup, prisma) to install even though NODE_ENV=production.
+    buildCommand: npm install -g pnpm@9.15.9 && pnpm install --frozen-lockfile --prod=false && pnpm build && pnpm --filter @kiki/api exec prisma migrate deploy
     startCommand: node apps/api/dist/main.js
     healthCheckPath: /health
     envVars:
