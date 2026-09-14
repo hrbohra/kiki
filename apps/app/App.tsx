@@ -26,6 +26,7 @@ import { WebShell } from './src/screens/web/WebShell';
 import { DemoEntry } from './src/screens/DemoEntry';
 import { hasOnboarded, resetOnboarded } from './src/demo/onboarding';
 import { SessionProvider, useSession } from './src/api/session';
+import { WorldProvider } from './src/api/world-provider';
 import type { RootStackParamList, RootTabParamList } from './src/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -105,20 +106,22 @@ function AppInner() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <NavigationContainer theme={navTheme} ref={navigationRef} initialState={seen ? undefined : { index: 1, routes: [{ name: 'Tabs' }, { name: 'Onboard' }] }}>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Tabs" component={Tabs} />
-          <Stack.Screen name="HostProfile" component={HostProfileScreen} />
-          <Stack.Screen name="Connection" component={ConnectionScreen} />
-          <Stack.Screen name="GuestBook" component={GuestBookScreen} />
-          <Stack.Screen name="Thread" component={ThreadScreen} />
-          <Stack.Screen name="Trust" component={TrustScreen} />
-          <Stack.Screen name="Onboard" component={OnboardScreen} />
-          <Stack.Screen name="TripOffers" component={TripOffersScreen} />
-          <Stack.Screen name="PlanTrip" component={PlanTripScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-      <ResetDemoButton />
+      <WorldProvider>
+        <NavigationContainer theme={navTheme} ref={navigationRef} initialState={seen ? undefined : { index: 1, routes: [{ name: 'Tabs' }, { name: 'Onboard' }] }}>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Tabs" component={Tabs} />
+            <Stack.Screen name="HostProfile" component={HostProfileScreen} />
+            <Stack.Screen name="Connection" component={ConnectionScreen} />
+            <Stack.Screen name="GuestBook" component={GuestBookScreen} />
+            <Stack.Screen name="Thread" component={ThreadScreen} />
+            <Stack.Screen name="Trust" component={TrustScreen} />
+            <Stack.Screen name="Onboard" component={OnboardScreen} />
+            <Stack.Screen name="TripOffers" component={TripOffersScreen} />
+            <Stack.Screen name="PlanTrip" component={PlanTripScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+        <ResetDemoButton />
+      </WorldProvider>
     </SafeAreaProvider>
   );
 }
