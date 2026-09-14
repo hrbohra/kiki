@@ -1,21 +1,82 @@
-import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, TextInput } from 'react-native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
 import { TRAIT_GLYPH } from '../ui/glyphs';
 import { color, font, radius, space, shadow } from '../theme/tokens';
-import { threadWith } from '../messaging/threads';
 import * as world from '../world';
+import { useSession } from '../api/session';
+import { tap } from '../ui/feedback';
 import type { StackProps } from '../navigation';
 
-/** A chat thread with a trust-context header you can glance at mid-conversation. */
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  text: string;
+}
+
+/** A live chat thread with a trust-context header. Persists + delivers in real time over WebSocket. */
 export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
+  const { api } = useSession();
   const member = world.memberById(route.params.memberId);
-  const thread = threadWith(member.id);
   const story = world.storyFor(member.id);
   const standing = world.standingOf(member.id);
   const context = story.reachable
     ? `${story.degrees === 1 ? 'Direct friend' : `${story.degrees}${story.degrees === 2 ? 'nd' : 'th'} degree`}${story.path[1] ? ` · via ${story.path[1].name}` : ''}`
     : 'New connection';
+
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const append = (m: ChatMessage) =>
+    setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+
+  useEffect(() => {
+    let alive = true;
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const thread = await api.messaging.open.mutate({ withId: member.id });
+      if (!alive) return;
+      setThreadId(thread.id);
+      const hist = await api.messaging.history.query({ threadId: thread.id });
+      if (!alive) return;
+      setMessages(hist.map((m) => ({ id: m.id, senderId: m.senderId, text: m.text })));
+      void api.messaging.markRead.mutate({ threadId: thread.id }).catch(() => {});
+      const sub = api.messaging.onMessage.subscribe(undefined, {
+        onData: (m) => {
+          if (m.threadId === thread.id) append({ id: m.id, senderId: m.senderId, text: m.text });
+        },
+      });
+      unsub = () => sub.unsubscribe();
+    })();
+    return () => {
+      alive = false;
+      unsub?.();
+    };
+  }, [api, member.id]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollToEnd({ animated: true });
+  }, [messages.length]);
+
+  const onSend = async () => {
+    const body = text.trim();
+    if (!body || !threadId || sending) return;
+    setSending(true);
+    setText('');
+    tap('light');
+    try {
+      await api.messaging.send.mutate({ threadId, text: body });
+      // the message arrives back via the subscription and appends (deduped)
+    } catch {
+      setText(body); // restore on failure
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -31,7 +92,7 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
         <TierBadge standing={standing} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {story.overlaps[0] ? (
           <View style={styles.contextCard}>
             {(() => { const G = TRAIT_GLYPH[story.overlaps[0].kind]; return <G size={16} color={color.textOnMint} accent={color.brand} surface={color.brandTint} />; })()}
@@ -39,9 +100,9 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
           </View>
         ) : null}
 
-        {thread ? (
-          thread.messages.map((msg) => {
-            const mine = msg.fromId === world.viewerId;
+        {messages.length > 0 ? (
+          messages.map((msg) => {
+            const mine = msg.senderId === world.viewerId;
             return (
               <View key={msg.id} style={[styles.bubbleRow, mine ? styles.rowMine : styles.rowTheirs]}>
                 <View style={[styles.bubble, mine ? styles.mine : [styles.theirs, shadow.card]]}>
@@ -56,8 +117,19 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
       </ScrollView>
 
       <View style={styles.inputBar}>
-        <View style={styles.input}><Text style={styles.inputPlaceholder}>Message {member.name}…</Text></View>
-        <View style={styles.send}><Text style={styles.sendArrow}>↑</Text></View>
+        <TextInput
+          style={styles.input}
+          value={text}
+          onChangeText={setText}
+          placeholder={`Message ${member.name}…`}
+          placeholderTextColor={color.inkFaint}
+          onSubmitEditing={onSend}
+          returnKeyType="send"
+          editable={!!threadId}
+        />
+        <Pressable onPress={onSend} disabled={!text.trim() || sending} style={[styles.send, (!text.trim() || sending) && styles.sendDisabled]}>
+          <Text style={styles.sendArrow}>↑</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -83,8 +155,8 @@ const styles = StyleSheet.create({
   msgTextMine: { color: '#FFFFFF' },
   empty: { ...font.body, textAlign: 'center', marginTop: space.xl },
   inputBar: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderTopWidth: 1, borderTopColor: color.hairline, backgroundColor: color.surface },
-  input: { flex: 1, backgroundColor: color.bg, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: space.lg, paddingVertical: 13 },
-  inputPlaceholder: { ...font.body, color: color.inkFaint },
+  input: { flex: 1, backgroundColor: color.bg, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: space.lg, paddingVertical: 13, ...font.body, color: color.ink },
   send: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
+  sendDisabled: { opacity: 0.4 },
   sendArrow: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginTop: -2 },
 });

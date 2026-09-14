@@ -21,6 +21,8 @@ const prisma = new PrismaClient({
 
 async function main(): Promise<void> {
   // Clear in FK-safe order (auth tables first, then the world).
+  await prisma.message.deleteMany();
+  await prisma.thread.deleteMany();
   await prisma.refreshToken.deleteMany();
   await prisma.otpToken.deleteMany();
   await prisma.invite.deleteMany();
@@ -137,6 +139,43 @@ async function main(): Promise<void> {
 
   // A host account (linked to member 'danica') so host-side writes (decide/inbox) are testable.
   await prisma.user.create({ data: { email: 'danica@kiki.demo', name: 'Danica', memberId: 'danica' } });
+
+  // Messaging demo threads (you <-> Maia/Katelin/Danica), so the inbox is populated live.
+  const threadSeeds: { with: string; msgs: [string, string][] }[] = [
+    {
+      with: 'emma',
+      msgs: [
+        ['you', 'Hi Maia! Nina pointed me your way — your De Beauvoir room looks lovely.'],
+        ['emma', "Oh amazing, any friend of Nina's! When are you thinking?"],
+        ['you', 'The 12th–15th. Also spotted we both did the Paris exchange in 2017 😄'],
+        ['emma', 'No way! Small world. Those dates work — happy to hold them for you.'],
+      ],
+    },
+    {
+      with: 'katelin',
+      msgs: [
+        ['you', 'Hi Katelin, Amy said wonderful things about staying with you.'],
+        ['katelin', "Amy's the best! Yes the Finsbury Park room is free end of the month."],
+      ],
+    },
+    {
+      with: 'danica',
+      msgs: [
+        ['danica', 'Thanks again for the stay in April — you left the place spotless!'],
+        ['you', 'Anytime! The garden was a dream for working. Would love to come back.'],
+      ],
+    },
+  ];
+  let ts = Date.now() - 7 * 86_400_000;
+  for (const t of threadSeeds) {
+    const [aId, bId] = ['you', t.with].sort();
+    const thread = await prisma.thread.create({ data: { aId, bId } });
+    for (const [senderId, text] of t.msgs) {
+      await prisma.message.create({ data: { threadId: thread.id, senderId, text, createdAt: new Date(ts) } });
+      ts += 3_600_000;
+    }
+    await prisma.thread.update({ where: { id: thread.id }, data: { updatedAt: new Date(ts) } });
+  }
 
   const counts = {
     members: members.length,
