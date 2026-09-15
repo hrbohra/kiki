@@ -50,7 +50,7 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
       </View>
 
       <View style={[styles.image, { backgroundColor: listing.photoColor }]}>
-        <Image source={photoFor(listing.id)} style={[StyleSheet.absoluteFill, styles.fill]} resizeMode="cover" />
+        <Image source={photoFor(listing.id)} style={[StyleSheet.absoluteFill, styles.fill]} resizeMode="cover" accessibilityLabel={`${listing.title} — ${host.name}'s place in ${listing.area}`} />
         <LinearGradient colors={['rgba(20,25,24,0)', 'rgba(20,25,24,0.5)']} style={StyleSheet.absoluteFill} />
         <View style={styles.watermark}>
           <Loop size={110} color="#FFFFFF" opacity={0.32} strokeWidth={6} />

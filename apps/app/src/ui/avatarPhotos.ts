@@ -5,8 +5,8 @@ import type { ImageSourcePropType } from 'react-native';
 // unit-testable. Members without an entry fall back to a gradient monogram.
 const PHOTOS: Record<string, ImageSourcePropType> = {
   you: require('../../assets/avatars/you.jpg'),
-  emma: require('../../assets/avatars/emma.jpg'),
-  bella: require('../../assets/avatars/bella.jpg'),
+  emma: require('../../assets/avatars/maia.jpg'), // member id 'emma' is displayed as Maia
+  bella: require('../../assets/avatars/nina.jpg'), // member id 'bella' is displayed as Nina
   sophie: require('../../assets/avatars/sophie.jpg'),
   amy: require('../../assets/avatars/amy.jpg'),
   katelin: require('../../assets/avatars/katelin.jpg'),
