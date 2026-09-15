@@ -8,6 +8,7 @@ import { VouchCard } from '../ui/trust/VouchCard';
 import { TieMeter } from '../ui/trust/TieMeter';
 import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
+import { relRange } from '../domain/relDates';
 import { MutualFriendIntro } from '../ui/MutualFriendIntro';
 import { GuestColumn } from './web/GuestColumn';
 import { color, radius } from '../theme/tokens';
@@ -44,8 +45,8 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
 
   const names = story.channels.map((ch) => ch.voucher.name);
   const req = story.warm
-    ? { dates: '14 Sep – 21 Sep', nights: 7 }
-    : { dates: '2 Oct – 5 Oct', nights: 3 };
+    ? { dates: relRange(4, 7), nights: 7 }
+    : { dates: relRange(18, 3), nights: 3 };
   const c = copy(perspective, host.name, { voucher: names[0], nights: req.nights, warm: story.warm, direct: story.direct });
 
   return (

@@ -3,13 +3,15 @@ import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'rea
 import { TrustPill } from '../ui/TrustPill';
 import { Dates } from '../ui/glyphs';
 import { ITALY_TRIP } from '../domain/trips';
+import { relRange } from '../domain/relDates';
 import { useCreatedTrip } from '../demo/createdTrip';
 import { color, font, radius, space, cardShadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
 
-// Recreates Kiki's real Trips screen for continuity of the demo (static data).
-const upcoming = { emoji: '✈️', title: 'Trip', detail: '1 night @ £47/night', dates: '30 – 31 Jul' };
-const past = [{ emoji: '🎂', title: 'Bday', detail: '4 nights @ £45/night', dates: '23 – 27 Apr', confirmed: true }];
+// Recreates Kiki's real Trips screen for continuity of the demo. Dates are relative to now so the
+// "upcoming" trip is always ahead and the "past" one always behind.
+const upcoming = { emoji: '✈️', title: 'Trip', detail: '1 night @ £47/night', dates: relRange(21, 1) };
+const past = [{ emoji: '🎂', title: 'Bday', detail: '4 nights @ £45/night', dates: relRange(-40, 4), confirmed: true }];
 
 export function TripsScreen() {
   const navigation = useNavigation<RootNav>();

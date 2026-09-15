@@ -8,6 +8,7 @@ import { VouchCard } from '../ui/trust/VouchCard';
 import { TieMeter } from '../ui/trust/TieMeter';
 import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
+import { relRange } from '../domain/relDates';
 import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
 import { color, radius } from '../theme/tokens';
@@ -45,8 +46,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
 
   const names = story.channels.map((c) => c.voucher.name);
   const req = story.warm
-    ? { dates: '14 Sep – 21 Sep', nights: 7, asked: 'asked you 2 days ago' }
-    : { dates: '2 Oct – 5 Oct', nights: 3, asked: 'asked you 4 hours ago' };
+    ? { dates: relRange(4, 7), nights: 7, asked: 'asked you 2 days ago' }
+    : { dates: relRange(18, 3), nights: 3, asked: 'asked you 4 hours ago' };
   const c = copy(perspective, host.name, names, story.channels.length, guestBook.summary.count, story.direct);
 
   return (
