@@ -119,7 +119,7 @@ const RECESSED = '#8A9099';
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.screen },
-  scroll: { paddingVertical: 40, paddingHorizontal: 20 },
+  scroll: { paddingTop: 40, paddingBottom: 72, paddingHorizontal: 20 },
   col: { maxWidth: 620, width: '100%', alignSelf: 'center', gap: 18 },
 
   card: { backgroundColor: color.surface, borderRadius: 20, ...WEB_SHADOW },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
 
   offer: { marginTop: 10, backgroundColor: color.surface, borderRadius: 20, padding: 20, gap: 14 },
   newPill: { position: 'absolute', left: 18, top: -10, backgroundColor: color.brand, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
-  newText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
+  newText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
   sentPill: { position: 'absolute', right: 20, top: -10, backgroundColor: color.screen, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   sentText: { fontSize: 11.5, fontWeight: '700', color: color.inkFaint },
   offerTop: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   offerName: { fontSize: 17, lineHeight: 24, fontWeight: '700', color: color.ink },
   flag: { fontSize: 15 },
   matchPill: { alignSelf: 'flex-start', borderWidth: 1, borderColor: color.brand, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
-  matchText: { fontSize: 11.5, fontWeight: '800', color: color.textOnMint },
+  matchText: { fontSize: 11.5, fontWeight: '700', color: color.textOnMint },
   fact: { fontSize: 14, lineHeight: 21, color: color.inkSoft },
 
   theirOffer: { fontSize: 13.5, lineHeight: 19, fontWeight: '700', color: color.ink },

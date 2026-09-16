@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import { Halo } from './motion';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar } from './Avatar';
 import { PressableScale } from './PressableScale';
@@ -39,7 +40,9 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
       style={[styles.card, shadow.card]}
     >
       <View style={styles.header}>
-        <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={46} />
+        <Halo on={story.reachable && story.degrees === 1} size={46}>
+          <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={46} />
+        </Halo>
         <View style={styles.headMeta}>
           <Text style={styles.title}>{listing.title}</Text>
           <Text style={styles.area}>{listing.area}</Text>
@@ -99,7 +102,7 @@ const styles = StyleSheet.create({
   imagePills: { position: 'absolute', top: 12, left: 12, flexDirection: 'row', gap: 6 },
   imagePill: { backgroundColor: 'rgba(255,255,255,0.94)', borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5 },
   pillKind: { fontSize: 12, fontWeight: '700', color: color.inkSoft },
-  pillPrice: { fontSize: 12, fontWeight: '800', color: color.ink },
+  pillPrice: { fontSize: 12, fontWeight: '700', color: color.ink },
   tagLine: { position: 'absolute', bottom: 12, left: 12, right: 12, fontSize: 12, fontWeight: '700', color: '#FFFFFF', textShadowColor: 'rgba(31,41,43,0.45)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   strip: { flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10 },
   stripText: { flex: 1, fontSize: 13, fontWeight: '700', color: color.textOnMint },

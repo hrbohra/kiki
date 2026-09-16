@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 19, lineHeight: 26, fontWeight: '700', color: color.ink, paddingRight: 32 },
   sub: { fontSize: 14, color: color.inkFaint, marginTop: 4 },
   textarea: { marginTop: 16, minHeight: 120, backgroundColor: color.screen, borderWidth: 1, borderColor: color.hairline, borderRadius: 12, padding: 14, fontSize: 15, lineHeight: 22, color: color.ink, textAlignVertical: 'top' },
-  eyebrow: { fontSize: 11.5, fontWeight: '800', color: color.inkSoft, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 18 },
+  eyebrow: { fontSize: 11.5, fontWeight: '700', color: color.inkSoft, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 18 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   chip: { borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1 },
   chipOn: { backgroundColor: color.brandTint, borderColor: color.brand },

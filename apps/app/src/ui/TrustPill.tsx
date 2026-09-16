@@ -29,5 +29,5 @@ const TONE = {
 
 const styles = StyleSheet.create({
   base: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill, alignSelf: 'flex-start' },
-  text: { fontSize: 11, fontWeight: '800' },
+  text: { fontSize: 11, fontWeight: '700' },
 });

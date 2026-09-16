@@ -1,6 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { color } from '../theme/tokens';
-import { tap } from './feedback';
+import { haptic } from './feedback';
 
 type Tab = 'profile' | 'trust';
 
@@ -25,7 +25,7 @@ export function PersonTabs({ active, onProfile, onTrust }: { active: Tab; onProf
             style={styles.tab}
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
-            onPress={() => { if (!on && t.go) { tap('light'); t.go(); } }}
+            onPress={() => { if (!on && t.go) { haptic.select(); t.go(); } }}
           >
             <Text style={[styles.label, on && styles.labelOn]}>{t.label}</Text>
             {on ? <View style={styles.indicator} /> : null}

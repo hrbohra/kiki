@@ -235,9 +235,6 @@ export function MapCanvas({ listings, selectedId, degreeForHost, onSelect }: Pro
 
           {/* zoom controls (bottom-right) */}
           <View style={styles.zoomBox}>
-            <Pressable style={styles.zoomBtn} onPress={() => zoomBy(1.35)}><Text style={styles.zoomGlyph}>+</Text></Pressable>
-            <Pressable style={styles.zoomBtn} onPress={() => zoomBy(1 / 1.35)}><Text style={styles.zoomGlyph}>−</Text></Pressable>
-            <Pressable style={styles.zoomBtn} onPress={fit}><Text style={styles.zoomFit}>FIT</Text></Pressable>
           </View>
 
           <Text style={styles.attribution}>© OpenStreetMap · CARTO</Text>
@@ -325,10 +322,10 @@ const styles = StyleSheet.create({
   ring: { backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center' },
   label: { marginTop: 4, backgroundColor: color.surface, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3, ...shadow.card, maxWidth: 150 },
   labelSelected: { backgroundColor: color.brand },
-  labelText: { fontSize: 11, fontWeight: '800', color: color.textOnMint },
+  labelText: { fontSize: 11, fontWeight: '700', color: color.textOnMint },
   labelTextSelected: { color: '#FFFFFF' },
   marker: { position: 'absolute', transform: [{ translateX: '-50%' }] as any, backgroundColor: 'rgba(255,255,255,0.94)', borderWidth: 1, borderColor: color.hairlineTint, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4, zIndex: 7 },
-  markerText: { fontSize: 11, fontWeight: '800', color: color.textOnMint },
+  markerText: { fontSize: 11, fontWeight: '700', color: color.textOnMint },
   hud: { position: 'absolute', left: 12, top: 12, ...HUD_CARD, paddingHorizontal: 14, paddingVertical: 10, maxWidth: 240 },
   hudTitle: { fontSize: 13, fontWeight: '700', color: color.ink },
   hudSub: { fontSize: 11.5, color: color.inkFaint, marginTop: 2 },
@@ -342,6 +339,6 @@ const styles = StyleSheet.create({
   zoomBox: { position: 'absolute', right: 12, bottom: 26, gap: 6 },
   zoomBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.94)', alignItems: 'center', justifyContent: 'center', ...shadow.card },
   zoomGlyph: { fontSize: 19, fontWeight: '700', color: color.ink, lineHeight: 22 },
-  zoomFit: { fontSize: 10, fontWeight: '800', color: color.inkSoft },
+  zoomFit: { fontSize: 10, fontWeight: '700', color: color.inkSoft },
   attribution: { position: 'absolute', right: 6, bottom: 4, fontSize: 9, fontWeight: '600', color: color.inkFaint, backgroundColor: 'rgba(255,255,255,0.7)', paddingHorizontal: 4, borderRadius: 4, overflow: 'hidden' },
 });

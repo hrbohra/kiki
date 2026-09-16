@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   card: { width: '100%', maxWidth: 420, backgroundColor: color.surface, borderRadius: 22, padding: 32, gap: 12, alignItems: 'flex-start' },
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   brand: { fontSize: 20, fontWeight: '700', letterSpacing: -0.2, color: color.ink },
-  title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.4, color: color.ink },
+  title: { fontSize: 22, fontWeight: '700', letterSpacing: -0.4, color: color.ink },
   sub: { fontSize: 14.5, lineHeight: 21, color: color.inkSoft },
   input: { alignSelf: 'stretch', marginTop: 6, backgroundColor: color.screen, borderWidth: 1, borderColor: color.hairline, borderRadius: 12, paddingHorizontal: 15, paddingVertical: 14, fontSize: 15, color: color.ink },
   inputError: { borderColor: color.caveat },

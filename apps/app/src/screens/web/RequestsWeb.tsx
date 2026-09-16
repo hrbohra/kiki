@@ -8,7 +8,8 @@ import { photoFor } from '../../ui/listingPhotos';
 import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import { useSession } from '../../api/session';
-import { tap } from '../../ui/feedback';
+import { haptic } from '../../ui/feedback';
+import { SlideToAccept } from '../../ui/SlideToAccept';
 import type { Member } from '../../domain/types';
 import type { RootNav } from '../../navigation';
 
@@ -37,7 +38,7 @@ export function RequestsWeb() {
   }, [focused, load]);
 
   const decide = async (id: string, decision: 'accept' | 'decline') => {
-    tap(decision === 'accept' ? 'medium' : 'light');
+    if (decision === 'accept') haptic.success(); else haptic.tap();
     setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, state: decision === 'accept' ? 'accepted' : 'declined' } : x)) ?? null);
     try {
       await api.requests.decide.mutate({ requestId: id, decision });
@@ -124,14 +125,24 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
           <Pressable onPress={onOpen}><Text style={styles.reqLink}>Read their trust page ›</Text></Pressable>
           <View style={{ flex: 1 }} />
           {needs ? (
-            <View style={styles.actions}>
-              <Pressable onPress={() => onDecide(item.id, 'decline')} style={({ hovered }: any) => [styles.declineBtn, hovered && styles.declineHover]}>
-                <Text style={styles.declineText}>Decline</Text>
-              </Pressable>
-              <Pressable onPress={() => onDecide(item.id, 'accept')} style={({ hovered }: any) => [styles.acceptBtn, hovered && styles.acceptHover]}>
-                <Text style={styles.acceptText}>Accept</Text>
-              </Pressable>
-            </View>
+            !isWide ? (
+              /* Weight on the yes, nothing on the no (Sep 2/3): a deliberate slide to accept, a quiet link to decline. */
+              <View style={styles.slideWrap}>
+                <SlideToAccept name={person.name} onCommit={() => setTimeout(() => onDecide(item.id, 'accept'), 900)} />
+                <Pressable hitSlop={10} onPress={() => onDecide(item.id, 'decline')} accessibilityRole="button" style={styles.declineLinkWrap}>
+                  <Text style={styles.declineLink}>Decline</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.actions}>
+                <Pressable onPress={() => onDecide(item.id, 'decline')} style={({ hovered }: any) => [styles.declineBtn, hovered && styles.declineHover]}>
+                  <Text style={styles.declineText}>Decline</Text>
+                </Pressable>
+                <Pressable onPress={() => onDecide(item.id, 'accept')} style={({ hovered }: any) => [styles.acceptBtn, hovered && styles.acceptHover]}>
+                  <Text style={styles.acceptText}>Accept</Text>
+                </Pressable>
+              </View>
+            )
           ) : null}
         </View>
       </View>
@@ -166,12 +177,15 @@ const styles = StyleSheet.create({
   reqFoot: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: 2, gap: 12 },
   reqLink: { fontSize: 13, fontWeight: '700', color: color.textOnMint },
   actions: { flexDirection: 'row', gap: 8 },
+  slideWrap: { flexBasis: '100%', gap: 4, marginTop: 4 },
+  declineLinkWrap: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 10 },
+  declineLink: { fontSize: 13.5, fontWeight: '600', color: color.inkFaint },
   declineBtn: { borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: color.bg, borderWidth: 1, borderColor: color.hairline },
   declineHover: { backgroundColor: color.hairline },
   declineText: { fontSize: 13, fontWeight: '700', color: color.inkFaint },
   acceptBtn: { borderRadius: radius.pill, paddingHorizontal: 18, paddingVertical: 8, backgroundColor: color.brand },
   acceptHover: { opacity: 0.9 },
-  acceptText: { fontSize: 13, fontWeight: '800', color: '#fff' },
+  acceptText: { fontSize: 13, fontWeight: '700', color: '#fff' },
 
   card: { backgroundColor: color.surface, borderRadius: 20, ...WEB_SHADOW },
   caution: { backgroundColor: color.surface, borderRadius: 20, padding: 20, paddingLeft: 23, gap: 8, overflow: 'hidden', ...WEB_SHADOW },

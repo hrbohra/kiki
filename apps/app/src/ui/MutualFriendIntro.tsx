@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
+import { haptic } from './feedback';
 
 import { composeMutualFriendIntro, type IntroPart } from '../domain/mutualFriendIntro';
 import { generateIntroText } from '../demo/introLLM';
@@ -43,6 +44,7 @@ export function MutualFriendIntro({ hostId }: { hostId: string }) {
         setParagraph(text);
         setLive(isLive);
         setWriting(false);
+        haptic.land(); // the answer lands — a single, meaningful tick
         loop.stop();
         Animated.timing(fade, { toValue: 1, duration: 360, useNativeDriver: true }).start();
       }, wait);
@@ -121,11 +123,11 @@ function provChips(parts: IntroPart[]): { label: string; tone: 'tint' | 'dashed'
 const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: 20, padding: 20, gap: 12 },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  title: { fontSize: 17, fontWeight: '800', color: color.ink },
+  title: { fontSize: 17, fontWeight: '700', color: color.ink },
   draftPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: color.brandTint, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
-  draftText: { fontSize: 11.5, fontWeight: '800', color: color.textOnMint },
+  draftText: { fontSize: 11.5, fontWeight: '700', color: color.textOnMint },
   spotlight: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', backgroundColor: color.brandTint, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },
-  spotlightText: { fontSize: 15, fontWeight: '800', color: color.textOnMint },
+  spotlightText: { fontSize: 15, fontWeight: '700', color: color.textOnMint },
 
   typingRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: color.trust2 },
@@ -142,12 +144,12 @@ const styles = StyleSheet.create({
   chipTextMuted: { color: color.inkSoft },
 
   meter: { borderTopWidth: 1, borderTopColor: color.hairlineSoft, paddingTop: 12, gap: 8 },
-  meterTitle: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase', color: color.inkFaint },
+  meterTitle: { fontSize: 11.5, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase', color: color.inkFaint },
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   mark: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   markOn: { backgroundColor: color.brand },
   markOff: { borderWidth: 1, borderColor: color.hairline },
-  markGlyph: { fontSize: 11, fontWeight: '800' },
+  markGlyph: { fontSize: 11, fontWeight: '700' },
   markGlyphOn: { color: '#FFFFFF' },
   markGlyphOff: { color: color.inkFaint },
   meterLabel: { flex: 1, fontSize: 14, color: color.ink },

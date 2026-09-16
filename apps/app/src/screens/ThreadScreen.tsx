@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, TextInput } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
 import { TRAIT_GLYPH } from '../ui/glyphs';
@@ -80,6 +80,7 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, shadow.card]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back">
           <Text style={styles.back}>‹</Text>
@@ -131,6 +132,7 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
           <Text style={styles.sendArrow}>↑</Text>
         </Pressable>
       </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.lg, paddingVertical: space.md, backgroundColor: color.surface, borderBottomWidth: 1, borderBottomColor: color.hairline, zIndex: 2 },
   back: { fontSize: 28, color: color.brand, fontWeight: '700' },
   headMeta: { flex: 1 },
-  name: { fontSize: 16, fontWeight: '800', color: color.ink },
+  name: { fontSize: 16, fontWeight: '700', color: color.ink },
   context: { fontSize: 13, fontWeight: '600', color: color.textOnMint },
   body: { padding: space.lg, gap: space.sm },
   contextCard: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: space.sm, alignSelf: 'center', marginBottom: space.sm },
@@ -158,5 +160,5 @@ const styles = StyleSheet.create({
   input: { flex: 1, backgroundColor: color.bg, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: space.lg, paddingVertical: 13, ...font.body, color: color.ink },
   send: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
   sendDisabled: { opacity: 0.4 },
-  sendArrow: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginTop: -2 },
+  sendArrow: { color: '#FFFFFF', fontSize: 22, fontWeight: '700', marginTop: -2 },
 });

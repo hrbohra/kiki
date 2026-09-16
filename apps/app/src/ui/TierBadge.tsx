@@ -38,5 +38,5 @@ const styles = StyleSheet.create({
   },
   inline: { borderWidth: 0, paddingHorizontal: 0, paddingVertical: 0 },
   dot: { width: 7, height: 7, borderRadius: 4 },
-  label: { fontSize: 11, fontWeight: '800' },
+  label: { fontSize: 11, fontWeight: '700' },
 });

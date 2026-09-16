@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   meterWrap: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   meterTrack: { flex: 1, height: 9, borderRadius: radius.pill, backgroundColor: color.hairlineSoft, overflow: 'hidden' },
   meterFill: { height: 9, borderRadius: radius.pill },
-  verdict: { fontSize: 12, fontWeight: '800', width: 66, textAlign: 'right' },
+  verdict: { fontSize: 12, fontWeight: '700', width: 66, textAlign: 'right' },
   themeRow: { gap: 6 },
   themeLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   themeLabel: { fontSize: 13, fontWeight: '700', color: color.inkSoft, textTransform: 'capitalize' },

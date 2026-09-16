@@ -13,6 +13,9 @@ import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
 import { PersonTabs } from '../ui/PersonTabs';
 import { useSession } from '../api/session';
+import { haptic } from '../ui/feedback';
+import { SlideToAccept } from '../ui/SlideToAccept';
+import { GuestColumn } from './web/GuestColumn';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import * as world from '../world';
 import type { StackProps } from '../navigation';
@@ -52,6 +55,7 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
   /** Host flow: a decision made here lands you back on Requests, which refetches on focus. */
   const decide = async (decision: 'accept' | 'decline') => {
     if (!requestId) return;
+    if (decision === 'accept') haptic.success(); else haptic.tap();
     try { await api.requests.decide.mutate({ requestId, decision }); } finally { navigation.goBack(); }
   };
 
@@ -92,7 +96,7 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
         <Text style={styles.perspHint}>Reading as</Text>
         <View style={styles.segment}>
           {(['host', 'guest'] as P[]).map((p) => (
-            <Pressable key={p} onPress={() => setPerspective(p)} style={[styles.segBtn, perspective === p && styles.segActive]}>
+            <Pressable key={p} onPress={() => { haptic.select(); setPerspective(p); }} style={[styles.segBtn, perspective === p && styles.segActive]}>
               <Text style={[styles.segText, perspective === p && styles.segTextActive]}>{p === 'host' ? 'The host' : 'The guest'}</Text>
             </Pressable>
           ))}
@@ -106,11 +110,16 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
           <Text style={styles.timestamp}>{req.asked}</Text>
         </View>
 
-        {story.warm || story.direct ? (
+        {perspective === 'host' ? (
+          /* Reading as the host, the question you're exposed to is how they treat someone else's flat —
+             the guest side. Restored on phone from the desktop GuestColumn (dropped in the migration). */
+          <GuestColumn hostId={hostId} onBackToHost={() => { haptic.select(); setPerspective('guest'); }} />
+        ) : story.warm || story.direct ? (
           <WarmBody
             story={story} host={host} viewer={viewer} listing={listing} guestBook={guestBook}
             copy={c} whyOpen={whyOpen} setWhyOpen={setWhyOpen} graphOpen={graphOpen} setGraphOpen={setGraphOpen}
             inferOpen={inferOpen} setInferOpen={setInferOpen} notify={notify}
+            onRoute={() => navigation.navigate('Connection', { hostId })}
           />
         ) : (
           <ColdBody story={story} host={host} copy={c} notify={notify} />
@@ -137,27 +146,25 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
             </View>
           </View>
           {perspective === 'host' && requestId ? (
-            <View style={styles.decisionRow}>
-              <Pressable style={({ pressed }) => [styles.declineBtn, pressed && styles.secondaryPressed]} onPress={() => decide('decline')}>
-                <Text style={styles.declineText}>Decline</Text>
-              </Pressable>
-              <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => decide('accept')}>
-                <Text style={styles.primaryBtnText}>Accept</Text>
-              </Pressable>
-            </View>
+            <Pressable hitSlop={10} onPress={() => decide('decline')} accessibilityRole="button" style={styles.declineLinkWrap}>
+              <Text style={styles.declineLink}>Decline</Text>
+            </Pressable>
           ) : (
             <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
               <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
             </Pressable>
           )}
         </View>
+        {perspective === 'host' && requestId ? (
+          <SlideToAccept name={host.name} onCommit={() => setTimeout(() => decide('accept'), 900)} />
+        ) : null}
       </View>
     </SafeAreaView>
   );
 }
 
 // ---- Warm body -------------------------------------------------------------
-function WarmBody({ story, host, viewer, listing, guestBook, copy: c, whyOpen, setWhyOpen, graphOpen, setGraphOpen, inferOpen, setInferOpen, notify }: any) {
+function WarmBody({ story, host, viewer, listing, guestBook, copy: c, whyOpen, setWhyOpen, graphOpen, setGraphOpen, inferOpen, setInferOpen, notify, onRoute }: any) {
   const authors = guestBook.reviews.slice(0, 3).map((r: any) => world.memberById(r.authorId));
   const knownCount = guestBook.reviews.filter((r: any) => Number.isFinite(world.degreeToHost(r.authorId)) && world.degreeToHost(r.authorId) <= 2).length;
   const inferItems = selectInferences(story.overlaps);
@@ -250,6 +257,7 @@ function WarmBody({ story, host, viewer, listing, guestBook, copy: c, whyOpen, s
               <Text style={styles.directRouteText}>{story.directLink?.note ?? 'A direct connection of yours.'}</Text>
               {story.directLink ? <TieMeter strength={story.directLink.tie.strength} /> : null}
             </View>
+            <Pressable onPress={onRoute} hitSlop={8} accessibilityRole="button"><Text style={styles.seeRoute}>See the route ›</Text></Pressable>
           </View>
         </>
       )}
@@ -388,6 +396,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },
   nav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingTop: 10, paddingBottom: 2 },
   back: { ...font.h3, color: color.brand },
+  seeRoute: { fontSize: 13.5, fontWeight: '700', color: color.brand, marginTop: 4 },
+  declineLinkWrap: { paddingVertical: 10, paddingHorizontal: 6 },
+  declineLink: { fontSize: 14, fontWeight: '600', color: color.inkFaint },
   saveHeart: { fontSize: 21, color: color.inkFaint },
   heroWrap: { paddingHorizontal: 18, paddingTop: 6 },
   hero: { backgroundColor: color.surface, borderRadius: radius.hero, padding: space.xl, alignItems: 'center', gap: space.sm },

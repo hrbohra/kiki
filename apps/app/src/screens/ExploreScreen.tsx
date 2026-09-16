@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, ScrollView, Pressable, StyleSheet, SafeAreaView } from 'react-native';
+import { Reveal } from '../ui/motion';
+import { haptic } from '../ui/feedback';
 import { MapCanvas } from '../ui/MapCanvas';
 import { ListingPreview } from '../ui/ListingPreview';
 import { ListingCard } from '../ui/ListingCard';
@@ -53,7 +55,7 @@ export function ExploreScreen() {
           <Text style={styles.h1}>Explore</Text>
           <View style={styles.segment}>
             {(['homes', 'map'] as ViewMode[]).map((m) => (
-              <Pressable key={m} onPress={() => setMode(m)} style={[styles.segBtn, mode === m && styles.segActive]}>
+              <Pressable key={m} onPress={() => { haptic.select(); setMode(m); }} style={[styles.segBtn, mode === m && styles.segActive]}>
                 <Text style={[styles.segText, mode === m && styles.segTextActive]}>{m === 'homes' ? 'Homes' : 'Map'}</Text>
               </Pressable>
             ))}
@@ -75,14 +77,16 @@ export function ExploreScreen() {
       {mode === 'homes' ? (
         listings.length > 0 ? (
           <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-            {listings.map((l) => (
-              <ListingCard
-                key={l.id}
-                listing={l}
-                host={world.hostOf(l)}
-                story={world.storyFor(l.hostId)}
-                onOpen={() => navigation.navigate('HostProfile', { listingId: l.id })}
-              />
+            {/* The list assembles itself: cards rise on a 110ms stagger (Sep 2 handoff). */}
+            {listings.map((l, i) => (
+              <Reveal key={l.id} index={i}>
+                <ListingCard
+                  listing={l}
+                  host={world.hostOf(l)}
+                  story={world.storyFor(l.hostId)}
+                  onOpen={() => navigation.navigate('HostProfile', { listingId: l.id })}
+                />
+              </Reveal>
             ))}
           </ScrollView>
         ) : (

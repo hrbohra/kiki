@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { haptic } from '../../ui/feedback';
 import { Avatar } from '../../ui/Avatar';
 import { Loop } from '../../ui/Loop';
 import { Hometown, Studied, Climb, Work } from '../../ui/glyphs';
@@ -31,7 +32,7 @@ export function OnboardingWeb() {
   const [facts, setFacts] = useState(ONBOARD_FACTS.map((f) => f.on));
   const inviter = world.memberById(INVITE.fromId);
   const last = ONBOARD_STEPS.length - 1;
-  const done = () => { setOnboarded(); navigation.popToTop(); };
+  const done = () => { haptic.success(); setOnboarded(); navigation.popToTop(); };
   const nextLabel = step === 0 ? 'Accept the invite' : step === 1 ? 'Looks right' : 'I understand';
   const sharedCount = facts.filter(Boolean).length;
 
@@ -94,7 +95,7 @@ export function OnboardingWeb() {
                     const on = facts[i];
                     const Glyph = FACT_GLYPH[f.kind];
                     return (
-                      <Pressable key={f.label} onPress={() => setFacts((p) => p.map((v, j) => (j === i ? !v : v)))} style={[styles.factRow, on ? styles.factOn : styles.factOff]}>
+                      <Pressable key={f.label} onPress={() => { haptic.select(); setFacts((p) => p.map((v, j) => (j === i ? !v : v))); }} style={[styles.factRow, on ? styles.factOn : styles.factOff]}>
                         <Glyph size={24} color={color.ink} accent={color.brand} />
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.factLabel, on && styles.factLabelOn]}>{f.label}</Text>
@@ -141,7 +142,7 @@ export function OnboardingWeb() {
             {/* footer controls */}
             <View style={styles.footer}>
               {step > 0 ? <Pressable style={styles.backBtn} onPress={() => setStep((s) => s - 1)}><Text style={styles.backText}>Back</Text></Pressable> : null}
-              <Pressable style={styles.primary} onPress={() => (step === last ? done() : setStep((s) => s + 1))}>
+              <Pressable style={styles.primary} onPress={() => { if (step === last) done(); else { haptic.select(); setStep((s) => s + 1); } }}>
                 <Text style={styles.primaryText}>{step === last ? 'Start exploring' : nextLabel}</Text>
               </Pressable>
               <View style={{ flex: 1 }} />
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
   dot: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   dotOn: { backgroundColor: color.brand, borderColor: color.brand },
   dotOff: { backgroundColor: color.surface, borderColor: color.hairline },
-  dotNum: { fontSize: 12, fontWeight: '800' },
+  dotNum: { fontSize: 12, fontWeight: '700' },
   dotNumOn: { color: '#FFFFFF' },
   dotNumOff: { color: color.inkFaint },
   connector: { flex: 1, width: 2, minHeight: 22, backgroundColor: color.hairline, marginVertical: 3 },
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: 20, ...WEB_SHADOW },
   stepCard: { padding: 32, gap: 14, alignItems: 'flex-start' },
   stepCardPhone: { padding: 20 },
-  eyebrow: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.8, color: color.inkFaint },
+  eyebrow: { fontSize: 11.5, fontWeight: '700', letterSpacing: 0.8, color: color.inkFaint },
   inviterRow: { flexDirection: 'row', alignItems: 'center', gap: 14, alignSelf: 'stretch' },
   inviterAv: { width: 64, height: 64 },
   inviterBadge: { position: 'absolute', left: 0, bottom: 0, width: 24, height: 24, borderRadius: 12, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   check: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   checkOn: { backgroundColor: color.brand, borderColor: color.brand },
   checkOff: { backgroundColor: 'transparent', borderColor: color.hairline },
-  checkMark: { fontSize: 12, fontWeight: '800', color: '#FFFFFF' },
+  checkMark: { fontSize: 12, fontWeight: '700', color: '#FFFFFF' },
   footNote: { fontSize: 12.5, lineHeight: 18, color: color.inkFaint },
 
   stakeCard: { backgroundColor: color.bg, borderRadius: 14, padding: 16, paddingLeft: 21, overflow: 'hidden', alignSelf: 'stretch' },
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   doneCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.brandTint, alignItems: 'center', justifyContent: 'center' },
   statList: { alignSelf: 'stretch', gap: 10 },
   statRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
-  statNum: { width: 26, fontSize: 20, lineHeight: 21, fontWeight: '800', color: color.ink },
+  statNum: { width: 26, fontSize: 20, lineHeight: 21, fontWeight: '700', color: color.ink },
   statLabel: { flex: 1, fontSize: 14.5, lineHeight: 21, color: color.inkSoft },
 
   footer: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },

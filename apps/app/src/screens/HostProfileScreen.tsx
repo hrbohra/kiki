@@ -43,7 +43,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
           <Text style={styles.sub}>{listing.title} · {listing.area}</Text>
           <View style={styles.badges}>
             <TierBadge standing={standing} showRank />
-            {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone="tint" /> : null}
+            {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone={story.degrees >= 3 ? 'outline' : 'tint'} /> : null}
           </View>
           <View style={styles.tagRow}>
             {listing.tags.map((t) => <Chip key={t} label={t} readOnly />)}

@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   rail: { width: 36, alignItems: 'center' },
   connector: { flex: 1, width: 2, backgroundColor: '#CDE6DF', marginVertical: 4, minHeight: 22 },
   content: { flex: 1, marginLeft: space.md, paddingBottom: 22 },
-  name: { fontSize: 15, fontWeight: '800', color: color.ink },
+  name: { fontSize: 15, fontWeight: '700', color: color.ink },
   role: { fontSize: 13, fontWeight: '600', color: color.inkFaint, marginTop: 1 },
   noteBubble: { backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: 13, paddingVertical: 11, marginTop: space.sm },
   noteText: { fontSize: 13, fontWeight: '600', color: color.textOnMint, lineHeight: 18 },

@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: 20, ...WEB_SHADOW },
   headCard: { overflow: 'hidden', padding: 24, paddingLeft: 27, gap: 10 },
   rule: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3 },
-  eyebrow: { fontSize: 12, fontWeight: '800', letterSpacing: 0.8 },
+  eyebrow: { fontSize: 12, fontWeight: '700', letterSpacing: 0.8 },
   title: { fontSize: 18, lineHeight: 26, fontWeight: '700', color: color.ink },
   body: { fontSize: 15, lineHeight: 22, color: color.inkSoft },
 

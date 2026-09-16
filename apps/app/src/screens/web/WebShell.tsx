@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 14.5, fontWeight: '600', color: color.inkFaint },
   tabTextActive: { fontWeight: '700', color: color.ink },
   badge: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 5, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
-  badgeText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
+  badgeText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
   you: {},
   scroll: { paddingBottom: 96 },
   shell: { maxWidth: 1560, width: '100%', alignSelf: 'center', paddingHorizontal: 40, paddingTop: 36 },

@@ -52,7 +52,7 @@ export function Avatar({ name, tint, country, size = 44, ring = false, id }: Pro
 const styles = StyleSheet.create({
   disc: { alignItems: 'center', justifyContent: 'center' },
   ring: { borderWidth: 3, borderColor: color.surface },
-  initial: { color: '#FFFFFF', fontWeight: '800' },
+  initial: { color: '#FFFFFF', fontWeight: '700' },
   flagBadge: {
     position: 'absolute',
     right: -2,

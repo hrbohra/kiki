@@ -21,7 +21,7 @@ export function TripsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>Kiki Trips</Text>
+        <Text style={styles.h1}>Trips</Text>
 
         <View style={styles.sectionRow}>
           <Text style={styles.section}>Out for offers</Text>
@@ -69,7 +69,7 @@ export function TripsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },
-  body: { padding: space.lg, gap: space.md },
+  body: { padding: space.lg, paddingBottom: space.xxl, gap: space.md },
   h1: { ...font.display },
   tripCard: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: color.surface, borderRadius: radius.md, padding: space.md },
   thumb: { width: 64, height: 64, borderRadius: radius.sm, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center' },
@@ -82,5 +82,5 @@ const styles = StyleSheet.create({
   planPill: { borderWidth: 1, borderColor: color.brand, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 7 },
   planText: { fontSize: 13, fontWeight: '700', color: color.textOnMint },
   neutralPill: { backgroundColor: color.hairlineSoft, borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 5 },
-  neutralPillText: { fontSize: 11.5, fontWeight: '800', color: color.inkFaint },
+  neutralPillText: { fontSize: 11.5, fontWeight: '700', color: color.inkFaint },
 });

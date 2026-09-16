@@ -72,12 +72,12 @@ function Tile({ value, label }: { value: string; label: string }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },
-  body: { padding: space.screen, gap: space.md },
+  body: { padding: space.screen, paddingBottom: space.xxl, gap: space.md },
   hero: { backgroundColor: color.surface, borderRadius: radius.hero, padding: space.xl, alignItems: 'center', gap: space.sm },
   name: { ...font.h2 },
   tiles: { flexDirection: 'row', gap: space.sm },
   tile: { flex: 1, backgroundColor: color.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: color.hairline, paddingVertical: space.md, alignItems: 'center' },
-  tileValue: { fontSize: 22, fontWeight: '800', color: color.ink },
+  tileValue: { fontSize: 22, fontWeight: '700', color: color.ink },
   tileLabel: { ...font.caption },
   decay: { ...font.caption, lineHeight: 18 },
   card: { backgroundColor: color.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: color.hairline, padding: space.card, gap: space.sm },

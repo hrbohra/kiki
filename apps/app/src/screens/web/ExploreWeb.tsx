@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   sub: { fontSize: 14, color: color.inkFaint, marginTop: 4 },
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
   vibeRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: -8 },
-  vibeLabel: { fontSize: 12.5, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', color: color.inkFaint, marginRight: 2 },
+  vibeLabel: { fontSize: 12.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: color.inkFaint, marginRight: 2 },
   search: { flexGrow: 1, minWidth: 260, backgroundColor: color.surface, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: 20, paddingVertical: 13 },
   searchText: { fontSize: 14, color: color.inkFaint },
   segment: { flexDirection: 'row', backgroundColor: color.hairline, borderRadius: radius.pill, padding: 3 },

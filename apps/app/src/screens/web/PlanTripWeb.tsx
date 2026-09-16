@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Platform, View, Text, Pressable, TextInput, ScrollView, StyleSheet } from 'react-native';
+import { haptic } from '../../ui/feedback';
 
 import { color } from '../../theme/tokens';
 import { Dates } from '../../ui/glyphs';
@@ -18,7 +19,9 @@ interface Draft {
   icon: string;
 }
 
-const DRAFT_DEFAULT: Draft = { name: '', start: '2027-06-07', end: '2027-06-20', budget: '40', icon: TRIP_KINDS[0] };
+/** Defaults relative to today so the form never opens on a date in the past. */
+const isoInDays = (d: number) => { const t = new Date(); t.setDate(t.getDate() + d); return t.toISOString().slice(0, 10); };
+const DRAFT_DEFAULT: Draft = { name: '', start: isoInDays(35), end: isoInDays(48), budget: '40', icon: TRIP_KINDS[0] };
 
 /** Create-a-trip: you post a trip and hosts come to you. Nights and total are derived, never
  *  typed; a live preview shows exactly what a host will see; posting builds the trip and opens
@@ -45,6 +48,7 @@ export function PlanTripWeb() {
       dates: `${shortDate(draft.start)} - ${shortDate(draft.end)}`,
       nights, budget: Number(draft.budget || 0), offers: [],
     };
+    haptic.success();
     setCreatedTrip(trip);
     navigation.replace('TripOffers', { tripId: 'created' });
   };
@@ -151,7 +155,7 @@ function DateInput({ value, onChange }: { value: string; onChange: (v: string) =
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.screen },
-  scroll: { paddingVertical: 40, paddingHorizontal: 20 },
+  scroll: { paddingTop: 40, paddingBottom: 72, paddingHorizontal: 20 },
   col: { maxWidth: 620, width: '100%', alignSelf: 'center', gap: 18 },
 
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },

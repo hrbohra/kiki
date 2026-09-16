@@ -87,5 +87,5 @@ export function GraphView({ path, branches = [] }: Props) {
 const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: color.hairline, marginVertical: space.sm, overflow: 'hidden' },
   node: { position: 'absolute', alignItems: 'center' },
-  name: { position: 'absolute', fontSize: 11, fontWeight: '800', color: color.inkSoft, textAlign: 'center' },
+  name: { position: 'absolute', fontSize: 11, fontWeight: '700', color: color.inkSoft, textAlign: 'center' },
 });

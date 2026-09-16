@@ -77,5 +77,5 @@ const styles = StyleSheet.create({
   name: { ...font.h3, fontSize: 16 },
   preview: { ...font.body, color: color.inkSoft },
   unread: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  unreadText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
 });

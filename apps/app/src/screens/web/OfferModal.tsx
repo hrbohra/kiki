@@ -1,4 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { haptic } from '../../ui/feedback';
 
 import { Avatar } from '../../ui/Avatar';
 import { color } from '../../theme/tokens';
@@ -45,7 +46,7 @@ export function OfferModal({ offer, onClose }: { offer: OfferView; onClose: () =
 
       <Text style={styles.disclosure}>Accepting opens a thread. It does not confirm anything until you both agree the dates.</Text>
       <View style={styles.actions}>
-        <Pressable style={styles.accept} onPress={onClose}><Text style={styles.acceptText}>Accept and message</Text></Pressable>
+        <Pressable style={styles.accept} onPress={() => { haptic.success(); onClose(); }}><Text style={styles.acceptText}>Accept and message</Text></Pressable>
         <Pressable style={styles.decline} onPress={onClose}><Text style={styles.declineText}>Decline</Text></Pressable>
       </View>
     </WebModal>
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
   well: { marginTop: 16, backgroundColor: color.screen, borderRadius: 14, padding: 16, gap: 10 },
   rowBetween: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 },
   wellNights: { fontSize: 15, lineHeight: 22, fontWeight: '700', color: color.ink },
-  wellTotal: { fontSize: 17, lineHeight: 24, fontWeight: '800', color: color.ink },
+  wellTotal: { fontSize: 17, lineHeight: 24, fontWeight: '700', color: color.ink },
   track: { height: 8, borderRadius: 999, backgroundColor: '#E4EAE8', overflow: 'hidden' },
   fill: { height: 8, borderRadius: 999, backgroundColor: color.brand },
   metaLabel: { fontSize: 13, lineHeight: 19, color: color.inkFaint },

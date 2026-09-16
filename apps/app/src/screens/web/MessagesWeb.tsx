@@ -121,5 +121,5 @@ const styles = StyleSheet.create({
   input: { flex: 1, backgroundColor: color.bg, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: 16, paddingVertical: 12 },
   inputPlaceholder: { fontSize: 14, color: color.inkFaint },
   send: { width: 42, height: 42, borderRadius: 21, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
-  sendArrow: { color: '#FFFFFF', fontSize: 20, fontWeight: '800' },
+  sendArrow: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' },
 });

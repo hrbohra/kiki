@@ -91,14 +91,14 @@ export const shadow = {
 export const cardShadow = shadow.card;
 
 export const font = {
-  display: { fontSize: 29, fontWeight: '800' as const, color: color.ink, letterSpacing: -0.7 },
-  h1: { fontSize: 27, fontWeight: '800' as const, color: color.ink, letterSpacing: -0.6 },
-  h2: { fontSize: 22, fontWeight: '800' as const, color: color.ink, letterSpacing: -0.5 },
-  h3: { fontSize: 17, fontWeight: '800' as const, color: color.ink },
-  title: { fontSize: 18, fontWeight: '800' as const, color: color.ink, letterSpacing: -0.2 },
+  display: { fontSize: 29, fontWeight: '700' as const, color: color.ink, letterSpacing: -0.7 },
+  h1: { fontSize: 27, fontWeight: '700' as const, color: color.ink, letterSpacing: -0.6 },
+  h2: { fontSize: 22, fontWeight: '700' as const, color: color.ink, letterSpacing: -0.5 },
+  h3: { fontSize: 17, fontWeight: '700' as const, color: color.ink },
+  title: { fontSize: 18, fontWeight: '700' as const, color: color.ink, letterSpacing: -0.2 },
   body: { fontSize: 15, fontWeight: '500' as const, color: color.inkSoft, lineHeight: 22 },
   caption: { fontSize: 13, fontWeight: '600' as const, color: color.inkFaint },
-  micro: { fontSize: 11, fontWeight: '800' as const, color: color.inkSoft },
+  micro: { fontSize: 11, fontWeight: '700' as const, color: color.inkSoft },
   button: { fontSize: 16, fontWeight: '700' as const, color: '#FFFFFF' },
 } as const;
 

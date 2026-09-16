@@ -84,10 +84,10 @@ const styles = StyleSheet.create({
   countTile: { alignItems: 'center', backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 6 },
   countNum: { fontSize: 17, fontWeight: '700', color: color.textOnMint },
   countLabel: { fontSize: 10, fontWeight: '700', color: color.textOnMint },
-  rank: { width: 22, textAlign: 'center', fontSize: 15, fontWeight: '800', color: color.inkFaint },
+  rank: { width: 22, textAlign: 'center', fontSize: 15, fontWeight: '700', color: color.inkFaint },
   rankTop: { color: '#C98A2B' },
   scoreCol: { alignItems: 'flex-end' },
-  score: { fontSize: 16, fontWeight: '800', color: color.ink },
+  score: { fontSize: 16, fontWeight: '700', color: color.ink },
   scoreLabel: { fontSize: 10, fontWeight: '700', color: color.inkFaint },
   foot: { fontSize: 12.5, color: color.inkFaint, marginTop: 10 },
 });

@@ -28,7 +28,7 @@ export function TripsWeb() {
 
   return (
     <View style={{ gap: 20 }}>
-      <Text style={styles.h1}>Kiki Trips</Text>
+      <Text style={styles.h1}>Trips</Text>
 
       <View style={styles.cols}>
         <View style={styles.main}>
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   countPill: { borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 5 },
   countBrand: { backgroundColor: color.brand },
   countNeutral: { backgroundColor: color.hairlineSoft },
-  countText: { fontSize: 11.5, fontWeight: '800' },
+  countText: { fontSize: 11.5, fontWeight: '700' },
   countTextBrand: { color: '#FFFFFF' },
   countTextNeutral: { color: color.inkFaint },
   cols: { flexDirection: 'row', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },
@@ -162,17 +162,17 @@ const styles = StyleSheet.create({
   creditText: { fontSize: 13.5, fontWeight: '600', color: color.textOnMint },
   owed: { backgroundColor: color.brandTint, borderRadius: 12, padding: 12, gap: 10, marginTop: 2 },
   owedText: { fontSize: 13.5, lineHeight: 19, color: color.textOnMint },
-  owedDone: { fontSize: 14, fontWeight: '800', color: color.textOnMint },
+  owedDone: { fontSize: 14, fontWeight: '700', color: color.textOnMint },
   owedBtn: { backgroundColor: color.brand, borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
   owedBtnText: { color: '#FFFFFF', fontSize: 13.5, fontWeight: '700' },
   card: { backgroundColor: color.surface, borderRadius: 20, padding: 20, gap: 10, ...WEB_SHADOW },
   cardTitle: { fontSize: 16, fontWeight: '700', color: color.ink },
   leaveRow: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
-  leaveVal: { fontSize: 22, fontWeight: '800', color: color.ink, width: 30 },
+  leaveVal: { fontSize: 22, fontWeight: '700', color: color.ink, width: 30 },
   leaveLabel: { fontSize: 14, color: color.inkSoft },
   leaveFoot: { fontSize: 12.5, color: color.inkFaint, marginTop: 4 },
   unlockCard: { backgroundColor: color.brandTint, borderRadius: 20, padding: 20, gap: 8 },
-  unlockTitle: { fontSize: 16, fontWeight: '800', color: color.textOnMint },
+  unlockTitle: { fontSize: 16, fontWeight: '700', color: color.textOnMint },
   unlockBody: { fontSize: 14, lineHeight: 21, color: color.textOnMintSoft },
   openCard: { backgroundColor: color.surface, borderRadius: 20, padding: 18, paddingLeft: 21, gap: 8, overflow: 'hidden', ...WEB_SHADOW },
   caveatStrip: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: color.caveat },
