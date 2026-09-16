@@ -31,7 +31,7 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
   const requestId = route.params.requestId;
   const story = world.trustStoryFor(hostId);
   const { isWide } = useResponsive();
-  if (isWide) return <PersonView hostId={hostId} initialTab="trust" navigation={navigation} />;
+  if (isWide) return <PersonView hostId={hostId} initialTab="trust" navigation={navigation} as={entryAs} />;
   const host = story.host;
   const listing = world.listingForHost(hostId);
   const guestBook = world.guestBookOf(hostId);

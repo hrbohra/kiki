@@ -11,6 +11,7 @@ import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
 import { MutualFriendIntro } from '../ui/MutualFriendIntro';
 import { GuestColumn } from './web/GuestColumn';
+import { GraphModal } from './web/GraphModal';
 import { color, radius } from '../theme/tokens';
 import * as world from '../world';
 import type { RootNav } from '../navigation';
@@ -38,6 +39,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
   const perspective = extPerspective ?? perspInternal;
   const setPerspective = onPerspective ?? setPerspInternal;
   const [inferOpen, setInferOpen] = useState(false);
+  const [routeOpen, setRouteOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
@@ -126,7 +128,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
                 {story.warm ? (
                   <WarmCenter story={story} host={host} viewer={viewer} listing={listing} guestBook={guestBook} c={c} inferOpen={inferOpen} setInferOpen={setInferOpen} notify={notify} />
                 ) : story.direct ? (
-                  <DirectCenter story={story} host={host} listing={listing} guestBook={guestBook} c={c} inferOpen={inferOpen} setInferOpen={setInferOpen} />
+                  <DirectCenter story={story} host={host} listing={listing} guestBook={guestBook} c={c} inferOpen={inferOpen} setInferOpen={setInferOpen} onRoute={() => setRouteOpen(true)} />
                 ) : (
                   <ColdCenter story={story} host={host} notify={notify} />
                 )}
@@ -135,6 +137,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
           </View>
         </View>
       </ScrollView>
+      {routeOpen ? <GraphModal hostId={hostId} onClose={() => setRouteOpen(false)} /> : null}
     </View>
   );
 }
@@ -189,7 +192,7 @@ function WarmCenter({ story, host, viewer, listing, guestBook, c, inferOpen, set
 }
 
 // ---- DIRECT ----------------------------------------------------------------
-function DirectCenter({ story, host, listing, guestBook, c, inferOpen, setInferOpen }: any) {
+function DirectCenter({ story, host, listing, guestBook, c, inferOpen, setInferOpen, onRoute }: any) {
   const infer = inferences(story.overlaps);
   return (
     <>
@@ -207,6 +210,7 @@ function DirectCenter({ story, host, listing, guestBook, c, inferOpen, setInferO
             <Text style={styles.directRouteText}>{story.directLink?.note ?? 'A direct connection of yours.'}</Text>
             {story.directLink ? <TieMeter strength={story.directLink.tie.strength} /> : null}
           </View>
+          <Pressable onPress={onRoute} hitSlop={8} accessibilityRole="button"><Text style={styles.seeRoute}>See the route ›</Text></Pressable>
         </View>
       </View>
       <TrackRecord host={host} listing={listing} guestBook={guestBook} c={c} notify={() => {}} />
@@ -361,6 +365,7 @@ function copy(p: P, host: string, o: { voucher?: string; nights: number; warm: b
 }
 
 const styles = StyleSheet.create({
+  seeRoute: { fontSize: 13.5, fontWeight: '700', color: color.brand, marginTop: 6 },
   page: { flex: 1, backgroundColor: color.screen },
   header: { height: 68, backgroundColor: 'rgba(255,255,255,0.94)', borderBottomWidth: 1, borderBottomColor: color.hairline, ...(sticky(0)), zIndex: 20 },
   headerInner: { flex: 1, maxWidth: 1440, width: '100%', alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 28, paddingHorizontal: 40 },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Loop } from '../../ui/Loop';
 import { Avatar } from '../../ui/Avatar';
@@ -11,7 +11,7 @@ import { GuestBookWeb } from './GuestBookWeb';
 import { TripsWeb } from './TripsWeb';
 import { MessagesWeb } from './MessagesWeb';
 import { MeWeb } from './MeWeb';
-import { requestsNeedingReply } from '../../domain/requests';
+import { useSession } from '../../api/session';
 
 export type WebPage = 'explore' | 'requests' | 'community' | 'guestbook' | 'trips' | 'messages' | 'me';
 const TABS: { key: WebPage; label: string }[] = [
@@ -32,7 +32,15 @@ const TABS: { key: WebPage; label: string }[] = [
 export function WebShell() {
   const [page, setPage] = useState<WebPage>('explore');
   const viewer = world.memberById(world.viewerId);
-  const needsReply = requestsNeedingReply();
+  const { api } = useSession();
+  const [needsReply, setNeedsReply] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    api.requests.inbox.query()
+      .then((r) => { if (alive) setNeedsReply((r as { state: string }[]).filter((x) => x.state === 'pending').length); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [api, page]);
 
   return (
     <View style={styles.root}>

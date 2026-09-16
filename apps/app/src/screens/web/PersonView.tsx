@@ -23,9 +23,10 @@ type P = 'host' | 'guest';
  * Room / Profile / Trust tabs, and the host/guest reading toggle) sharing one identity card. This
  * replaced the separate host-profile page that duplicated the Trust page with different chrome.
  */
-export function PersonView({ hostId, initialTab, navigation }: { hostId: string; initialTab: Tab; navigation: RootNav }) {
+export function PersonView({ hostId, initialTab, navigation, as: entryAs }: { hostId: string; initialTab: Tab; navigation: RootNav; as?: 'host' | 'guest' }) {
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [view, setView] = useState<P>('host');
+  // 'The host' / 'The guest' are facets of THEM: arriving as the host, you read their guest side.
+  const [view, setView] = useState<P>(entryAs === 'host' ? 'guest' : 'host');
 
   return (
     <View style={styles.root}>

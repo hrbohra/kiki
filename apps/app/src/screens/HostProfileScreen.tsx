@@ -18,7 +18,7 @@ import type { StackProps } from '../navigation';
 export function HostProfileScreen(props: StackProps<'HostProfile'>) {
   const { isWide } = useResponsive();
   const { route, navigation } = props;
-  if (isWide) return <PersonView hostId={world.listingById(route.params.listingId).hostId} initialTab="profile" navigation={navigation} />;
+  if (isWide) return <PersonView hostId={world.listingById(route.params.listingId).hostId} initialTab="profile" navigation={navigation} as="guest" />;
   const listing = world.listingById(route.params.listingId);
   const host = world.hostOf(listing);
   const story = world.storyFor(host.id);

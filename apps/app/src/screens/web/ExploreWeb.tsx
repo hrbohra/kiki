@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar } from '../../ui/Avatar';
+import { Reveal, Halo } from '../../ui/motion';
 import { Chip } from '../../ui/Chip';
 import { MapCanvas } from '../../ui/MapCanvas';
 import { photoFor } from '../../ui/listingPhotos';
@@ -81,7 +82,11 @@ export function ExploreWeb() {
       {mode === 'homes' ? (
         listings.length ? (
           <View style={styles.grid}>
-            {listings.map((l) => <WebListingCard key={l.id} listing={l} onPress={() => open(l)} />)}
+            {listings.map((l, i) => (
+              <Reveal key={l.id} index={i} style={styles.cell}>
+                <WebListingCard listing={l} onPress={() => open(l)} />
+              </Reveal>
+            ))}
           </View>
         ) : (
           <View style={styles.empty}>
@@ -139,7 +144,7 @@ function WebListingCard({ listing, onPress }: { listing: Listing; onPress: () =>
         <LinearGradient colors={['rgba(20,25,24,0)', 'rgba(20,25,24,0.42)']} style={StyleSheet.absoluteFill} />
         <View style={styles.kindPill}><Text style={styles.kindText}>{listing.kind}</Text></View>
         <View style={styles.hostRow}>
-          <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={26} ring />
+          <Halo on={deg === 1} size={26}><Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={26} ring /></Halo>
           <Text style={styles.hostName}>{host.name}</Text>
         </View>
       </View>
@@ -169,7 +174,8 @@ const styles = StyleSheet.create({
   segText: { fontSize: 13, fontWeight: '700', color: color.inkFaint },
   segTextActive: { color: color.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 18 },
-  card: { width: 300, flexGrow: 1, maxWidth: 380, backgroundColor: color.surface, borderRadius: 20, overflow: 'hidden' },
+  cell: { width: 300, flexGrow: 1, maxWidth: 380 },
+  card: { width: '100%', backgroundColor: color.surface, borderRadius: 20, overflow: 'hidden' },
   cardHover: { transform: [{ translateY: -3 }] },
   photoWrap: { height: 168, justifyContent: 'flex-end', backgroundColor: color.hairline },
   photo: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },

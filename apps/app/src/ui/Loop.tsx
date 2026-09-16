@@ -1,24 +1,25 @@
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { color as tokens } from '../theme/tokens';
+import { MARK } from './glyphs/_shared';
 
 interface Props {
-  size?: number; // width; height follows the 100×60 aspect
+  size?: number; // rendered square: `size` is both width and height
   color?: string;
   opacity?: number;
+  /** Kept for call-site compatibility; the mark is a filled outline and is never stroked. */
   strokeWidth?: number;
 }
 
 /**
- * The signature motif: two overlapping rings — the pretzel/knot reduced to its simplest
- * legible form. It means "two people, one overlap", which is the whole product. Used only
- * as faint texture (never > ~18% opacity) or as a small leading glyph on trust banners.
+ * The Kiki mark — the real logo path, verbatim from kiki-logo.svg (glyphs/_shared MARK).
+ * This replaced the earlier two-ring stand-in everywhere it was used (wordmarks, the profile hero
+ * watermark, trust badges, the entry screen): the Sep 6 glyph handoff fixed the logo, and the app
+ * now carries it in one place. A filled outline: never stroke it, never re-trace it.
  */
-export function Loop({ size = 100, color = tokens.brand, opacity = 0.1, strokeWidth = 6 }: Props) {
-  const h = size * 0.6;
+export function Loop({ size = 100, color = tokens.brand, opacity = 0.1 }: Props) {
   return (
-    <Svg width={size} height={h} viewBox="0 0 100 60" opacity={opacity}>
-      <Circle cx={38} cy={30} r={21} stroke={color} strokeWidth={strokeWidth} fill="none" />
-      <Circle cx={62} cy={30} r={21} stroke={color} strokeWidth={strokeWidth} fill="none" />
+    <Svg width={size} height={size} viewBox="21 9 53 53" opacity={opacity}>
+      <Path d={MARK} fill={color} />
     </Svg>
   );
 }
