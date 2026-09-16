@@ -136,6 +136,7 @@ function Entry({ review }: { review: Review }) {
   const author = world.memberById(review.authorId);
   const sentiment = a.sentiment === 'neutral' ? 'mixed' : a.sentiment;
   const chipColor = sentimentColor[sentiment];
+  const self = author.id === world.viewerId;
   const deg = degreeOf(author.id);
   return (
     <View style={[styles.review, shadow.card]}>
@@ -143,14 +144,14 @@ function Entry({ review }: { review: Review }) {
         <Avatar id={author.id} name={author.name} tint={author.avatarColor} country={author.country} size={32} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.author}>{author.name}</Text>
-          <Text style={styles.authorDeg}>{deg === 1 ? 'You know them directly' : deg === 2 ? 'Two steps from you' : deg === 3 ? 'Three steps away' : 'Outside your circle'}</Text>
+          <Text style={styles.authorDeg}>{self ? 'You wrote this' : deg === 1 ? 'You know them directly' : deg === 2 ? 'Two steps from you' : deg === 3 ? 'Three steps away' : 'Outside your circle'}</Text>
         </View>
         <View style={[styles.sentChip, { borderColor: chipColor }]}>
           <Text style={[styles.sentChipText, { color: chipColor }]}>{sentiment}</Text>
         </View>
       </View>
       <Text style={styles.reviewText}>{review.text}</Text>
-      {deg <= 2 ? <TrustPill label="Someone you can call" tone="tint" /> : null}
+      {!self && deg <= 2 ? <TrustPill label="Someone you can call" tone="tint" /> : null}
     </View>
   );
 }
