@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { useResponsive } from '../../ui/useResponsive';
 import { Avatar } from '../../ui/Avatar';
 import { ReachPill, WEB_SHADOW } from './webBits';
 import { photoFor } from '../../ui/listingPhotos';
@@ -91,6 +92,7 @@ export function RequestsWeb() {
 }
 
 function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () => void; onDecide: (id: string, d: 'accept' | 'decline') => void }) {
+  const { isWide } = useResponsive();
   const person = item.guest;
   const guestListing = world.listingForHost(person.id);
   const steps = world.degreeToHost(person.id);
@@ -105,7 +107,7 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
   return (
     <View style={[styles.reqCard, WEB_SHADOW]}>
       {needs ? <View style={styles.needsRule} /> : null}
-      {guestListing ? <Image source={photoFor(guestListing.id)} style={styles.reqPhoto} resizeMode="cover" /> : null}
+      {guestListing ? <Image source={photoFor(guestListing.id)} style={[styles.reqPhoto, !isWide && styles.reqPhotoPhone]} resizeMode="cover" /> : null}
       <View style={styles.reqBody}>
         <View style={styles.reqTop}>
           <Avatar id={person.id} name={person.name} tint={person.avatarColor} country={person.country} size={34} />
@@ -141,14 +143,15 @@ const styles = StyleSheet.create({
   h1: { fontSize: 30, fontWeight: '700', letterSpacing: -0.6, color: color.ink },
   sub: { fontSize: 14, color: color.inkFaint, marginTop: 4 },
   cols: { flexDirection: 'row', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },
-  list: { flexGrow: 1, flexBasis: 560, minWidth: 320, gap: 14 },
-  rail: { flexGrow: 1, flexBasis: 300, minWidth: 280, gap: 16 },
+  list: { flexGrow: 1, flexShrink: 1, flexBasis: 560, minWidth: 0, gap: 14 },
+  rail: { flexGrow: 1, flexShrink: 1, flexBasis: 300, minWidth: 0, gap: 16 },
   loading: { paddingVertical: 40, alignItems: 'center' },
   empty: { fontSize: 14.5, color: color.inkSoft, paddingVertical: 24 },
 
   reqCard: { flexDirection: 'row', backgroundColor: color.surface, borderRadius: 20, overflow: 'hidden' },
   needsRule: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: color.brand, zIndex: 1 },
   reqPhoto: { width: 150, height: '100%', minHeight: 150 },
+  reqPhotoPhone: { width: 110, minHeight: 120 },
   reqBody: { flex: 1, padding: 18, gap: 8 },
   reqTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   reqName: { fontSize: 17, fontWeight: '700', color: color.ink },

@@ -5,6 +5,7 @@ import { Avatar } from '../../ui/Avatar';
 import { Loop } from '../../ui/Loop';
 import { Hometown, Studied, Climb, Work } from '../../ui/glyphs';
 import { WEB_SHADOW } from './webBits';
+import { useResponsive } from '../../ui/useResponsive';
 import { INVITE, ONBOARD_FACTS, ONBOARD_STEPS } from '../../domain/invite';
 import { setOnboarded } from '../../demo/onboarding';
 import { color } from '../../theme/tokens';
@@ -25,6 +26,7 @@ import type { RootNav } from '../../navigation';
  */
 export function OnboardingWeb() {
   const navigation = useNavigation<RootNav>();
+  const { isWide } = useResponsive();
   const [step, setStep] = useState(0);
   const [facts, setFacts] = useState(ONBOARD_FACTS.map((f) => f.on));
   const inviter = world.memberById(INVITE.fromId);
@@ -35,8 +37,8 @@ export function OnboardingWeb() {
 
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.shell}>
+      <ScrollView contentContainerStyle={[styles.scroll, !isWide && styles.scrollPhone]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.shell, !isWide && styles.shellPhone]}>
           {/* numbered rail */}
           <View style={styles.rail}>
             <View style={styles.wordmark}><Loop size={30} color={color.brand} opacity={1} strokeWidth={9} /><Text style={styles.brand}>Kiki</Text></View>
@@ -59,7 +61,7 @@ export function OnboardingWeb() {
           {/* step card + footer */}
           <View style={styles.right}>
             {step === 0 ? (
-              <View style={[styles.card, styles.stepCard]}>
+              <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <Text style={styles.eyebrow}>YOUR INVITE</Text>
                 <View style={styles.inviterRow}>
                   <View style={styles.inviterAv}>
@@ -84,7 +86,7 @@ export function OnboardingWeb() {
                 </View>
               </View>
             ) : step === 1 ? (
-              <View style={[styles.card, styles.stepCard]}>
+              <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <Text style={styles.h1}>What you bring</Text>
                 <Text style={styles.body}>These are the facts we match you on. Share only what you want strangers to find you by — you can change any of it later, and we will always label what we worked out ourselves.</Text>
                 <View style={{ gap: 10, alignSelf: 'stretch' }}>
@@ -106,7 +108,7 @@ export function OnboardingWeb() {
                 <Text style={styles.footNote}>{sharedCount} shared. A shared fact is not a safety signal — it is just something to open with.</Text>
               </View>
             ) : step === 2 ? (
-              <View style={[styles.card, styles.stepCard]}>
+              <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <Text style={styles.h1}>What this costs you</Text>
                 <Text style={styles.body}>Three things are true from the moment you join. None of them are in a terms page.</Text>
                 <View style={{ gap: 12 }}>
@@ -123,7 +125,7 @@ export function OnboardingWeb() {
                 </View>
               </View>
             ) : (
-              <View style={[styles.card, styles.stepCard]}>
+              <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <View style={styles.doneCircle}><Loop size={24} color={color.brand} opacity={1} strokeWidth={9} /></View>
                 <Text style={styles.h1}>You’re in.</Text>
                 <Text style={styles.body}>You are one step from {INVITE.fromName} and two steps from eleven other people. That is your whole network today, and it is enough to start.</Text>
@@ -159,7 +161,9 @@ function Stat({ n, label }: { n: string; label: string }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.screen },
   scroll: { paddingVertical: 40, minHeight: '100%' },
+  scrollPhone: { paddingVertical: 24 },
   shell: { maxWidth: 1040, width: '100%', alignSelf: 'center', paddingHorizontal: 40, flexDirection: 'row', flexWrap: 'wrap', gap: 40, alignItems: 'flex-start' },
+  shellPhone: { paddingHorizontal: 16, gap: 24 },
 
   rail: { width: 200, gap: 4 },
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 20 },
@@ -177,9 +181,10 @@ const styles = StyleSheet.create({
   railLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: color.inkFaint, paddingTop: 2, paddingBottom: 14 },
   railLabelActive: { fontWeight: '700', color: color.ink },
 
-  right: { flexGrow: 1, flexBasis: 520, minWidth: 300, gap: 16 },
+  right: { flexGrow: 1, flexShrink: 1, flexBasis: 520, minWidth: 0, gap: 16 },
   card: { backgroundColor: color.surface, borderRadius: 20, ...WEB_SHADOW },
   stepCard: { padding: 32, gap: 14, alignItems: 'flex-start' },
+  stepCardPhone: { padding: 20 },
   eyebrow: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.8, color: color.inkFaint },
   inviterRow: { flexDirection: 'row', alignItems: 'center', gap: 14, alignSelf: 'stretch' },
   inviterAv: { width: 64, height: 64 },
