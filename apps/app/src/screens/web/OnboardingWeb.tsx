@@ -7,6 +7,8 @@ import { Loop } from '../../ui/Loop';
 import { Hometown, Studied, Climb, Work } from '../../ui/glyphs';
 import { WEB_SHADOW } from './webBits';
 import { useResponsive } from '../../ui/useResponsive';
+import { useSession } from '../../api/session';
+import { useWorldRefresh } from '../../api/world-provider';
 import { INVITE, ONBOARD_FACTS, ONBOARD_STEPS } from '../../domain/invite';
 import { setOnboarded } from '../../demo/onboarding';
 import { color } from '../../theme/tokens';
@@ -28,6 +30,15 @@ import type { RootNav } from '../../navigation';
 export function OnboardingWeb() {
   const navigation = useNavigation<RootNav>();
   const { isWide } = useResponsive();
+  const { api } = useSession();
+  const refreshWorld = useWorldRefresh();
+  const FACT_KIND = { hometown: 'origin', studied: 'education', climb: 'interest', work: 'work' } as const;
+  /** The toggles are real: each fact is written to (or removed from) your profile, so the
+   *  overlaps other people see change with them. */
+  const syncFacts = () =>
+    Promise.all(ONBOARD_FACTS.map((f, i) => api.members.setTrait.mutate({ kind: FACT_KIND[f.kind], label: f.label, on: facts[i] }).catch(() => {})))
+      .then(() => refreshWorld())
+      .catch(() => {});
   const [step, setStep] = useState(0);
   const [facts, setFacts] = useState(ONBOARD_FACTS.map((f) => f.on));
   const inviter = world.memberById(INVITE.fromId);
@@ -142,7 +153,7 @@ export function OnboardingWeb() {
             {/* footer controls */}
             <View style={styles.footer}>
               {step > 0 ? <Pressable style={styles.backBtn} onPress={() => setStep((s) => s - 1)}><Text style={styles.backText}>Back</Text></Pressable> : null}
-              <Pressable style={styles.primary} onPress={() => { if (step === last) done(); else { haptic.select(); setStep((s) => s + 1); } }}>
+              <Pressable style={styles.primary} onPress={() => { if (step === last) done(); else { haptic.select(); if (step === 1) void syncFacts(); setStep((s) => s + 1); } }}>
                 <Text style={styles.primaryText}>{step === last ? 'Start exploring' : nextLabel}</Text>
               </Pressable>
               <View style={{ flex: 1 }} />

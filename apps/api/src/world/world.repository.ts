@@ -13,6 +13,27 @@ import { PrismaService } from '../prisma/prisma.service';
 export class WorldRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Add or remove one of the acting member's own facts. A label another member already
+   *  declared (same kind, same text, case-insensitive) reuses their canonical key, so the
+   *  overlap shows on both sides at once; otherwise a new key is minted. Only self-declared
+   *  facts are removable: inferred / matched ones are the system's and stay labelled as such. */
+  async setTrait(userId: string, input: { kind: 'origin' | 'education' | 'interest' | 'work' | 'event'; label: string; on: boolean }) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.memberId) throw new Error('Complete onboarding to act as a member.');
+    const memberId = user.memberId;
+    const label = input.label.trim().replace(/\s+/g, ' ');
+    const existing = await this.prisma.trait.findFirst({ where: { kind: input.kind, label: { equals: label, mode: 'insensitive' } } });
+    const key = existing?.key ?? input.kind + ':' + normalise(label);
+    const mine = await this.prisma.trait.findFirst({ where: { memberId, kind: input.kind, OR: [{ key }, { label: { equals: label, mode: 'insensitive' } }] } });
+    if (!input.on) {
+      if (mine && mine.provenance === 'self_declared') await this.prisma.trait.delete({ where: { id: mine.id } });
+      return { ok: true, key, on: false };
+    }
+    if (mine) return { ok: true, key: mine.key, on: true };
+    await this.prisma.trait.create({ data: { memberId, kind: input.kind, key, label, provenance: 'self_declared' } });
+    return { ok: true, key, on: true };
+  }
+
   async load(): Promise<WorldData> {
     const [members, vouches, listings, reviews, guestReviews, contributions] = await Promise.all([
       this.prisma.member.findMany({ include: { traits: true } }),
@@ -83,4 +104,9 @@ export class WorldRepository {
       viewerId: VIEWER_ID,
     };
   }
+}
+
+/** Lowercase, drop a leading article, hyphenate: 'Blok Shoreditch' -> 'blok-shoreditch'. */
+function normalise(label: string): string {
+  return label.toLowerCase().replace(/^(the|a|an)\s+/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }

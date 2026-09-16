@@ -26,6 +26,12 @@ export class WorldService {
     return (await this.load()).data;
   }
 
+  async setTrait(userId: string, input: { kind: 'origin' | 'education' | 'interest' | 'work' | 'event'; label: string; on: boolean }) {
+    const r = await this.repo.setTrait(userId, input);
+    this.invalidate();
+    return r;
+  }
+
   invalidate(): void {
     this.cache = undefined;
   }

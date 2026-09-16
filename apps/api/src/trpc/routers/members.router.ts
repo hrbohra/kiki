@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../trpc';
+import { router, publicProcedure, protectedProcedure } from '../trpc';
 
 export const membersRouter = router({
   /** All members in the world. */
@@ -19,6 +19,11 @@ export const membersRouter = router({
     const world = await ctx.world.world();
     return world.peopleLikeYou();
   }),
+
+  /** Add or remove one of your own facts, the things people are matched on. */
+  setTrait: protectedProcedure
+    .input(z.object({ kind: z.enum(['origin', 'education', 'interest', 'work', 'event']), label: z.string().trim().min(1).max(80), on: z.boolean() }))
+    .mutation(({ ctx, input }) => ctx.world.setTrait(ctx.user.id, input)),
 
   /** Community leaderboard by contribution. */
   leaderboard: publicProcedure.query(async ({ ctx }) => {

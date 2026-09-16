@@ -3,6 +3,8 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Avatar } from '../../ui/Avatar';
 import { TierBadge } from '../../ui/TierBadge';
 import { WEB_SHADOW } from './webBits';
+import { FactsEditor } from '../../ui/FactsEditor';
+import { useWorldVersion } from '../../api/world-provider';
 import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
@@ -12,6 +14,7 @@ import type { RootNav } from '../../navigation';
  *  adds the provenance tags and the consent card the Trust tab relies on. */
 export function MeWeb() {
   const navigation = useNavigation<RootNav>();
+  useWorldVersion(); // re-render when your facts change
   const me = world.memberById(world.viewerId);
   const standing = world.standingOf(me.id);
   const cohort = world.leaderboard().length;
@@ -59,16 +62,7 @@ export function MeWeb() {
         <View style={styles.col}>
           <Text style={styles.h2}>What we match you on</Text>
           <View style={[styles.card, WEB_SHADOW]}>
-            {me.traits.map((t) => (
-              <View key={t.key} style={styles.traitRow}>
-                <Text style={styles.traitLabel}>{traitPlain(t.label)}</Text>
-                <View style={[styles.provTag, t.provenance === 'self_declared' ? styles.provWords : styles.provWorked]}>
-                  <Text style={[styles.provText, t.provenance === 'self_declared' ? styles.provWordsText : styles.provWorkedText]}>
-                    {t.provenance === 'self_declared' ? 'Your words' : 'We worked it out'}
-                  </Text>
-                </View>
-              </View>
-            ))}
+            <FactsEditor traits={me.traits} title="Your facts" compact />
           </View>
 
           <View style={styles.consentCard}>

@@ -5,6 +5,8 @@ import { TierBadge } from '../ui/TierBadge';
 import { PressableScale } from '../ui/PressableScale';
 import { useResponsive } from '../ui/useResponsive';
 import { resetOnboarded } from '../demo/onboarding';
+import { FactsEditor } from '../ui/FactsEditor';
+import { useWorldVersion } from '../api/world-provider';
 import { useSession } from '../api/session';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
@@ -19,6 +21,7 @@ export function MeScreen() {
   const navigation = useNavigation<RootNav>();
   const { isWide } = useResponsive();
   const { api } = useSession();
+  useWorldVersion(); // re-render when your facts change
 
   const replayDemo = () => {
     api.demo.reset.mutate().catch(() => {}); // put the seeded requests back for the next visitor
@@ -43,12 +46,7 @@ export function MeScreen() {
         <Text style={styles.decay}>Recent contributions count for more — your standing reflects the last few months, not all time.</Text>
 
         <View style={[styles.card, shadow.card]}>
-          <Text style={styles.cardTitle}>What you're matched on</Text>
-          {me.traits.map((t) => (
-            <View key={t.key} style={styles.traitRow}>
-              <Text style={styles.traitLabel}>{t.label}</Text>
-            </View>
-          ))}
+          <FactsEditor traits={me.traits} />
         </View>
 
         {/* Demo-only affordance to replay the invite flow. Mobile only — on desktop the same action
