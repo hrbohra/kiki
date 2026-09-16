@@ -55,7 +55,7 @@ export function PersonView({ hostId, initialTab, navigation, as: entryAs }: { ho
       </View>
 
       {tab === 'trust' ? (
-        <TrustWeb hostId={hostId} navigation={navigation} embedded perspective={view} onPerspective={setView} />
+        <TrustWeb hostId={hostId} navigation={navigation} embedded perspective={view} onPerspective={setView} reader={entryAs ?? 'guest'} />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.shell}>

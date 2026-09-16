@@ -27,7 +27,7 @@ const CARD_SHADOW = { shadowColor: '#1A1A1A', shadowOpacity: 0.05, shadowRadius:
  * column changes with the state. Warm keeps the desktop-only cross-highlighting between the
  * vouch cards and the graph.
  */
-export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspective, onPerspective }: { hostId: string; navigation: RootNav; embedded?: boolean; perspective?: P; onPerspective?: (p: P) => void }) {
+export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspective, onPerspective, reader }: { hostId: string; navigation: RootNav; embedded?: boolean; perspective?: P; onPerspective?: (p: P) => void; /** who is reading: drives the rail copy + CTA; the facet toggle drives the centre column */ reader?: P }) {
   const story = world.trustStoryFor(hostId);
   const host = story.host;
   const viewer = world.memberById(world.viewerId);
@@ -49,7 +49,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
   const req = story.warm
     ? { dates: relRange(4, 7), nights: 7 }
     : { dates: relRange(18, 3), nights: 3 };
-  const c = copy(perspective, host.name, { voucher: names[0], nights: req.nights, warm: story.warm, direct: story.direct });
+  const c = copy(reader ?? perspective, host.name, { voucher: names[0], nights: req.nights, warm: story.warm, direct: story.direct });
 
   return (
     <View style={styles.page}>

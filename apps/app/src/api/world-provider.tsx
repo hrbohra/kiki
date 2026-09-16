@@ -15,7 +15,7 @@ const Ctx = createContext<WorldCtx | null>(null);
 /** Loads the world snapshot from the API once (per signed-in member) and feeds it into the world
  *  facade, then renders the app. `refresh()` re-pulls after a write so reads reflect it. */
 export function WorldProvider({ children }: { children: ReactNode }) {
-  const { api } = useSession();
+  const { api, signOut } = useSession();
   const [version, setVersion] = useState(0);
   const [ready, setReadyState] = useState(isReady());
   const [failed, setFailed] = useState(false);
@@ -23,7 +23,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setFailed(false);
     try {
-      const snap = await api.world.snapshot.query();
+      // A stale token can leave the first load hanging; never let the splash be the last thing a visitor sees.
+      const snap = await Promise.race([
+        api.world.snapshot.query(),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("snapshot timeout")), 12000)),
+      ]);
       setWorldData(snap as WorldData);
       setReadyState(true);
       setVersion((v) => v + 1);
@@ -43,6 +47,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
           <>
             <Text style={styles.msg}>Couldn't load your world.</Text>
             <Pressable onPress={() => void refresh()} style={styles.retry}><Text style={styles.retryText}>Retry</Text></Pressable>
+            <Pressable onPress={() => { void signOut(); }} style={styles.retry}><Text style={styles.retryText}>Start over</Text></Pressable>
           </>
         ) : (
           <ActivityIndicator color={color.brand} />
