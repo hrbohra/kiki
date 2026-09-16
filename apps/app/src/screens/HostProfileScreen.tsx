@@ -152,7 +152,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
           <Text style={styles.eyebrow}>TRUST</Text>
           <Text style={styles.lead}>Can you trust {host.name} with your home, or theirs with you? The evidence, and what we can't answer.</Text>
           <View style={styles.chips}>
-            <CountPill label={`${mutuals} ${mutuals === 1 ? 'mutual' : 'mutuals'}`} />
+            {mutuals > 0 ? <CountPill label={`${mutuals} ${mutuals === 1 ? 'mutual' : 'mutuals'}`} /> : null}
             <CountPill label={`${summary.count} guest book ${summary.count === 1 ? 'entry' : 'entries'}`} />
             {story.reachable ? <CountPill label={`${ordinal(story.degrees)} degree`} /> : null}
           </View>
