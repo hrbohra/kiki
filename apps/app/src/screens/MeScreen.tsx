@@ -5,6 +5,7 @@ import { TierBadge } from '../ui/TierBadge';
 import { PressableScale } from '../ui/PressableScale';
 import { useResponsive } from '../ui/useResponsive';
 import { resetOnboarded } from '../demo/onboarding';
+import { useSession } from '../api/session';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
 import * as world from '../world';
@@ -17,8 +18,10 @@ export function MeScreen() {
   const similarCount = world.peopleLikeYou().length;
   const navigation = useNavigation<RootNav>();
   const { isWide } = useResponsive();
+  const { api } = useSession();
 
   const replayDemo = () => {
+    api.demo.reset.mutate().catch(() => {}); // put the seeded requests back for the next visitor
     resetOnboarded();
     navigation.navigate('Onboard');
   };

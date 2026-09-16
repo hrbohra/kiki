@@ -79,4 +79,18 @@ export class RequestsService {
       data: { state: input.decision === 'accept' ? 'accepted' : 'declined', decidedAt: new Date() },
     });
   }
+
+  /** Demo only: put the seeded decision state back (Maia + Priya pending, Danica accepted) so the
+   *  shared public demo always has a request to decide on. Mirrors prisma/seed.ts. */
+  async resetDemo() {
+    const pending = await this.prisma.stayRequest.updateMany({
+      where: { hostId: 'you', guestId: { in: ['emma', 'priya'] } },
+      data: { state: 'pending', decidedAt: null },
+    });
+    const accepted = await this.prisma.stayRequest.updateMany({
+      where: { hostId: 'you', guestId: 'danica' },
+      data: { state: 'accepted', decidedAt: new Date() },
+    });
+    return { ok: true, pending: pending.count, accepted: accepted.count };
+  }
 }

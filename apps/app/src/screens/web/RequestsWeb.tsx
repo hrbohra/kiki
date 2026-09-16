@@ -68,7 +68,7 @@ export function RequestsWeb() {
               <RequestCard
                 key={r.id}
                 item={r}
-                onOpen={() => navigation.navigate('Trust', { hostId: r.guestId, as: 'host', requestId: r.id })}
+                onOpen={() => navigation.navigate('Trust', { hostId: r.guestId, as: 'host', requestId: r.state === 'pending' ? r.id : undefined })}
                 onDecide={decide}
               />
             ))

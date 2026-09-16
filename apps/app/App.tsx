@@ -37,8 +37,10 @@ const navigationRef = createNavigationContainerRef<RootStackParamList>();
  *  Desktop only — on mobile it would float over the bottom tab bar. */
 function ResetDemoButton() {
   const { isWide } = useResponsive();
+  const { api } = useSession();
   if (!isWide) return null;
   const replay = () => {
+    api.demo.reset.mutate().catch(() => {}); // put the seeded requests back for the next visitor
     resetOnboarded();
     if (navigationRef.isReady()) navigationRef.navigate('Onboard');
   };

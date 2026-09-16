@@ -11,6 +11,7 @@ import { messagingRouter } from './routers/messaging.router';
 import { mediaRouter } from './routers/media.router';
 import { aiRouter } from './routers/ai.router';
 import { worldRouter } from './routers/world.router';
+import { demoRouter } from './routers/demo.router';
 
 /** The root tRPC router. Its type is exported for the type-safe client (@kiki/api-client). */
 export const appRouter = router({
@@ -26,6 +27,7 @@ export const appRouter = router({
   media: mediaRouter,
   ai: aiRouter,
   world: worldRouter,
+  demo: demoRouter,
 });
 
 export type AppRouter = typeof appRouter;
