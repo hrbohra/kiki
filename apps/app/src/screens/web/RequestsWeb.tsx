@@ -106,7 +106,7 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
       : 'A new face in the network.';
 
   return (
-    <View style={[styles.reqCard, WEB_SHADOW]}>
+    <View style={[styles.reqCard, !isWide && styles.reqCardPhone, WEB_SHADOW]}>
       {needs ? <View style={styles.needsRule} /> : null}
       {guestListing ? <Image source={photoFor(guestListing.id)} style={[styles.reqPhoto, !isWide && styles.reqPhotoPhone]} resizeMode="cover" /> : null}
       <View style={styles.reqBody}>
@@ -160,9 +160,11 @@ const styles = StyleSheet.create({
   empty: { fontSize: 14.5, color: color.inkSoft, paddingVertical: 24 },
 
   reqCard: { flexDirection: 'row', backgroundColor: color.surface, borderRadius: 20, overflow: 'hidden' },
+  // Phone: a narrow card can't afford a side column, so the photo of their place becomes a banner.
+  reqCardPhone: { flexDirection: 'column' },
   needsRule: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: color.brand, zIndex: 1 },
   reqPhoto: { width: 150, height: '100%', minHeight: 150 },
-  reqPhotoPhone: { width: 110, minHeight: 120 },
+  reqPhotoPhone: { width: '100%', height: 150, minHeight: 150 },
   reqBody: { flex: 1, padding: 18, gap: 8 },
   reqTop: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 },
   reqName: { fontSize: 17, fontWeight: '700', color: color.ink },

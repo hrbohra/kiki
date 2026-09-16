@@ -1,19 +1,20 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { radius, tierColor } from '../theme/tokens';
+import { color, radius, tierColor } from '../theme/tokens';
 import type { MemberStanding } from '../pipeline/tiering';
 
 interface Props {
   standing: MemberStanding;
   showRank?: boolean; // append "· #rank"
   inline?: boolean; // dense lists: drop the border, keep dot + label
+  gold?: boolean; // your own standing only
 }
 
 /**
  * A coloured dot + label ("Pillar · #1"): one dot in four colours carries the tier, letting
  * the colour do the talking instead of four mismatched emoji.
  */
-export function TierBadge({ standing, showRank = false, inline = false }: Props) {
-  const tint = tierColor[standing.tier];
+export function TierBadge({ standing, showRank = false, inline = false, gold = false }: Props) {
+  const tint = gold ? color.gold : tierColor[standing.tier];
   return (
     <View style={[styles.badge, inline ? styles.inline : { borderColor: tint }]}>
       <View style={[styles.dot, { backgroundColor: tint }]} />

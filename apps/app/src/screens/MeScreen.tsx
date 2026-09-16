@@ -30,9 +30,9 @@ export function MeScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={[styles.hero, shadow.card]}>
-          <Avatar id={me.id} name={me.name} tint={me.avatarColor} country={me.country} size={76} ring />
+          <Avatar id={me.id} name={me.name} tint={me.avatarColor} country={me.country} size={76} ring ringColor={color.gold} />
           <Text style={styles.name}>You</Text>
-          <TierBadge standing={standing} showRank />
+          <TierBadge standing={standing} showRank gold />
         </View>
 
         <View style={styles.tiles}>

@@ -52,8 +52,8 @@ export function WebShell() {
           </View>
           <View style={styles.tabs}>
             {TABS.map((t) => (
-              <Pressable key={t.key} style={[styles.tab, page === t.key && styles.tabActive]} onPress={() => setPage(t.key)} accessibilityRole="button">
-                <Text style={[styles.tabText, page === t.key && styles.tabTextActive]}>{t.label}</Text>
+              <Pressable key={t.key} style={[styles.tab, page === t.key && (t.key === 'me' ? styles.tabActiveGold : styles.tabActive)]} onPress={() => setPage(t.key)} accessibilityRole="button">
+                <Text style={[styles.tabText, page === t.key && (t.key === 'me' ? styles.tabTextActiveGold : styles.tabTextActive)]}>{t.label}</Text>
                 {t.key === 'requests' && needsReply > 0 ? (
                   <View style={styles.badge}><Text style={styles.badgeText}>{needsReply}</Text></View>
                 ) : null}
@@ -93,6 +93,9 @@ const styles = StyleSheet.create({
   tabActive: { borderBottomWidth: 2.5, borderBottomColor: color.ink },
   tabText: { fontSize: 14.5, fontWeight: '600', color: color.inkFaint },
   tabTextActive: { fontWeight: '700', color: color.ink },
+  // Gold is spent once: your own standing.
+  tabActiveGold: { borderBottomWidth: 2.5, borderBottomColor: color.gold },
+  tabTextActiveGold: { fontWeight: '700', color: color.gold },
   badge: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 5, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
   badgeText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
   you: {},

@@ -20,7 +20,7 @@ export function MeWeb() {
   return (
     <View style={{ gap: 20 }}>
       <View style={styles.hero}>
-        <Avatar id={me.id} name={me.name} tint={me.avatarColor} country={me.country} size={72} />
+        <Avatar id={me.id} name={me.name} tint={me.avatarColor} country={me.country} size={72} ring ringColor={color.gold} />
         <View>
           <Text style={styles.name}>You</Text>
           <Text style={styles.headline}>You've vouched for 4 people. Three of them have hosted since.</Text>
@@ -31,7 +31,7 @@ export function MeWeb() {
         <View style={styles.col}>
           <Text style={styles.h2}>Your standing</Text>
           <View style={[styles.card, WEB_SHADOW]}>
-            <View style={styles.badgeRow}><TierBadge standing={standing} showRank /></View>
+            <View style={styles.badgeRow}><TierBadge standing={standing} showRank gold /></View>
             <View style={styles.tiles}>
               <Tile value={`${standing.score}`} label="points" />
               <Tile value={`#${standing.rank}`} label={`of ${cohort}`} />

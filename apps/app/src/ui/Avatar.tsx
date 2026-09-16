@@ -9,6 +9,7 @@ interface Props {
   country?: string;
   size?: number;
   ring?: boolean; // white border, for overlapping chains / graph nodes
+  ringColor?: string; // gold is spent once: only on your own standing (Me)
   id?: string; // member id; if it has a portrait, the photo is used instead of the monogram
 }
 
@@ -17,7 +18,7 @@ interface Props {
  * (a two-stop diagonal gradient of the member's hue with a white initial). Either way it can
  * carry a nationality-flag badge and an optional white ring, matching Kiki's listing avatars.
  */
-export function Avatar({ name, tint, country, size = 44, ring = false, id }: Props) {
+export function Avatar({ name, tint, country, size = 44, ring = false, ringColor, id }: Props) {
   const initial = name.trim().charAt(0).toUpperCase() || '?';
   const badge = Math.max(17, size * 0.4);
   const photo = avatarPhotoFor(id);
@@ -28,14 +29,14 @@ export function Avatar({ name, tint, country, size = 44, ring = false, id }: Pro
         <Image
           source={photo}
           resizeMode="cover"
-          style={[{ width: size, height: size, borderRadius: size / 2 }, ring && styles.ring]}
+          style={[{ width: size, height: size, borderRadius: size / 2 }, ring && styles.ring, ring && ringColor ? { borderColor: ringColor } : null]}
         />
       ) : (
         <LinearGradient
           colors={avatarGradient(tint)}
           start={gradientStart}
           end={gradientEnd}
-          style={[styles.disc, { width: size, height: size, borderRadius: size / 2 }, ring && styles.ring]}
+          style={[styles.disc, { width: size, height: size, borderRadius: size / 2 }, ring && styles.ring, ring && ringColor ? { borderColor: ringColor } : null]}
         >
           <Text style={[styles.initial, { fontSize: size * 0.4 }]}>{initial}</Text>
         </LinearGradient>
