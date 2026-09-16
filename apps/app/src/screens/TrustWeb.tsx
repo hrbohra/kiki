@@ -89,7 +89,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
             <View style={[styles.card, styles.railCard]}>
               {toast ? <View style={styles.toast}><Text style={styles.toastText}>{toast}</Text></View> : null}
               {names[0] ? (
-                <Pressable style={({ pressed }) => [styles.secondary, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => notify(`Asked ${names[0]} about ${host.name}`)}>
+                <Pressable style={({ pressed }) => [styles.secondary, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => navigation.navigate('Thread', { memberId: story.channels[0].voucher.id })}>
                   <Text style={styles.secondaryText}>Ask {names[0]} about {host.name}</Text>
                   <Text style={styles.secondarySub}>she's hosted for you before</Text>
                 </Pressable>
@@ -99,7 +99,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
                   <Text style={styles.primaryName}>{host.name} · {req.nights} nights</Text>
                   <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
                 </View>
-                <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => notify(`${c.ctaLabel} sent`)}>
+                <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
                   <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
                 </Pressable>
               </View>
