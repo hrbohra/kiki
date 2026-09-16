@@ -6,6 +6,7 @@ import { SentimentMeter } from '../ui/Bars';
 import { Chip } from '../ui/Chip';
 import { Loop } from '../ui/Loop';
 import { TRAIT_GLYPH } from '../ui/glyphs';
+import { PersonTabs } from '../ui/PersonTabs';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
@@ -49,6 +50,8 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
           </View>
         </View>
 
+        <PersonTabs active="profile" onTrust={() => navigation.navigate('Trust', { hostId: host.id, as: 'guest' })} />
+
         {/* Door 1: connection */}
         <Pressable style={({ pressed }) => [styles.card, shadow.card, pressed && styles.cardPressed]} onPress={() => navigation.navigate('Connection', { hostId: host.id })}>
           <Row title="How you're connected" cta="View graph" />
@@ -88,7 +91,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
         </Pressable>
 
         {/* Door 3: trust */}
-        <Pressable style={({ pressed }) => [styles.card, shadow.card, pressed && styles.cardPressed]} onPress={() => navigation.navigate('Trust', { hostId: host.id })}>
+        <Pressable style={({ pressed }) => [styles.card, shadow.card, pressed && styles.cardPressed]} onPress={() => navigation.navigate('Trust', { hostId: host.id, as: 'guest' })}>
           <Row title="Trust" cta="Open" />
           <Text style={styles.cardLead}>Can you trust {host.name} with your home, or theirs with you? The evidence, and what we can't answer.</Text>
         </Pressable>

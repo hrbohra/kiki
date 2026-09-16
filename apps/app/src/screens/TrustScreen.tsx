@@ -11,7 +11,9 @@ import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
 import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
-import { color, radius } from '../theme/tokens';
+import { PersonTabs } from '../ui/PersonTabs';
+import { useSession } from '../api/session';
+import { color, font, radius, space, shadow } from '../theme/tokens';
 import * as world from '../world';
 import type { StackProps } from '../navigation';
 import type { Overlap } from '../domain/types';
@@ -22,6 +24,8 @@ type P = 'host' | 'guest';
  *  the two-column TrustWeb layout; everything narrower keeps this phone-first screen. */
 export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
   const hostId = route.params.hostId;
+  const entryAs: P = route.params.as ?? 'guest';
+  const requestId = route.params.requestId;
   const story = world.trustStoryFor(hostId);
   const { isWide } = useResponsive();
   if (isWide) return <PersonView hostId={hostId} initialTab="trust" navigation={navigation} />;
@@ -30,7 +34,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
   const guestBook = world.guestBookOf(hostId);
   const viewer = world.memberById(world.viewerId);
 
-  const [perspective, setPerspective] = useState<P>('host');
+  const { api } = useSession();
+  const [perspective, setPerspective] = useState<P>(entryAs);
   const [whyOpen, setWhyOpen] = useState(false);
   const [inferOpen, setInferOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
@@ -44,6 +49,12 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
     timer.current = setTimeout(() => setToast(null), 1800);
   };
 
+  /** Host flow: a decision made here lands you back on Requests, which refetches on focus. */
+  const decide = async (decision: 'accept' | 'decline') => {
+    if (!requestId) return;
+    try { await api.requests.decide.mutate({ requestId, decision }); } finally { navigation.goBack(); }
+  };
+
   const names = story.channels.map((c) => c.voucher.name);
   const req = story.warm
     ? { dates: relRange(4, 7), nights: 7, asked: 'asked you 2 days ago' }
@@ -52,27 +63,28 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Nav row */}
+      {/* Nav row: the same back affordance as HostProfile / Connection / GuestBook / Thread */}
       <View style={styles.nav}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back">
-          <Text style={styles.back}>‹</Text>
+          <Text style={styles.back}>‹  Back</Text>
         </Pressable>
-        <Text style={styles.saveHeart} accessibilityLabel="Save" accessibilityRole="button">♡</Text>
       </View>
 
-      {/* Identity */}
-      <View style={styles.identity}>
-        <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={74} />
-        <Text style={styles.name}>{host.name}</Text>
-        <Text style={styles.sub}>{c.profileSub}</Text>
+      {/* Identity: the same hero card as HostProfile, so Profile <-> Trust reads as a tab switch */}
+      <View style={styles.heroWrap}>
+        <View style={[styles.hero, shadow.card]}>
+          <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={92} ring />
+          <Text style={styles.name}>{host.name}</Text>
+          <Text style={styles.sub}>{c.profileSub}</Text>
+        </View>
       </View>
 
-      {/* Tab bar: Room · Profile · Trust */}
-      <View style={styles.tabbar}>
-        <ProfileTab label="Room" onPress={() => navigation.goBack()} />
-        <ProfileTab label="Profile" onPress={() => navigation.goBack()} />
-        <ProfileTab label="Trust" active />
-        <View style={styles.indicator} />
+      {/* Profile · Trust: real tabs. Profile opens this person's profile when they have a listing. */}
+      <View style={styles.heroWrap}>
+        <PersonTabs
+          active="trust"
+          onProfile={listing ? () => navigation.replace('HostProfile', { listingId: listing.id }) : undefined}
+        />
       </View>
 
       {/* Perspective toggle (prototype-only; production derives this) */}
@@ -111,7 +123,7 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
           <View style={styles.toast} accessibilityRole="alert"><Text style={styles.toastText}>{toast}</Text></View>
         ) : null}
         {story.warm && names[0] ? (
-          <Pressable style={({ pressed }) => [styles.secondary, pressed && styles.secondaryPressed]} onPress={() => notify(`Asked ${names[0]} about ${host.name}`)}>
+          <Pressable style={({ pressed }) => [styles.secondary, pressed && styles.secondaryPressed]} onPress={() => navigation.navigate('Thread', { memberId: story.channels[0].voucher.id })}>
             <Text style={styles.secondaryText}>Ask {names[0]} about {host.name}</Text>
             <Text style={styles.secondarySub}>{story.channels[0].tie.reason.replace(/\.$/, '')}</Text>
           </Pressable>
@@ -124,9 +136,20 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
               <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
             </View>
           </View>
-          <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => notify(`${c.ctaLabel} sent`)}>
-            <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
-          </Pressable>
+          {perspective === 'host' && requestId ? (
+            <View style={styles.decisionRow}>
+              <Pressable style={({ pressed }) => [styles.declineBtn, pressed && styles.secondaryPressed]} onPress={() => decide('decline')}>
+                <Text style={styles.declineText}>Decline</Text>
+              </Pressable>
+              <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => decide('accept')}>
+                <Text style={styles.primaryBtnText}>Accept</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
+              <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
+            </Pressable>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -326,13 +349,6 @@ function ColdBody({ story, host, copy: c, notify }: any) {
 }
 
 // ---- helpers ----
-function ProfileTab({ label, active, onPress }: { label: string; active?: boolean; onPress?: () => void }) {
-  return (
-    <Pressable style={styles.tab} onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: active }}>
-      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
-    </Pressable>
-  );
-}
 function BorderPill({ label }: { label: string }) {
   return <View style={styles.borderPill}><Text style={styles.borderPillText}>{label}</Text></View>;
 }
@@ -369,13 +385,14 @@ function copy(p: P, host: string, names: string[], mutuals: number, hostedCount:
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.screen },
+  safe: { flex: 1, backgroundColor: color.bg },
   nav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingTop: 10, paddingBottom: 2 },
-  back: { fontSize: 28, color: color.ink, fontWeight: '700' },
+  back: { ...font.h3, color: color.brand },
   saveHeart: { fontSize: 21, color: color.inkFaint },
-  identity: { alignItems: 'center', gap: 4, paddingHorizontal: 18, paddingTop: 6 },
-  name: { fontSize: 23, fontWeight: '700', letterSpacing: -0.4, color: color.ink, marginTop: 6 },
-  sub: { fontSize: 14, color: color.inkFaint },
+  heroWrap: { paddingHorizontal: 18, paddingTop: 6 },
+  hero: { backgroundColor: color.surface, borderRadius: radius.hero, padding: space.xl, alignItems: 'center', gap: space.sm },
+  name: { ...font.h2, marginTop: space.sm },
+  sub: { ...font.caption },
   tabbar: { flexDirection: 'row', marginTop: 16, borderBottomWidth: 1, borderBottomColor: color.hairline, position: 'relative' },
   tab: { flex: 1, alignItems: 'center', paddingBottom: 12 },
   tabText: { fontSize: 15, fontWeight: '600', color: color.inkFaint },
@@ -449,11 +466,14 @@ const styles = StyleSheet.create({
   footer: { backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.hairline, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 22, gap: 8 },
   toast: { backgroundColor: color.ink, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11 },
   toastText: { color: '#FFFFFF', fontSize: 13.5, fontWeight: '600' },
+  decisionRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  declineBtn: { borderRadius: 12, height: 44, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: color.bg, borderWidth: 1, borderColor: color.hairline },
+  declineText: { fontSize: 15, fontWeight: '700', color: color.ink },
   secondary: { borderWidth: 1, borderColor: color.brand, borderRadius: 12, height: 44, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6, paddingHorizontal: 12 },
   secondaryPressed: { backgroundColor: color.brandTint, transform: [{ scale: 0.985 }] },
   secondaryText: { fontSize: 14.5, fontWeight: '600', color: color.textOnMint },
   secondarySub: { fontSize: 12.5, color: color.textOnMintSoft },
-  primaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  primaryRow: { flexWrap: 'wrap', rowGap: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   primaryLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   primaryName: { fontSize: 14, fontWeight: '600', color: color.ink },
   primaryPrice: { fontSize: 12.5, color: color.inkFaint },

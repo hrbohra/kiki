@@ -8,7 +8,8 @@ export type RootStackParamList = {
   Connection: { hostId: string };
   GuestBook: { hostId: string };
   Thread: { memberId: string };
-  Trust: { hostId: string };
+  /** as: who is reading (derived from the entry, not a toggle). requestId: set when a host opens a guest from Requests. */
+  Trust: { hostId: string; as?: 'host' | 'guest'; requestId?: string };
   Onboard: undefined;
   TripOffers: { tripId: 'italy' | 'created' };
   PlanTrip: undefined;
