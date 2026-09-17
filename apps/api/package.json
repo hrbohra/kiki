@@ -21,6 +21,7 @@
     "seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
     "import:data": "dotenv -e ../../.env -- tsx import/import.ts",
     "seed:world": "tsx import/seed-world.ts",
+    "measure:ties": "tsx import/measure-imported-ties.ts",
     "studio": "dotenv -e ../../.env -- prisma studio",
     "test": "dotenv -e ../../.env -- vitest run"
   },
