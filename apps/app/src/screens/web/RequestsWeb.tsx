@@ -10,6 +10,7 @@ import * as world from '../../world';
 import { useSession } from '../../api/session';
 import { haptic } from '../../ui/feedback';
 import { SlideToAccept } from '../../ui/SlideToAccept';
+import { stayLength } from '../../domain/stay';
 import type { Member } from '../../domain/types';
 import type { RootNav } from '../../navigation';
 
@@ -119,7 +120,7 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
             <Text style={[styles.statusText, needs ? styles.statusTextNeeds : styles.statusTextWaiting]}>{needs ? 'Needs your reply' : 'Confirmed'}</Text>
           </View>
         </View>
-        <Text style={styles.reqDates}>{item.nights} nights</Text>
+        <Text style={styles.reqDates}>{stayLength(item.nights)}</Text>
         <Text style={styles.reqLine}>{line}</Text>
         <View style={styles.reqFoot}>
           <Pressable onPress={onOpen}><Text style={styles.reqLink}>Read their trust page ›</Text></Pressable>

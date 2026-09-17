@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 
 export const tripsRouter = router({
-  /** Post a trip (out for offers). */
+  /** Post the weeks you are away (looking for a Kikier). */
   create: protectedProcedure
     .input(
       z.object({
@@ -10,7 +10,7 @@ export const tripsRouter = router({
         kind: z.string().min(1).max(40),
         fromDay: z.number().int(),
         toDay: z.number().int(),
-        budgetPerNight: z.number().int().min(0),
+        budgetPerWeek: z.number().int().min(0),
         idempotencyKey: z.string().optional(),
       }),
     )

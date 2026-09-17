@@ -1,48 +1,48 @@
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { TrustPill } from '../ui/TrustPill';
-import { Dates } from '../ui/glyphs';
-import { ITALY_TRIP } from '../domain/trips';
+import { Dates, Keys } from '../ui/glyphs';
+import { ITALY_TRIP, fmtWeeks } from '../domain/trips';
 import { relRange } from '../domain/relDates';
 import { useCreatedTrip } from '../demo/createdTrip';
 import { color, font, radius, space, cardShadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
 
-// Recreates Kiki's real Trips screen for continuity of the demo. Dates are relative to now so the
-// "upcoming" trip is always ahead and the "past" one always behind.
-const upcoming = { emoji: '✈️', title: 'Trip', detail: '1 night @ £47/night', dates: relRange(21, 1) };
-const past = [{ emoji: '🎂', title: 'Bday', detail: '4 nights @ £45/night', dates: relRange(-40, 4), confirmed: true }];
+// Away: your place while you are gone, the stays you have coming up, and the ones behind you.
+// Dates are relative to now so "coming up" is always ahead and "past" always behind.
+const upcoming = { title: 'Maia’s Room · De Beauvoir', detail: '4 weeks · £310 / week', dates: relRange(21, 28) };
+const past = [{ title: 'Danica’s Room · Tooting', detail: '3 weeks · £285 / week', dates: relRange(-60, 21), confirmed: true }];
 
 export function TripsScreen() {
   const navigation = useNavigation<RootNav>();
   const created = useCreatedTrip();
-  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'offer' : 'offers'}`;
+  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'person' : 'people'} can cover it`;
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>Trips</Text>
+        <Text style={styles.h1}>Away</Text>
 
         <View style={styles.sectionRow}>
-          <Text style={styles.section}>Out for offers</Text>
-          <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Plan a trip</Text></Pressable>
+          <Text style={styles.section}>Looking for a Kikier</Text>
+          <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>List my place</Text></Pressable>
         </View>
         {created ? (
           <Pressable style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })}>
             <View style={styles.thumb}><Dates size={30} color={color.ink} /></View>
-            <View style={styles.meta}><Text style={styles.title}>{created.name}</Text><Text style={styles.detail}>{created.dates} · {created.nights} nights</Text></View>
+            <View style={styles.meta}><Text style={styles.title}>{created.name}</Text><Text style={styles.detail}>{created.dates} · {fmtWeeks(created.weeks)}</Text></View>
             <View style={styles.neutralPill}><Text style={styles.neutralPillText}>No offers yet</Text></View>
           </Pressable>
         ) : null}
         <Pressable style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })}>
           <View style={styles.thumb}><Dates size={30} color={color.ink} /></View>
-          <View style={styles.meta}><Text style={styles.title}>{ITALY_TRIP.name}</Text><Text style={styles.detail}>{ITALY_TRIP.dates} · {ITALY_TRIP.nights} nights</Text></View>
+          <View style={styles.meta}><Text style={styles.title}>{ITALY_TRIP.name}</Text><Text style={styles.detail}>{ITALY_TRIP.dates} · {fmtWeeks(ITALY_TRIP.weeks)}</Text></View>
           <TrustPill label={italyCount} tone="solid" />
         </Pressable>
 
         <Text style={styles.section}>Coming up</Text>
         <View style={[styles.tripCard, cardShadow]}>
-          <View style={styles.thumb}><Text style={styles.emoji}>{upcoming.emoji}</Text></View>
+          <View style={styles.thumb}><Keys size={30} color={color.ink} /></View>
           <View style={styles.meta}>
             <Text style={styles.title}>{upcoming.title}</Text>
             <Text style={styles.detail}>{upcoming.detail}</Text>
@@ -50,10 +50,10 @@ export function TripsScreen() {
           </View>
         </View>
 
-        <Text style={styles.section}>Past trips</Text>
+        <Text style={styles.section}>Past stays</Text>
         {past.map((t) => (
           <View key={t.title} style={[styles.tripCard, cardShadow]}>
-            <View style={styles.thumb}><Text style={styles.emoji}>{t.emoji}</Text></View>
+            <View style={styles.thumb}><Keys size={30} color={color.ink} /></View>
             <View style={styles.meta}>
               <Text style={styles.title}>{t.title}</Text>
               <Text style={styles.detail}>{t.detail}</Text>
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   h1: { ...font.display },
   tripCard: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: color.surface, borderRadius: radius.md, padding: space.md },
   thumb: { width: 64, height: 64, borderRadius: radius.sm, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center' },
-  emoji: { fontSize: 30 },
   meta: { flex: 1, gap: 2 },
   title: { ...font.h3 },
   detail: { ...font.body },

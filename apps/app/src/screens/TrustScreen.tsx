@@ -9,6 +9,7 @@ import { TieMeter } from '../ui/trust/TieMeter';
 import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
+import { stayLength } from '../domain/stay';
 import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
 import { PersonTabs } from '../ui/PersonTabs';
@@ -61,8 +62,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
 
   const names = story.channels.map((c) => c.voucher.name);
   const req = story.warm
-    ? { dates: relRange(4, 7), nights: 7, asked: 'asked you 2 days ago' }
-    : { dates: relRange(18, 3), nights: 3, asked: 'asked you 4 hours ago' };
+    ? { dates: relRange(4, 28), nights: 28, asked: 'asked you 2 days ago' }
+    : { dates: relRange(18, 14), nights: 14, asked: 'asked you 4 hours ago' };
   const c = copy(perspective, host.name, names, story.channels.length, guestBook.summary.count, story.direct);
 
   return (
@@ -141,8 +142,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
           <View style={styles.primaryLeft}>
             <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={34} />
             <View>
-              <Text style={styles.primaryName}>{host.name} · {req.nights} nights</Text>
-              <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
+              <Text style={styles.primaryName}>{host.name} · {stayLength(req.nights)}</Text>
+              <Text style={styles.primaryPrice}>£{listing?.pricePerWeek ?? 0} / week</Text>
             </View>
           </View>
           {perspective === 'host' && requestId ? (

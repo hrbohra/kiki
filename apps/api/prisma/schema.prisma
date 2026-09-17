@@ -111,7 +111,7 @@ model Listing {
   hostId        String
   title         String
   area          String
-  pricePerNight Int
+  pricePerWeek  Int // GBP — what a stay covers of the rent, per week
   kind          String // "Room" | "Whole place" (kept as text to match the domain literal)
   lat           Float
   lng           Float
@@ -294,7 +294,7 @@ model StayRequest {
   @@map("stay_requests")
 }
 
-/// A trip a traveller posts; hosts answer with partial-coverage offers.
+/// A stretch away that a member posts; Kikiers answer with partial-coverage offers on the rent.
 model Trip {
   id             String    @id @default(cuid())
   authorId       String
@@ -303,7 +303,7 @@ model Trip {
   fromDay        Int
   toDay          Int
   nights         Int
-  budgetPerNight Int
+  budgetPerWeek  Int
   state          TripState @default(open)
   createdAt      DateTime  @default(now())
 
@@ -314,7 +314,7 @@ model Trip {
   @@map("trips")
 }
 
-/// A host's partial offer against a trip (covers some nights, not necessarily all).
+/// A Kikier's partial offer against a stretch away (covers some of the weeks, not necessarily all).
 model TripOffer {
   id               String   @id @default(cuid())
   tripId           String

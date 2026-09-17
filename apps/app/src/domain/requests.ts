@@ -19,17 +19,17 @@ export interface StayRequest {
 
 export const REQUESTS: StayRequest[] = [
   {
-    id: 'emma', personId: 'emma', dates: relRange(4, 7), nights: 7, steps: 2, state: 'needs',
+    id: 'emma', personId: 'emma', dates: relRange(4, 28), nights: 28, steps: 2, state: 'needs',
     line: 'Nina vouches for her. Two routes, both people you can call.',
     age: 'Asked 2 days ago',
   },
   {
-    id: 'priya', personId: 'priya', dates: relRange(18, 3), nights: 3, steps: 3, state: 'needs',
+    id: 'priya', personId: 'priya', dates: relRange(18, 14), nights: 14, steps: 3, state: 'needs',
     line: 'Nobody you know has met her. Katelin invited her in.',
     age: 'Asked yesterday',
   },
   {
-    id: 'danica', personId: 'danica', dates: relRange(18, 3), nights: 3, steps: 1, state: 'waiting',
+    id: 'danica', personId: 'danica', dates: relRange(18, 21), nights: 21, steps: 1, state: 'waiting',
     line: 'You said yes. Danica is confirming her flights.',
     age: 'You replied 3 days ago',
   },

@@ -22,13 +22,13 @@ export function OfferModal({ offer, onClose }: { offer: OfferView; onClose: () =
 
       <View style={styles.well}>
         <View style={styles.rowBetween}>
-          <Text style={styles.wellNights}>{offer.nightsLabel}</Text>
+          <Text style={styles.wellNights}>{offer.weeksLabel}</Text>
           <Text style={styles.wellTotal}>{offer.totalLabel}</Text>
         </View>
         <View style={styles.track}><View style={[styles.fill, { width: `${offer.pct}%` }]} /></View>
         <MetaRow label="They requested" value={offer.requested} strong />
         <MetaRow label="Your dates" value={offer.yours} strong />
-        <MetaRow label="Works out at" value={offer.perNightLabel} strong />
+        <MetaRow label="Works out at" value={offer.perWeekLabel} strong />
       </View>
 
       {offer.hasGap ? (

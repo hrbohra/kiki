@@ -11,6 +11,7 @@ import { TrustWeb } from '../TrustWeb';
 import { GraphModal } from './GraphModal';
 import { profileDetail } from '../../domain/profiles';
 import { bakedBio } from '../../domain/generated';
+import { relRange } from '../../domain/relDates';
 import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
@@ -166,7 +167,7 @@ function RoomPanel({ hostId, perspective, navigation }: { hostId: string; perspe
         <View style={[styles.card, styles.roomCard]}>
           {listing ? <Image source={photoFor(listing.id)} style={styles.roomPhoto} resizeMode="cover" /> : null}
           <View style={styles.roomBody}>
-            <Text style={styles.roomRate}>£{listing?.pricePerNight ?? 0} / night · {listing?.kind} · {listing?.area}</Text>
+            <Text style={styles.roomRate}>£{listing?.pricePerWeek ?? 0} / week · {listing?.kind} · {listing?.area}</Text>
             <Text style={styles.roomDesc}>{detail.roomDescription}</Text>
 
             <Text style={styles.eyebrow}>WHAT'S HERE</Text>
@@ -209,12 +210,12 @@ function identityCopy(hostId: string, p: P) {
   const story = world.trustStoryFor(hostId);
   const host = story.host;
   const voucher = story.channels[0]?.voucher.name;
-  const nights = story.warm ? 7 : 3;
-  const dates = story.warm ? '14 Sep – 21 Sep' : '2 Oct – 5 Oct';
+  const stay = story.warm ? '4 weeks' : '2 weeks';
+  const dates = story.warm ? relRange(4, 28) : relRange(18, 14);
   const role = p === 'host' ? 'Hoping to stay with you' : 'Opening up their place';
   const headline = p === 'host'
-    ? `${host.name} is taking over your space for ${nights} nights.`
-    : `You'd have ${host.name}'s place to yourself for ${nights} nights.`;
+    ? `${host.name} is taking over your space for ${stay}.`
+    : `You'd have ${host.name}'s place to yourself for ${stay}.`;
   const qualifier = p === 'host'
     ? story.warm && voucher ? `Because ${voucher} vouches for them, your keys, your kitchen and your bed are in good hands.`
       : story.direct ? `You know ${host.name} yourself, so your place is in good hands.`

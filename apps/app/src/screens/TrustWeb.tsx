@@ -9,6 +9,7 @@ import { TieMeter } from '../ui/trust/TieMeter';
 import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
+import { stayLength } from '../domain/stay';
 import { MutualFriendIntro } from '../ui/MutualFriendIntro';
 import { GuestColumn } from './web/GuestColumn';
 import { GraphModal } from './web/GraphModal';
@@ -47,8 +48,8 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
 
   const names = story.channels.map((ch) => ch.voucher.name);
   const req = story.warm
-    ? { dates: relRange(4, 7), nights: 7 }
-    : { dates: relRange(18, 3), nights: 3 };
+    ? { dates: relRange(4, 28), nights: 28 }
+    : { dates: relRange(18, 14), nights: 14 };
   const c = copy(reader ?? perspective, host.name, { voucher: names[0], nights: req.nights, warm: story.warm, direct: story.direct });
 
   return (
@@ -96,8 +97,8 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
               ) : null}
               <View style={styles.primaryRow}>
                 <View>
-                  <Text style={styles.primaryName}>{host.name} · {req.nights} nights</Text>
-                  <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
+                  <Text style={styles.primaryName}>{host.name} · {stayLength(req.nights)}</Text>
+                  <Text style={styles.primaryPrice}>£{listing?.pricePerWeek ?? 0} / week</Text>
                 </View>
                 <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
                   <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
@@ -347,7 +348,7 @@ function copy(p: P, host: string, o: { voucher?: string; nights: number; warm: b
   if (p === 'host') {
     return {
       emmaRole: 'Hoping to stay with you', ctaLabel: 'Reply',
-      headline: `${host} is taking over your space for ${o.nights} nights.`,
+      headline: `${host} is taking over your space for ${stayLength(o.nights)}.`,
       stakeLine: hostStake,
       placeCaption: `This is the flat ${host} keeps herself — the closest thing to a preview of how she'll keep yours.`,
       reviewRead: `Every review talks about ${host} as a host. Not one is from someone who had her as a guest, which is what you'd be doing.`,
@@ -356,7 +357,7 @@ function copy(p: P, host: string, o: { voucher?: string; nights: number; warm: b
   }
   return {
     emmaRole: 'Opening up their place', ctaLabel: 'Request to book',
-    headline: `You'd have ${host}'s place to yourself for ${o.nights} nights.`,
+    headline: `You'd have ${host}'s place to yourself for ${stayLength(o.nights)}.`,
     stakeLine: guestStake,
     placeCaption: `This is the room you'd be sleeping in. People you know have already slept in it.`,
     reviewRead: `Every one of these is about staying in her place, which is exactly what you're about to do.`,

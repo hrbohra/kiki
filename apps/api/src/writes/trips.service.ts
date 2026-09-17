@@ -8,7 +8,7 @@ export interface CreateTripInput {
   kind: string;
   fromDay: number;
   toDay: number;
-  budgetPerNight: number;
+  budgetPerWeek: number;
   idempotencyKey?: string;
 }
 
@@ -19,7 +19,7 @@ export class TripsService {
     private readonly idem: IdempotencyService,
   ) {}
 
-  /** Post a trip (out for offers). */
+  /** Post the weeks you are away (looking for a Kikier). */
   async create(userId: string, input: CreateTripInput) {
     return this.idem.run(userId, input.idempotencyKey, async () => {
       const authorId = await actingMemberId(this.prisma, userId);
@@ -32,7 +32,7 @@ export class TripsService {
           fromDay: input.fromDay,
           toDay: input.toDay,
           nights,
-          budgetPerNight: input.budgetPerNight,
+          budgetPerWeek: input.budgetPerWeek,
         },
       });
     });

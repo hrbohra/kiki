@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { avatarGradient, gradientStart, gradientEnd, color, flagOf } from '../theme/tokens';
+import { avatarGradient, gradientStart, gradientEnd, color } from '../theme/tokens';
 import { avatarPhotoFor } from './avatarPhotos';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 /**
  * A member avatar: a real portrait when one exists for `id`, otherwise a gradient monogram
  * (a two-stop diagonal gradient of the member's hue with a white initial). Either way it can
- * carry a nationality-flag badge and an optional white ring, matching Kiki's listing avatars.
+ * carry a small two-letter nationality badge and an optional white ring, matching Kiki's listing avatars.
  */
 export function Avatar({ name, tint, country, size = 44, ring = false, ringColor, id }: Props) {
   const initial = name.trim().charAt(0).toUpperCase() || '?';
@@ -43,7 +43,7 @@ export function Avatar({ name, tint, country, size = 44, ring = false, ringColor
       )}
       {country ? (
         <View style={[styles.flagBadge, { width: badge, height: badge, borderRadius: badge / 2 }]}>
-          <Text style={{ fontSize: badge * 0.62 }}>{flagOf(country)}</Text>
+          <Text style={{ fontSize: badge * 0.42, fontWeight: '700', letterSpacing: 0.3, color: color.inkSoft }}>{country}</Text>
         </View>
       ) : null}
     </View>

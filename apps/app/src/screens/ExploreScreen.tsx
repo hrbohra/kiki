@@ -61,7 +61,7 @@ export function ExploreScreen() {
             ))}
           </View>
         </View>
-        <View style={styles.search}><Text style={styles.searchText}>🔍  Search by dates or duration</Text></View>
+        <View style={styles.search}><Text style={styles.searchText}>Search by dates or duration</Text></View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
           <Chip label="Connected" active={connectedOnly} onPress={() => setConnectedOnly((v) => !v)} />
           {(['All', 'Room', 'Whole place'] as Kind[]).map((k) => (

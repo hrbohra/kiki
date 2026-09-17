@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from 'react-native';
 // assets/listings/ATTRIBUTIONS.md). Kept out of the pure domain layer so the fixtures stay
 // require()-free and unit-testable in plain Node.
 const PHOTOS: Record<string, ImageSourcePropType> = {
-  'l-emma': require('../../assets/listings/emma.jpg'),
+  'l-emma': require('../../assets/listings/maia.jpg'), // member id 'emma' is displayed as Maia
   'l-katelin': require('../../assets/listings/katelin.jpg'),
   'l-danica': require('../../assets/listings/danica.jpg'),
   'l-ollie': require('../../assets/listings/ollie.jpg'),

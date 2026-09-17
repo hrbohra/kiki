@@ -31,7 +31,7 @@ const ListingSchema = z.object({
   hostId: z.string(),
   title: z.string(),
   area: z.string(),
-  pricePerNight: z.number().int(),
+  pricePerWeek: z.number().int(),
   kind: z.string(),
   lat: z.number(),
   lng: z.number(),
@@ -92,7 +92,7 @@ async function main() {
 
   for (const l of parsed.listings) {
     const data = {
-      hostId: l.hostId, title: l.title, area: l.area, pricePerNight: l.pricePerNight,
+      hostId: l.hostId, title: l.title, area: l.area, pricePerWeek: l.pricePerWeek,
       kind: l.kind, lat: l.lat, lng: l.lng, photoColor: l.photoColor, photoUrl: l.photoUrl ?? null, tags: l.tags,
     };
     await prisma.listing.upsert({ where: { id: l.id }, update: data, create: { id: l.id, ...data } });

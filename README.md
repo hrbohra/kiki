@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/hrbohra/kiki/actions/workflows/ci.yml/badge.svg)](https://github.com/hrbohra/kiki/actions/workflows/ci.yml)
 
-A trust-first sublet network — a real full-stack build on Kiki's own stack
+A working build of Kiki, the invite-only sublet club, on its own stack
 (React Native · TypeScript · NestJS · Postgres), built end to end by Harsh Bohra.
 
 **Live demo:** https://kiki-portfolio-one.vercel.app — one tap into a seeded world; no account, no email.

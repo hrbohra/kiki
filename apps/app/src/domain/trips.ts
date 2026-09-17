@@ -1,7 +1,7 @@
-// The trip planner is the inverse of Requests: there you are the host reading who wants to stay;
-// here you are the traveller who posts a trip and hosts answer with offers. An offer is partial
-// by default — a host covers some of your nights, not all — so the screen is built around nights
-// coverage, not a yes/no.
+// The weeks-away planner is the inverse of Requests: there you are the host reading who wants to
+// stay; here you are the one going away, and Kikiers answer with offers to cover your rent. An
+// offer is partial by default — someone covers some of your weeks, not all — so the screen is
+// built around weeks of rent covered, not a yes/no.
 
 import { relRange } from './relDates';
 
@@ -15,8 +15,8 @@ export interface TripOffer {
   sent: string;
   matches: number;
   facts: string[];
-  nights: number; // nights this host can cover
-  total: number; // GBP for their covered nights
+  weeks: number; // weeks of your rent this Kikier can cover
+  total: number; // GBP for their covered weeks
   requested: string; // the dates they asked for
   note: string; // benchmark note, or '' when there's a coverage gap instead
 }
@@ -26,12 +26,12 @@ export interface Trip {
   name: string;
   icon: string;
   dates: string;
-  nights: number;
-  budget: number; // per night
+  weeks: number;
+  budget: number; // GBP per week — what would cover the rent
   offers: TripOffer[];
 }
 
-/** Named trip kinds, shown as text chips (no emoji). Stored on Trip.icon. */
+/** Named reasons to be away, shown as text chips (no emoji). Stored on Trip.icon. */
 export const TRIP_KINDS = ['Beach', 'Mountains', 'Party', 'Work', 'Art', 'Food'];
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -39,21 +39,21 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 // Zero-padded "DD Mon - DD Mon" to match this screen's house style.
 const tripRange = (startInDays: number, nights: number) => relRange(startInDays, nights, { sep: '-', pad: true });
 
-/** The fixtured trip, exercising both offer variants: Kai (12/13, benchmark note, one-night gap)
- *  and Sara (8/13, no note, five-night gap). Dates are relative to now so the demo never goes stale. */
+/** The fixtured stretch away, exercising both offer variants: Kai (5/6 weeks, benchmark note,
+ *  one-week gap) and Sara (3/6, no note, three-week gap). Dates are relative to now so the demo never goes stale. */
 export const ITALY_TRIP: Trip = {
-  id: 'italy', name: 'Italy bday trip', icon: 'Beach', dates: tripRange(35, 13), nights: 13, budget: 40,
+  id: 'italy', name: 'Italy for Mum’s 60th', icon: 'Beach', dates: tripRange(35, 42), weeks: 6, budget: 300,
   offers: [
     {
       id: 'sam', name: 'Kai Gowen', country: 'NZ', avatarTint: '#5B7DB1', isNew: true, sent: 'Sent 1 day ago',
       matches: 3, facts: ['Male, 26', 'Founding Operations @Kiki', 'Grew up in Auckland'],
-      nights: 12, total: 480, requested: tripRange(36, 12),
-      note: 'Based on similar Kiki’s right now, 12 of 13 nights is more than most people are getting for this seasonality!',
+      weeks: 5, total: 1500, requested: tripRange(42, 35),
+      note: 'Based on similar Kikis right now, 5 of 6 weeks is more than most people are getting for this seasonality!',
     },
     {
       id: 'sara', name: 'Sara Foster', country: 'AU', avatarTint: '#B15B93', isNew: true, sent: 'Sent 4 days ago',
       matches: 1, facts: ['Female, 34', 'Occupational Therapist', 'Grew up in Perth'],
-      nights: 8, total: 320, requested: tripRange(35, 8), note: '',
+      weeks: 3, total: 900, requested: tripRange(35, 21), note: '',
     },
   ],
 };
@@ -65,17 +65,23 @@ export function shortDate(iso: string): string {
   return `${parts[2]} ${MONTHS[Number(parts[1]) - 1]}`;
 }
 
-/** Whole nights between two ISO dates; 0 (never negative) when either is invalid. */
-export function nightsBetween(start: string, end: string): number {
+/** Weeks between two ISO dates, to the nearest half week; 0 (never negative) when either is invalid. */
+export function weeksBetween(start: string, end: string): number {
   const a = Date.parse(start), b = Date.parse(end);
   if (isNaN(a) || isNaN(b)) return 0;
-  return Math.max(0, Math.round((b - a) / 86400000));
+  return Math.max(0, Math.round(((b - a) / 86400000 / 7) * 2) / 2);
+}
+
+/** 6 → "6 weeks", 1 → "1 week", 2.5 → "2.5 weeks". */
+export function fmtWeeks(weeks: number): string {
+  const w = Number.isInteger(weeks) ? String(weeks) : weeks.toFixed(1).replace(/\.0$/, '');
+  return `${w} ${weeks === 1 ? 'week' : 'weeks'}`;
 }
 
 export interface OfferView extends TripOffer {
-  nightsLabel: string;
+  weeksLabel: string;
   totalLabel: string;
-  perNightLabel: string;
+  perWeekLabel: string;
   matchesLabel: string;
   pct: number;
   yours: string;
@@ -87,20 +93,20 @@ export interface OfferView extends TripOffer {
   gapLine: string;
 }
 
-/** Derive an offer's display fields against its trip — coverage %, per-night rate, gap copy. */
+/** Derive an offer's display fields against the stretch away — coverage %, per-week rate, gap copy. */
 export function offerView(o: TripOffer, trip: Trip): OfferView {
-  const gap = trip.nights - o.nights;
+  const gap = trip.weeks - o.weeks;
   return {
     ...o,
-    nightsLabel: `${o.nights} of your ${trip.nights} nights`,
+    weeksLabel: `${fmtWeeks(o.weeks).replace(/ weeks?$/, '')} of your ${fmtWeeks(trip.weeks)}`,
     totalLabel: `£${o.total.toFixed(2)}`,
-    perNightLabel: `£${Math.round(o.total / o.nights)} / night`,
+    perWeekLabel: `£${Math.round(o.total / o.weeks)} / week`,
     matchesLabel: `${o.matches} Kiki ${o.matches === 1 ? 'match' : 'matches'}`,
-    pct: Math.round((o.nights / trip.nights) * 100),
+    pct: Math.round((o.weeks / trip.weeks) * 100),
     yours: trip.dates,
     hasNote: !!o.note,
     hasGap: gap > 0,
     showGapBox: gap > 0 && !o.note,
-    gapLine: gap === 1 ? 'Leaves 1 night of your trip uncovered.' : `Leaves ${gap} nights of your trip uncovered.`,
+    gapLine: `Leaves ${fmtWeeks(gap)} of your rent uncovered.`,
   };
 }

@@ -5,7 +5,7 @@ import { haptic } from '../../ui/feedback';
 
 import { color } from '../../theme/tokens';
 import { Dates } from '../../ui/glyphs';
-import { TRIP_KINDS, shortDate, nightsBetween, type Trip } from '../../domain/trips';
+import { TRIP_KINDS, shortDate, weeksBetween, fmtWeeks, type Trip } from '../../domain/trips';
 import { setCreatedTrip } from '../../demo/createdTrip';
 import { WEB_SHADOW } from './webBits';
 
@@ -21,32 +21,32 @@ interface Draft {
 
 /** Defaults relative to today so the form never opens on a date in the past. */
 const isoInDays = (d: number) => { const t = new Date(); t.setDate(t.getDate() + d); return t.toISOString().slice(0, 10); };
-const DRAFT_DEFAULT: Draft = { name: '', start: isoInDays(35), end: isoInDays(48), budget: '40', icon: TRIP_KINDS[0] };
+const DRAFT_DEFAULT: Draft = { name: '', start: isoInDays(35), end: isoInDays(77), budget: '300', icon: TRIP_KINDS[0] };
 
-/** Create-a-trip: you post a trip and hosts come to you. Nights and total are derived, never
- *  typed; a live preview shows exactly what a host will see; posting builds the trip and opens
- *  its (empty) offers screen. */
+/** List your place while you are away: Kikiers come to you. Weeks and total are derived, never
+ *  typed; a live preview shows exactly what a Kikier will see; posting builds the listing and
+ *  opens its (empty) offers screen. */
 export function PlanTripWeb() {
   const navigation = useNavigation<RootNav>();
   const [draft, setDraft] = useState<Draft>(DRAFT_DEFAULT);
   const patch = (p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p }));
 
-  const nights = nightsBetween(draft.start, draft.end);
-  const total = nights ? `£${nights * Number(draft.budget || 0)}` : '—';
+  const weeks = weeksBetween(draft.start, draft.end);
+  const total = weeks ? `£${Math.round(weeks * Number(draft.budget || 0))}` : '—';
   const named = draft.name.trim().length > 0;
-  const valid = nights > 0 && named;
-  const blockedWhy = !named ? 'Give the trip a name first.' : 'Pick an end date after your start date.';
+  const valid = weeks >= 1 && named;
+  const blockedWhy = !named ? 'Say where you’re off to first.' : 'Kiki stays are a week or longer.';
 
-  const previewName = draft.name.trim() || 'Untitled trip';
-  const previewMeta = nights
-    ? `${shortDate(draft.start)} - ${shortDate(draft.end)} · ${nights} ${nights === 1 ? 'night' : 'nights'} · £${draft.budget} / night`
-    : 'Pick an end date after your start date';
+  const previewName = draft.name.trim() || 'Away';
+  const previewMeta = weeks >= 1
+    ? `${shortDate(draft.start)} - ${shortDate(draft.end)} · ${fmtWeeks(weeks)} · £${draft.budget} / week`
+    : 'Kiki stays are a week or longer';
 
   const post = () => {
     const trip: Trip = {
       id: 'created', name: draft.name.trim(), icon: draft.icon,
       dates: `${shortDate(draft.start)} - ${shortDate(draft.end)}`,
-      nights, budget: Number(draft.budget || 0), offers: [],
+      weeks, budget: Number(draft.budget || 0), offers: [],
     };
     haptic.success();
     setCreatedTrip(trip);
@@ -59,34 +59,34 @@ export function PlanTripWeb() {
         <View style={styles.col}>
           <View style={styles.titleRow}>
             <Pressable style={styles.back} onPress={() => navigation.goBack()} accessibilityLabel="Back"><Text style={styles.backGlyph}>←</Text></Pressable>
-            <Text style={styles.title}>Plan a trip</Text>
+            <Text style={styles.title}>List my place while I’m away</Text>
           </View>
-          <Text style={styles.intro}>Say where you're going and what you can pay. Hosts within your network come to you — you don't apply to them.</Text>
+          <Text style={styles.intro}>Say when you’re away and what would cover your rent. Kikiers within your network come to you — you don’t apply to them.</Text>
 
           <View style={[styles.card, styles.formCard]}>
-            <Field label="What's the trip?">
-              <TextInput value={draft.name} onChangeText={(v) => patch({ name: v })} placeholder="Italy bday trip" placeholderTextColor={color.inkFaint} style={styles.input} />
+            <Field label="Where are you off to?">
+              <TextInput value={draft.name} onChangeText={(v) => patch({ name: v })} placeholder="Italy for Mum’s 60th" placeholderTextColor={color.inkFaint} style={styles.input} />
             </Field>
 
             <View style={styles.dateRow}>
-              <Field label="Arrive" style={styles.dateField}>
+              <Field label="Leaving" style={styles.dateField}>
                 <DateInput value={draft.start} onChange={(v) => patch({ start: v })} />
               </Field>
-              <Field label="Leave" style={styles.dateField}>
+              <Field label="Back" style={styles.dateField}>
                 <DateInput value={draft.end} onChange={(v) => patch({ end: v })} />
               </Field>
             </View>
 
-            <Field label="What you can pay, per night">
+            <Field label="What covers your rent, per week">
               <View style={styles.budgetWell}>
                 <Text style={styles.budgetSign}>£</Text>
                 <TextInput value={draft.budget} onChangeText={(v) => patch({ budget: v.replace(/[^0-9]/g, '') })} keyboardType="numeric" style={styles.budgetInput} />
-                <Text style={styles.budgetMeta}>{nights} nights · {total} total</Text>
+                <Text style={styles.budgetMeta}>{weeks >= 1 ? fmtWeeks(weeks) : '—'} · {total} total</Text>
               </View>
-              <Text style={styles.hint}>Hosts see this figure. Offers are never ranked by it.</Text>
+              <Text style={styles.hint}>Kikiers see this figure. Offers are never ranked by it.</Text>
             </Field>
 
-            <Field label="Kind">
+            <Field label="What for">
               <View style={styles.iconRow}>
                 {TRIP_KINDS.map((ic) => {
                   const on = draft.icon === ic;
@@ -100,7 +100,7 @@ export function PlanTripWeb() {
             </Field>
           </View>
 
-          <Text style={styles.previewLabel}>How it will look to hosts</Text>
+          <Text style={styles.previewLabel}>How it will look to Kikiers</Text>
           <View style={[styles.card, styles.previewCard]}>
             <View style={styles.previewIconTile}><Dates size={26} color={color.ink} /></View>
             <Text style={styles.previewName}>{previewName}</Text>

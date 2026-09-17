@@ -18,7 +18,7 @@ const PAD = 4;
 const COMMIT_AT = 0.86;
 const EASE_POW = 1.35;
 
-export function SlideToAccept({ name, onCommit, label = 'Slide to accept' }: { name: string; onCommit: () => void; label?: string }) {
+export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { name: string; onCommit: () => void; label?: string }) {
   const [trackW, setTrackW] = useState(0);
   const [committed, setCommitted] = useState(false);
   const x = useRef(new Animated.Value(0)).current;

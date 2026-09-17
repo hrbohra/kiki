@@ -20,6 +20,6 @@ export const listingsRouter = router({
         story: world.storyFor(listing.hostId),
         degrees: world.degreeToHost(listing.hostId),
       }))
-      .sort((a, b) => a.degrees - b.degrees || a.listing.pricePerNight - b.listing.pricePerNight);
+      .sort((a, b) => a.degrees - b.degrees || a.listing.pricePerWeek - b.listing.pricePerWeek);
   }),
 });

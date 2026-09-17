@@ -6,15 +6,16 @@ import { Dates } from '../../ui/glyphs';
 import { photoFor } from '../../ui/listingPhotos';
 import { WEB_SHADOW } from './webBits';
 import { WriteEntryModal } from './WriteEntryModal';
-import { ITALY_TRIP } from '../../domain/trips';
+import { ITALY_TRIP, fmtWeeks } from '../../domain/trips';
+import { relRange } from '../../domain/relDates';
 import { useCreatedTrip } from '../../demo/createdTrip';
 import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
 
-/** Trips — reframed from receipt to loop-closing: a trip is where trust gets made, so the
- *  page asks for it back. "Out for offers" is the traveller side; writing the owed entry closes
- *  the host-side loop. */
+/** Away — reframed from receipt to loop-closing: a stay is where trust gets made, so the
+ *  page asks for it back. "Looking for a Kikier" is your place while you are gone; writing the
+ *  owed entry closes the loop on the stays you took. */
 export function TripsWeb() {
   const navigation = useNavigation<RootNav>();
   const created = useCreatedTrip();
@@ -24,30 +25,30 @@ export function TripsWeb() {
   const danicaListing = world.listingForHost('danica');
   const [written, setWritten] = useState(false);
   const [modal, setModal] = useState(false);
-  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'offer' : 'offers'}`;
+  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'person' : 'people'} can cover it`;
 
   return (
     <View style={{ gap: 20 }}>
-      <Text style={styles.h1}>Trips</Text>
+      <Text style={styles.h1}>Away</Text>
 
       <View style={styles.cols}>
         <View style={styles.main}>
           <View style={styles.sectionRow}>
-            <Text style={styles.h2}>Out for offers</Text>
+            <Text style={styles.h2}>Looking for a Kikier</Text>
             <View style={{ flex: 1 }} />
-            <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Plan a trip</Text></Pressable>
+            <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>List my place while I’m away</Text></Pressable>
           </View>
           {created ? (
-            <TripRow name={created.name} meta={`${created.dates} · ${created.nights} nights · £${created.budget} / night`} pill="No offers yet" tone="neutral" onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })} />
+            <TripRow name={created.name} meta={`${created.dates} · ${fmtWeeks(created.weeks)} · £${created.budget} / week`} pill="No offers yet" tone="neutral" onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })} />
           ) : null}
-          <TripRow name={ITALY_TRIP.name} meta={`${ITALY_TRIP.dates} · ${ITALY_TRIP.nights} nights · £${ITALY_TRIP.budget} / night`} pill={italyCount} tone="brand" onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })} />
+          <TripRow name={ITALY_TRIP.name} meta={`${ITALY_TRIP.dates} · ${fmtWeeks(ITALY_TRIP.weeks)} · £${ITALY_TRIP.budget} / week`} pill={italyCount} tone="brand" onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })} />
 
           <Text style={[styles.h2, { marginTop: 18 }]}>Coming up</Text>
           <View style={[styles.trip, WEB_SHADOW]}>
             <Image source={emmaListing ? photoFor(emmaListing.id) : undefined} style={styles.tripPhoto} resizeMode="cover" />
             <View style={styles.tripBody}>
               <Text style={styles.tripTitle}>{emmaListing?.title} · De Beauvoir</Text>
-              <Text style={styles.tripDates}>14 – 21 Sep · 7 nights · £{emmaListing?.pricePerNight}/night</Text>
+              <Text style={styles.tripDates}>{relRange(21, 28)} · 4 weeks · £{emmaListing?.pricePerWeek} / week</Text>
               <View style={styles.credit}>
                 <Avatar id="bella" name="Nina" tint={world.memberById('bella').avatarColor} size={22} />
                 <Text style={styles.creditText}>Nina made this match.</Text>
@@ -55,12 +56,12 @@ export function TripsWeb() {
             </View>
           </View>
 
-          <Text style={styles.h2}>Been and gone</Text>
+          <Text style={styles.h2}>Past stays</Text>
           <View style={[styles.trip, WEB_SHADOW]}>
             <Image source={danicaListing ? photoFor(danicaListing.id) : undefined} style={styles.tripPhoto} resizeMode="cover" />
             <View style={styles.tripBody}>
               <Text style={styles.tripTitle}>{danicaListing?.title} · Tooting</Text>
-              <Text style={styles.tripDates}>23 – 27 Apr · 4 nights</Text>
+              <Text style={styles.tripDates}>{relRange(-60, 21)} · 3 weeks</Text>
               {written ? (
                 <View style={styles.owed}>
                   <Text style={styles.owedDone}>Entry written</Text>
@@ -87,8 +88,8 @@ export function TripsWeb() {
 
           {/* the "unchained" moment: rent reframed as freedom, never guilt */}
           <View style={styles.unlockCard}>
-            <Text style={styles.unlockTitle}>Two trips for the price of one</Text>
-            <Text style={styles.unlockBody}>Every night someone stays covers a night you travel. That's how a wedding back home, or a long weekend in Lisbon, stops being a question of money.</Text>
+            <Text style={styles.unlockTitle}>Two trips cost the same as one</Text>
+            <Text style={styles.unlockBody}>Every week someone covers your rent is a week you can be somewhere else. That's how a wedding back home, or a month in Lisbon, stops being a question of money.</Text>
           </View>
 
           {written ? null : (
@@ -104,7 +105,7 @@ export function TripsWeb() {
       {modal ? (
         <WriteEntryModal
           guestName={danica.name}
-          place="Four nights in Tooting, 23 – 27 April."
+          place={`Three weeks in Tooting, ${relRange(-60, 21)}.`}
           onPost={() => { setWritten(true); setModal(false); }}
           onClose={() => setModal(false)}
         />

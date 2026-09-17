@@ -103,12 +103,12 @@ export const vouches: Vouch[] = [
 const TAGS = ['Near tube', 'Quiet', 'Pet-friendly', 'Ensuite', 'Balcony', 'Central', 'Garden', 'WFH desk', 'Female-only', 'Long stays'];
 
 export const listings: Listing[] = [
-  { id: 'l-emma', hostId: 'emma', title: 'Maia’s Room', area: 'De Beauvoir, London', pricePerNight: 44, kind: 'Room', lat: 51.5385, lng: -0.0785, photoColor: '#CBD5CE', tags: ['Near tube', 'Quiet', 'WFH desk', 'Female-only'] },
-  { id: 'l-katelin', hostId: 'katelin', title: 'Katelin’s Room', area: 'Finsbury Park, London', pricePerNight: 38, kind: 'Room', lat: 51.5646, lng: -0.1066, photoColor: '#D6CFC4', tags: ['Near tube', 'Balcony', 'Long stays'] },
-  { id: 'l-danica', hostId: 'danica', title: 'Danica’s Room', area: 'Tooting, London', pricePerNight: 41, kind: 'Room', lat: 51.4271, lng: -0.168, photoColor: '#CFC9D6', tags: ['Quiet', 'Garden', 'Pet-friendly'] },
-  { id: 'l-ollie', hostId: 'ollie', title: 'Ollie’s Studio', area: 'Peckham, London', pricePerNight: 52, kind: 'Whole place', lat: 51.4739, lng: -0.0693, photoColor: '#C4D0D6', tags: ['Central', 'Ensuite', 'WFH desk'] },
-  { id: 'l-nate', hostId: 'nate', title: 'Nate’s Flat', area: 'Hackney, London', pricePerNight: 49, kind: 'Whole place', lat: 51.5450, lng: -0.0553, photoColor: '#CED6C4', tags: ['Balcony', 'WFH desk', 'Long stays'] },
-  { id: 'l-priya', hostId: 'priya', title: 'Priya’s Room', area: 'Bermondsey, London', pricePerNight: 46, kind: 'Room', lat: 51.4979, lng: -0.0637, photoColor: '#D6C4CE', tags: ['Near tube', 'Central', 'Female-only'] },
+  { id: 'l-emma', hostId: 'emma', title: 'Maia’s Room', area: 'De Beauvoir, London', pricePerWeek: 310, kind: 'Room', lat: 51.5385, lng: -0.0785, photoColor: '#CBD5CE', tags: ['Near tube', 'Quiet', 'WFH desk', 'Female-only'] },
+  { id: 'l-katelin', hostId: 'katelin', title: 'Katelin’s Room', area: 'Finsbury Park, London', pricePerWeek: 265, kind: 'Room', lat: 51.5646, lng: -0.1066, photoColor: '#D6CFC4', tags: ['Near tube', 'Balcony', 'Long stays'] },
+  { id: 'l-danica', hostId: 'danica', title: 'Danica’s Room', area: 'Tooting, London', pricePerWeek: 285, kind: 'Room', lat: 51.4271, lng: -0.168, photoColor: '#CFC9D6', tags: ['Quiet', 'Garden', 'Pet-friendly'] },
+  { id: 'l-ollie', hostId: 'ollie', title: 'Ollie’s Studio', area: 'Peckham, London', pricePerWeek: 365, kind: 'Whole place', lat: 51.4739, lng: -0.0693, photoColor: '#C4D0D6', tags: ['Central', 'Ensuite', 'WFH desk'] },
+  { id: 'l-nate', hostId: 'nate', title: 'Nate’s Flat', area: 'Hackney, London', pricePerWeek: 345, kind: 'Whole place', lat: 51.5450, lng: -0.0553, photoColor: '#CED6C4', tags: ['Balcony', 'WFH desk', 'Long stays'] },
+  { id: 'l-priya', hostId: 'priya', title: 'Priya’s Room', area: 'Bermondsey, London', pricePerWeek: 320, kind: 'Room', lat: 51.4979, lng: -0.0637, photoColor: '#D6C4CE', tags: ['Near tube', 'Central', 'Female-only'] },
 ];
 
 export const availableTags = TAGS;

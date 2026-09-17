@@ -29,7 +29,7 @@ export function ListingPreview({ listing, host, story, onOpen }: Props) {
         <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={48} />
         <View style={styles.headMeta}>
           <Text style={styles.title}>{listing.title}</Text>
-          <Text style={styles.area}>{listing.area} · £{listing.pricePerNight}/night</Text>
+          <Text style={styles.area}>{listing.area} · £{listing.pricePerWeek}/week</Text>
         </View>
         {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone="tint" /> : null}
       </View>

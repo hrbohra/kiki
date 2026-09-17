@@ -130,8 +130,3 @@ export function photoGradient(hex: string): [string, string] {
 export const gradientStart = { x: 0, y: 0 };
 export const gradientEnd = { x: 1, y: 1 };
 
-/** Emoji flag for a 2-letter country code. */
-export function flagOf(country: string): string {
-  const map: Record<string, string> = { NZ: '🇳🇿', AU: '🇦🇺', GB: '🇬🇧', US: '🇺🇸' };
-  return map[country] ?? '🏳️';
-}

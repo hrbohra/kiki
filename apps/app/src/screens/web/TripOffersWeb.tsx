@@ -4,8 +4,8 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { Avatar } from '../../ui/Avatar';
 import { Dates, Standing } from '../../ui/glyphs';
-import { color, flagOf } from '../../theme/tokens';
-import { ITALY_TRIP, offerView } from '../../domain/trips';
+import { color } from '../../theme/tokens';
+import { ITALY_TRIP, offerView, fmtWeeks } from '../../domain/trips';
 import { useCreatedTrip } from '../../demo/createdTrip';
 import { WEB_SHADOW } from './webBits';
 import { OfferModal } from './OfferModal';
@@ -13,7 +13,7 @@ import { OfferModal } from './OfferModal';
 import type { OfferView } from '../../domain/trips';
 import type { RootNav } from '../../navigation';
 
-/** A posted trip and the offers on it. The traveller's inverse of Requests — built around nights
+/** Your place while you are away, and the offers on it. The inverse of Requests — built around weeks
  *  coverage, since an offer is partial by default. Serves the fixtured trip or a just-created one. */
 export function TripOffersWeb({ tripId }: { tripId: 'italy' | 'created' }) {
   const navigation = useNavigation<RootNav>();
@@ -31,18 +31,18 @@ export function TripOffersWeb({ tripId }: { tripId: 'italy' | 'created' }) {
             <Pressable style={styles.back} onPress={() => navigation.goBack()} accessibilityLabel="Back"><Text style={styles.backGlyph}>←</Text></Pressable>
             <View style={styles.iconTile}><Dates size={27} color={color.ink} /></View>
             <Text style={styles.tripName}>{trip.name}</Text>
-            <Text style={styles.tripMeta}>{trip.dates} · {trip.nights} nights · £{trip.budget} / night</Text>
+            <Text style={styles.tripMeta}>{trip.dates} · {fmtWeeks(trip.weeks)} · £{trip.budget} / week</Text>
           </View>
 
           <View style={styles.offersHead}>
             <Text style={styles.offersTitle}>Offers</Text>
-            <Text style={styles.offersSub}>{offers.length} {offers.length === 1 ? 'offer' : 'offers'} · nobody has to cover the whole trip</Text>
+            <Text style={styles.offersSub}>{offers.length} {offers.length === 1 ? 'person' : 'people'} can cover it · nobody has to take the whole stretch</Text>
           </View>
 
           {offers.length === 0 ? (
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>No offers yet.</Text>
-              <Text style={styles.emptyBody}>Everyone within two steps of you can see this trip from today. Some trips get an offer in a day, some never do — we won't send you a fake nudge either way.</Text>
+              <Text style={styles.emptyBody}>Everyone within two steps of you can see your place is free from today. Some get an offer in a day, some never do — we won't send you a fake nudge either way.</Text>
             </View>
           ) : (
             <View style={{ gap: 22 }}>
@@ -69,7 +69,7 @@ function OfferCard({ o, onOpen }: { o: OfferView; onOpen: () => void }) {
 
       <View style={styles.offerTop}>
         <View style={{ flex: 1, gap: 8 }}>
-          <View style={styles.nameRow}><Text style={styles.offerName}>{o.name}</Text><Text style={styles.flag}>{flagOf(o.country)}</Text></View>
+          <View style={styles.nameRow}><Text style={styles.offerName}>{o.name}</Text><Text style={styles.flag}>{o.country}</Text></View>
           <View style={styles.matchPill}><Text style={styles.matchText}>{o.matchesLabel}</Text></View>
           <View style={{ gap: 2 }}>{o.facts.map((f) => <Text key={f} style={styles.fact}>{f}</Text>)}</View>
         </View>
@@ -79,13 +79,13 @@ function OfferCard({ o, onOpen }: { o: OfferView; onOpen: () => void }) {
       <View style={{ gap: 8 }}>
         <Text style={styles.theirOffer}>Their offer:</Text>
         <View style={styles.rowBetween}>
-          <Text style={styles.coverNights}>{o.nightsLabel}</Text>
+          <Text style={styles.coverNights}>{o.weeksLabel}</Text>
           <Text style={styles.coverTotal}>{o.totalLabel}</Text>
         </View>
         <View style={styles.track}><View style={[styles.fill, { width: `${o.pct}%` }]} /></View>
         <MetaRow label="Requested" value={o.requested} recessed />
         <MetaRow label="Your dates" value={o.yours} />
-        <MetaRow label="Works out at" value={o.perNightLabel} />
+        <MetaRow label="Works out at" value={o.perWeekLabel} />
       </View>
 
       {o.hasNote ? (
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   offerTop: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   offerName: { fontSize: 17, lineHeight: 24, fontWeight: '700', color: color.ink },
-  flag: { fontSize: 15 },
+  flag: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, color: color.inkFaint, borderWidth: 1, borderColor: color.hairline, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2 },
   matchPill: { alignSelf: 'flex-start', borderWidth: 1, borderColor: color.brand, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
   matchText: { fontSize: 11.5, fontWeight: '700', color: color.textOnMint },
   fact: { fontSize: 14, lineHeight: 21, color: color.inkSoft },

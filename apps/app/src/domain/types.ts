@@ -62,7 +62,7 @@ export interface Listing {
   hostId: string;
   title: string;
   area: string; // "Finsbury Park, London"
-  pricePerNight: number; // GBP
+  pricePerWeek: number; // GBP — what a stay covers of the rent, per week
   kind: 'Room' | 'Whole place';
   lat: number;
   lng: number;
