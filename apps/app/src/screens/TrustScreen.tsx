@@ -66,6 +66,9 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
     }
   };
 
+  const writerAs: P = requestId ? 'host' : entryAs;
+  const cold = !story.warm && !story.direct;
+  const openDraft = (kind: DraftKind) => { haptic.select(); navigation.navigate('Thread', { memberId: hostId, draft: { kind, as: writerAs, nights: req.nights } }); };
   const names = story.channels.map((c) => c.voucher.name);
   const req = story.warm
     ? { dates: relRange(4, 28), nights: 28, asked: 'asked you 2 days ago' }
@@ -120,7 +123,10 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
         {perspective === 'host' ? (
           /* Reading as the host, the question you're exposed to is how they treat someone else's flat —
              the guest side. Restored on phone from the desktop GuestColumn (dropped in the migration). */
-          <GuestColumn hostId={hostId} onBackToHost={() => { haptic.select(); setPerspective('guest'); }} />
+          <>
+            <GuestColumn hostId={hostId} onBackToHost={() => { haptic.select(); setPerspective('guest'); }} />
+            {cold ? <NextSteps options={draftOptions(writerAs, req.nights)} onDraft={openDraft} /> : null}
+          </>
         ) : story.warm || story.direct ? (
           <WarmBody
             story={story} host={host} viewer={viewer} listing={listing} guestBook={guestBook}
@@ -131,8 +137,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
         ) : (
           <ColdBody
             story={story} host={host} copy={c} notify={notify}
-            options={draftOptions(perspective, req.nights)}
-            onDraft={(kind: DraftKind) => { haptic.select(); navigation.navigate('Thread', { memberId: hostId, draft: { kind, as: perspective, nights: req.nights } }); }}
+            options={draftOptions(writerAs, req.nights)}
+            onDraft={openDraft}
           />
         )}
       </ScrollView>
@@ -355,17 +361,25 @@ function ColdBody({ story, host, copy: c, options, onDraft }: any) {
         <Text style={styles.gapRow}>They've been on Kiki six weeks, so the record is thin either way.</Text>
       </View>
 
-      <View style={styles.nextCard}>
-        <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
-        <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
-        {(options as { kind: DraftKind; label: string }[]).map((o) => (
-          <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && styles.nextRowPressed]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
-            <Text style={styles.nextRowText}>{o.label} ›</Text>
-          </Pressable>
-        ))}
-        <Text style={styles.nextFoot}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
-      </View>
+      <NextSteps options={options} onDraft={onDraft} />
     </>
+  );
+}
+
+/** "You don't have to decide on this today": three things that help a cold match, each opening a
+ *  message Kiki drafts from what the graph can prove. The member edits and sends it. */
+function NextSteps({ options, onDraft }: { options: { kind: DraftKind; label: string }[]; onDraft: (kind: DraftKind) => void }) {
+  return (
+    <View style={styles.nextCard}>
+      <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
+      <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
+      {options.map((o) => (
+        <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && styles.nextRowPressed]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
+          <Text style={styles.nextRowText}>{o.label} ›</Text>
+        </Pressable>
+      ))}
+      <Text style={styles.nextFoot}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
+    </View>
   );
 }
 

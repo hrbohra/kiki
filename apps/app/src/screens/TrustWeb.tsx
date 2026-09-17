@@ -123,7 +123,15 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
           {/* Centre — the guest side is a different question, so it replaces the whole column */}
           <View style={styles.center}>
             {perspective === 'guest' ? (
-              <GuestColumn hostId={hostId} onBackToHost={() => setPerspective('host')} />
+              <>
+                <GuestColumn hostId={hostId} onBackToHost={() => setPerspective('host')} />
+                {!story.warm && !story.direct ? (
+                  <NextStepsWeb
+                    options={draftOptions(reader ?? 'guest', req.nights)}
+                    onDraft={(kind: DraftKind) => navigation.navigate('Thread', { memberId: hostId, draft: { kind, as: reader ?? 'guest', nights: req.nights } })}
+                  />
+                ) : null}
+              </>
             ) : (
               <>
                 <MutualFriendIntro hostId={hostId} />
@@ -260,19 +268,26 @@ function ColdCenter({ story, host, options, onDraft }: any) {
         </View>
       </View>
 
-      <View style={styles.band}>
-        <View style={styles.nextCard}>
-          <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
-          <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
-          {(options as { kind: DraftKind; label: string }[]).map((o) => (
-            <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
-              <Text style={styles.nextRowText}>{o.label} ›</Text>
-            </Pressable>
-          ))}
-          <Text style={{ fontSize: 12.5, lineHeight: 18, color: color.inkFaint, marginTop: 6 }}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
-        </View>
-      </View>
+      <NextStepsWeb options={options} onDraft={onDraft} />
     </>
+  );
+}
+
+/** "You don't have to decide on this today" — see NextSteps in TrustScreen. */
+function NextStepsWeb({ options, onDraft }: { options: { kind: DraftKind; label: string }[]; onDraft: (kind: DraftKind) => void }) {
+  return (
+    <View style={styles.band}>
+      <View style={styles.nextCard}>
+        <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
+        <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
+        {options.map((o) => (
+          <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
+            <Text style={styles.nextRowText}>{o.label} ›</Text>
+          </Pressable>
+        ))}
+        <Text style={{ fontSize: 12.5, lineHeight: 18, color: color.inkFaint, marginTop: 6 }}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
+      </View>
+    </View>
   );
 }
 
