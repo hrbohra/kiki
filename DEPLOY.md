@@ -1,47 +1,66 @@
-# Deploying the Kiki API (Render) + wiring the live public demo
+# Deploying Kiki
 
-The API is a long-lived Node service (NestJS + Prisma + tRPC + WebSockets). Render's free web
-service supports WebSockets and connects to your existing Neon Postgres, so real-time messaging
-keeps working. `render.yaml` is already in the repo.
+Three moving parts: the **API** (NestJS + Prisma + tRPC + WebSockets) on Render, **Postgres** on
+Neon, and the **web export** of the app embedded in the showcase site on Vercel. All three run on
+free tiers; a scheduled ping keeps the API warm.
 
-## Your steps (need your accounts)
+## 1. Database (Neon)
 
-### 1. Push the monorepo to GitHub
-Render builds from a Git repo. Create a repo (e.g. `hrbohra/kiki`) and push:
+Create a Postgres project and take both connection strings: the pooled one as `DATABASE_URL`, the
+direct one as `DIRECT_URL` (migrations and the seed use the direct connection).
+
 ```bash
-cd C:\dev\kiki
-git remote add origin https://github.com/hrbohra/kiki.git
-git push -u origin main
-```
-(Or tell me the remote and I'll push it — commits are already Harsh-only.)
-
-### 2. Create the Render service from the blueprint
-- render.com → New → **Blueprint** → connect the `kiki` repo → it reads `render.yaml`.
-- When prompted, set the secret env vars (values are in your local `C:\dev\kiki\.env`):
-  `DATABASE_URL`, `DIRECT_URL`, `GEMINI_API_KEY`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`,
-  `EMAIL_API_KEY`, `EMAIL_FROM`. (`DEMO_MODE=1`, `NODE_ENV`, `GEMINI_MODEL` are preset.)
-- Deploy. You'll get a URL like `https://kiki-api.onrender.com`.
-
-### 3. Verify
-```
-https://kiki-api.onrender.com/health   → {"ok":true}
-https://kiki-api.onrender.com/summary  → members/listings counts
+pnpm --filter @kiki/api exec prisma migrate deploy
+pnpm --filter @kiki/api exec prisma db seed      # the demo world: members, listings, vouches, threads
 ```
 
-### 4. Tell me the URL
-I'll then re-export the app web build against it and re-embed it in the portfolio, so the public
-demo is truly live end-to-end (one-tap in → real data → real messaging).
+## 2. API (Render)
 
-## What I do after you give me the URL
+`render.yaml` at the repo root is a Render Blueprint. On render.com choose **New → Blueprint**,
+connect the `kiki` repo, and it reads the file. Set the secret variables when prompted:
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL`, `DIRECT_URL` | Neon connection strings |
+| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | token signing (15-minute access, rotating refresh) |
+| `GEMINI_API_KEY` | the model, called server-side only; the key never reaches a client |
+| `EMAIL_API_KEY`, `EMAIL_FROM` | Resend, for the real invite → OTP flow |
+
+`DEMO_MODE=1`, `NODE_ENV` and `GEMINI_MODEL` are preset in the blueprint. Build gotchas that the
+blueprint already handles: Node is pinned by `.node-version` (22), pnpm is installed with
+`npm i -g pnpm` rather than corepack, and `pnpm install --prod=false` keeps devDependencies so the
+build can run.
+
+Verify:
+
+```
+https://<your-service>.onrender.com/health    → {"ok":true}
+https://<your-service>.onrender.com/summary   → member and listing counts
+```
+
+## 3. Web export (Vercel, via the showcase repo)
+
+The app is exported for the web twice, once per mount path, and copied into the showcase repo:
+
 ```bash
-cd C:\dev\kiki\apps\app
-EXPO_PUBLIC_API_URL=https://kiki-api.onrender.com npx expo export --platform web
-# copy dist -> kiki-portfolio/app  (and a /try/app variant), then redeploy the portfolio
+cd apps/app
+# set expo.experiments.baseUrl to "/app", then "/try/app", in app.json for each export
+EXPO_PUBLIC_API_URL=https://<your-service>.onrender.com npx expo export --platform web
+# copy dist/ to <showcase>/app and <showcase>/try/app, then deploy the showcase with `vercel --prod`
 ```
+
+The API URL is the only value baked into the client.
+
+## 4. Keeping the free tier warm
+
+Render's free service sleeps after ~15 minutes idle and cold-starts in about 30 seconds.
+`.github/workflows/keepalive.yml` pings `/health` every 10 minutes from GitHub Actions, which keeps
+a single service inside the free monthly allowance.
 
 ## Notes
-- **Free tier sleeps** after ~15 min idle; the first hit cold-starts (~30s). Fine for a demo; a
-  paid instance or a cron ping keeps it warm.
-- Real-time works because it's a single long-lived instance (in-memory pub/sub). To scale to
-  multiple instances later, flip `MESSAGE_BUS=redis` + `REDIS_URL` (the adapter is already built).
-- Alternatives with the same shape: Railway or Fly.io (Fly needs a Dockerfile).
+
+- Real-time messaging works on one instance through the in-memory pub/sub. To run more than one
+  instance, set `MESSAGE_BUS=redis` and `REDIS_URL`; the Redis adapter is already in the codebase.
+- The demo has a one-tap sign-in and a demo-only reset (`demo.reset`) that restores the seeded
+  requests, so a shared public demo is never left in a spent state. Both are gated by `DEMO_MODE`.
+- Railway or Fly.io would host the API the same way (Fly needs a Dockerfile).
