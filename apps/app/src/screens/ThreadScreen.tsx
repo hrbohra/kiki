@@ -7,6 +7,7 @@ import { color, font, radius, space, shadow } from '../theme/tokens';
 import * as world from '../world';
 import { useSession } from '../api/session';
 import { tap } from '../ui/feedback';
+import { buildDraftFacts, DRAFT_TASKS } from '@kiki/domain';
 import type { StackProps } from '../navigation';
 
 interface ChatMessage {
@@ -34,6 +35,8 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
   const draftAsk = route.params.draft;
   const [drafting, setDrafting] = useState(false);
   const [drafted, setDrafted] = useState<null | 'live' | 'cached' | 'baked' | 'composed'>(null);
+  const textRef = useRef('');
+  textRef.current = text;
   const scrollRef = useRef<ScrollView>(null);
 
   const append = (m: ChatMessage) =>
@@ -70,9 +73,14 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
   useEffect(() => {
     if (!draftAsk || !threadId) return;
     let alive = true;
+    // The deterministic twin paints at once (same facts, same task, computed on the device); the
+    // model's version replaces it when it arrives — unless the member has already started editing.
+    const twin = DRAFT_TASKS[draftAsk.kind].compose(buildDraftFacts(world.trustStoryFor(member.id), draftAsk.kind, draftAsk.as, draftAsk.nights));
+    setText(twin);
+    setDrafted('composed');
     setDrafting(true);
     api.ai.draft.query({ kind: draftAsk.kind, memberId: member.id, as: draftAsk.as, nights: draftAsk.nights })
-      .then((r) => { if (alive) { setText(r.text); setDrafted(r.source); } })
+      .then((r) => { if (alive && textRef.current === twin && r.source !== 'composed') { setText(r.text); setDrafted(r.source); } })
       .catch(() => {})
       .finally(() => { if (alive) setDrafting(false); });
     return () => { alive = false; };
@@ -140,7 +148,7 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
           <Compose size={16} color={color.textOnMint} accent={color.brand} />
           <Text style={styles.draftNote}>
             {drafting
-              ? 'Kiki is drafting this from what the graph can prove…'
+              ? 'Drafted from the facts on file. Kiki’s AI is writing a warmer version; start editing to keep this one.'
               : drafted === 'composed'
                 ? 'Drafted from the facts on file (no model was used). Edit it; nothing sends until you do.'
                 : `Drafted by Kiki’s AI${drafted === 'cached' ? ' (a saved run)' : ''} from what the graph can prove. Edit it; nothing sends until you do.`}

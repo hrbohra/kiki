@@ -29,13 +29,15 @@ export class GeminiProvider implements LlmProvider {
         `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${encodeURIComponent(key)}`,
         {
           method: 'POST',
+          // a model that has not answered in 15s is, for a person waiting on a draft, not answering
+          signal: AbortSignal.timeout(15_000),
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: req.system }] },
             contents: [{ parts: [{ text: req.user }] }],
             // Headroom matters: a reasoning model spends output tokens thinking before it writes, and a
             // tight cap returns half a sentence. Tasks are short; the cap is only a ceiling.
-            generationConfig: { temperature: 0.8, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 512 } },
+            generationConfig: { temperature: 0.8, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 128 } },
           }),
         },
       );
