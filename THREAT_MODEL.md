@@ -8,7 +8,7 @@ real-user-readiness bar; revisit before onboarding real users at scale.
 - User accounts + sessions (JWT access, refresh tokens).
 - Messages between members.
 - Secrets: DB URLs, JWT secrets, Gemini key, Resend key, blob token.
-- The ~10k-conversation corpus (voice only) — **not in the app DB**; isolated + anonymised.
+- Kiki's ~10k-conversation corpus is **not in this repo or any system here**. `@kiki/voice` is the port it would plug into (voice/style only); if it were ever loaded, it would be isolated from the app DB and anonymised.
 
 ## Trust boundaries
 Client ⇄ API (tRPC HTTP + WS) · API ⇄ Postgres · API ⇄ third parties (Gemini, Resend, Blob).

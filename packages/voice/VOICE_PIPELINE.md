@@ -1,7 +1,7 @@
 # Voice pipeline — turning Kiki's corpus into the LLM's voice
 
 **Blueprint + plug-in port.** This package is the seam a future Kiki team fills in to give the AI
-Kiki's own voice, learned from the ~10,000 real Instagram conversations. It ships as a stub
+Kiki's own voice, learned from their ~10,000 real Instagram conversations (**not included here** — this is the port, not the data). It ships as a stub
 (`src/pipeline.ts` stages throw `TODO`) so the app compiles and runs today on the default
 prompt-injection voice, and the corpus pipeline drops in later **without touching the AI layer**.
 

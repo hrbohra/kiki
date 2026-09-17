@@ -65,6 +65,7 @@ export function DemoEntry() {
                 {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>Enter the demo</Text>}
               </Pressable>
             )}
+            {demoAvailable && <Text style={styles.noFriction}>No account, no email. One tap and you're in as a seeded member.</Text>}
             <Pressable onPress={() => { tap('light'); setMode('email'); }} style={styles.linkBtn}>
               <Text style={styles.linkText}>Sign in with a real invite instead</Text>
             </Pressable>
@@ -116,6 +117,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.85, transform: [{ scale: 0.985 }] },
   disabled: { opacity: 0.5 },
   primaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  noFriction: { ...font.caption, color: color.inkFaint, textAlign: 'center', marginTop: 10 },
   linkBtn: { paddingVertical: 10, alignItems: 'center' },
   linkText: { ...font.body, color: color.brand, fontWeight: '700' },
   input: { backgroundColor: color.surface, borderWidth: 1, borderColor: color.hairline, borderRadius: radius.md, paddingHorizontal: space.lg, paddingVertical: 13, ...font.body, color: color.ink },

@@ -8,12 +8,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # The `secrets` context is not allowed inside an `if`; surface the flag as a job env var.
+      HAS_DB: ${{ secrets.DATABASE_URL != '' }}
     steps:
       - uses: actions/checkout@v4
 
+      # pnpm version comes from the root package.json "packageManager" pin.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -35,7 +37,7 @@ jobs:
       # API integration tests run only when a database is configured (set these repo secrets to
       # a disposable Postgres/Neon branch).
       - name: API integration tests
-        if: ${{ secrets.DATABASE_URL != '' }}
+        if: env.HAS_DB == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -43,4 +45,4 @@ jobs:
           JWT_REFRESH_SECRET: ci-refresh-secret
         run: |
           pnpm --filter @kiki/api exec prisma migrate deploy
-          pnpm --filter @kiki/api exec dotenv -e /dev/null -- vitest run --dir apps/api
+          pnpm --filter @kiki/api exec vitest run
