@@ -63,7 +63,7 @@ async function main(): Promise<void> {
         hostId: l.hostId,
         title: l.title,
         area: l.area,
-        pricePerWeek: l.pricePerWeek,
+        pricePerNight: l.pricePerNight,
         kind: l.kind,
         lat: l.lat,
         lng: l.lng,
@@ -182,7 +182,7 @@ async function main(): Promise<void> {
   await prisma.listing.create({
     data: {
       id: 'l-you', hostId: 'you', title: 'Your place', area: 'De Beauvoir, London',
-      pricePerWeek: 320, kind: 'Whole place', lat: 51.539, lng: -0.081, photoColor: '#D9E2DE',
+      pricePerNight: 46, kind: 'Whole place', lat: 51.539, lng: -0.081, photoColor: '#D9E2DE',
       tags: ['Quiet', 'WFH desk', 'Near tube'],
     },
   });
@@ -203,10 +203,10 @@ async function main(): Promise<void> {
 
   // Six weeks away that "you" posted, with a couple of partial offers to cover the rent.
   const trip = await prisma.trip.create({
-    data: { authorId: 'you', title: 'Italy for Mum’s 60th', kind: 'Beach', fromDay: 500, toDay: 542, nights: 42, budgetPerWeek: 300, state: 'open' },
+    data: { authorId: 'you', title: 'Italy for Mum’s 60th', kind: 'Beach', fromDay: 500, toDay: 542, nights: 42, budgetPerNight: 45, state: 'open' },
   });
-  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'nate', nights: 35, total: 1500, requestedFromDay: 507, requestedToDay: 542, note: '5 of your 6 weeks — more than most get this season.' } });
-  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'priya', nights: 21, total: 900, requestedFromDay: 500, requestedToDay: 521, note: null } });
+  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'nate', nights: 35, total: 1575, requestedFromDay: 507, requestedToDay: 542, note: '5 of your 6 weeks — more than most get this season.' } });
+  await prisma.tripOffer.create({ data: { tripId: trip.id, hostId: 'priya', nights: 21, total: 945, requestedFromDay: 500, requestedToDay: 521, note: null } });
 
   const counts = {
     members: members.length,

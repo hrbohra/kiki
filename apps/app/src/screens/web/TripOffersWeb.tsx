@@ -31,7 +31,7 @@ export function TripOffersWeb({ tripId }: { tripId: 'italy' | 'created' }) {
             <Pressable style={styles.back} onPress={() => navigation.goBack()} accessibilityLabel="Back"><Text style={styles.backGlyph}>←</Text></Pressable>
             <View style={styles.iconTile}><Dates size={27} color={color.ink} /></View>
             <Text style={styles.tripName}>{trip.name}</Text>
-            <Text style={styles.tripMeta}>{trip.dates} · {fmtWeeks(trip.weeks)} · £{trip.budget} / week</Text>
+            <Text style={styles.tripMeta}>{trip.dates} · {fmtWeeks(trip.weeks)} · £{trip.budget} / night</Text>
           </View>
 
           <View style={styles.offersHead}>
@@ -85,7 +85,7 @@ function OfferCard({ o, onOpen }: { o: OfferView; onOpen: () => void }) {
         <View style={styles.track}><View style={[styles.fill, { width: `${o.pct}%` }]} /></View>
         <MetaRow label="Requested" value={o.requested} recessed />
         <MetaRow label="Your dates" value={o.yours} />
-        <MetaRow label="Works out at" value={o.perWeekLabel} />
+        <MetaRow label="Works out at" value={o.perNightLabel} />
       </View>
 
       {o.hasNote ? (

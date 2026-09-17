@@ -8,10 +8,10 @@ import { useCreatedTrip } from '../demo/createdTrip';
 import { color, font, radius, space, cardShadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
 
-// Away: your place while you are gone, the stays you have coming up, and the ones behind you.
+// Trips, in Kiki’s own words: dates away, the stays coming up, and the ones behind you.
 // Dates are relative to now so "coming up" is always ahead and "past" always behind.
-const upcoming = { title: 'Maia’s Room · De Beauvoir', detail: '4 weeks · £310 / week', dates: relRange(21, 28) };
-const past = [{ title: 'Danica’s Room · Tooting', detail: '3 weeks · £285 / week', dates: relRange(-60, 21), confirmed: true }];
+const upcoming = { title: 'Maia’s Room · De Beauvoir', detail: '4 weeks · £44 / night', dates: relRange(21, 28) };
+const past = [{ title: 'Danica’s Room · Tooting', detail: '3 weeks · £41 / night', dates: relRange(-60, 21), confirmed: true }];
 
 export function TripsScreen() {
   const navigation = useNavigation<RootNav>();
@@ -21,11 +21,11 @@ export function TripsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>Away</Text>
+        <Text style={styles.h1}>Trips</Text>
 
         <View style={styles.sectionRow}>
-          <Text style={styles.section}>Looking for a Kikier</Text>
-          <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>List my place</Text></Pressable>
+          <Text style={styles.section}>Dates away</Text>
+          <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Add a new trip</Text></Pressable>
         </View>
         {created ? (
           <Pressable style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })}>

@@ -76,7 +76,7 @@ function BottomTabs() {
       <Tab.Screen name="Explore" component={ExploreScreen} />
       <Tab.Screen name="Requests" component={RequestsScreen} />
       <Tab.Screen name="Community" component={CommunityScreen} />
-      <Tab.Screen name="Trips" component={TripsScreen} options={{ tabBarLabel: 'Away' }} />
+      <Tab.Screen name="Trips" component={TripsScreen} />
       <Tab.Screen name="Messages" component={MessagesScreen} />
       <Tab.Screen name="Me" component={MeScreen} options={{ tabBarLabel: 'Me/Home', tabBarActiveTintColor: color.gold }} />
     </Tab.Navigator>

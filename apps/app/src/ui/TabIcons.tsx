@@ -27,7 +27,7 @@ export function CommunityIcon({ color, size = 22 }: IconProps) {
   );
 }
 
-/** Away — calendar. */
+/** Trips — calendar. */
 export function TripsIcon({ color, size = 22 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

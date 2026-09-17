@@ -77,7 +77,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
             <Image source={photoFor(listing.id)} style={StyleSheet.absoluteFill} resizeMode="cover" accessibilityLabel={`${listing.title} — ${host.name}'s place in ${listing.area}`} />
             <View style={styles.photoPills}>
               <View style={styles.photoPill}><Text style={styles.photoPillKind}>{listing.kind}</Text></View>
-              <View style={styles.photoPill}><Text style={styles.photoPillPrice}>£{listing.pricePerWeek} / week</Text></View>
+              <View style={styles.photoPill}><Text style={styles.photoPillPrice}>£{listing.pricePerNight} / night</Text></View>
             </View>
           </View>
           <Text style={styles.bodyText}>{detail.roomDescription}</Text>
@@ -167,7 +167,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
             <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={34} />
             <View>
               <Text style={styles.primaryName}>{host.name} · {listing.kind}</Text>
-              <Text style={styles.primaryPrice}>£{listing.pricePerWeek} / week · {listing.area.split(',')[0]}</Text>
+              <Text style={styles.primaryPrice}>£{listing.pricePerNight} / night · {listing.area.split(',')[0]}</Text>
             </View>
           </View>
           <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={go(() => navigation.navigate('Thread', { memberId: host.id }))} accessibilityRole="button">

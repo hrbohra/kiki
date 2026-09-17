@@ -10,7 +10,7 @@ export const tripsRouter = router({
         kind: z.string().min(1).max(40),
         fromDay: z.number().int(),
         toDay: z.number().int(),
-        budgetPerWeek: z.number().int().min(0),
+        budgetPerNight: z.number().int().min(0),
         idempotencyKey: z.string().optional(),
       }),
     )

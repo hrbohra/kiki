@@ -98,7 +98,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
               <View style={styles.primaryRow}>
                 <View>
                   <Text style={styles.primaryName}>{host.name} · {stayLength(req.nights)}</Text>
-                  <Text style={styles.primaryPrice}>£{listing?.pricePerWeek ?? 0} / week</Text>
+                  <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
                 </View>
                 <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
                   <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>

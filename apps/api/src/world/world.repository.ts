@@ -72,7 +72,7 @@ export class WorldRepository {
         hostId: l.hostId,
         title: l.title,
         area: l.area,
-        pricePerWeek: l.pricePerWeek,
+        pricePerNight: l.pricePerNight,
         kind: l.kind as Listing['kind'],
         lat: l.lat,
         lng: l.lng,

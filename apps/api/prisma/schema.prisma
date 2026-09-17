@@ -111,7 +111,7 @@ model Listing {
   hostId        String
   title         String
   area          String
-  pricePerWeek  Int // GBP — what a stay covers of the rent, per week
+  pricePerNight Int // GBP per night, the unit Kiki’s own app prices in
   kind          String // "Room" | "Whole place" (kept as text to match the domain literal)
   lat           Float
   lng           Float
@@ -303,7 +303,7 @@ model Trip {
   fromDay        Int
   toDay          Int
   nights         Int
-  budgetPerWeek  Int
+  budgetPerNight Int
   state          TripState @default(open)
   createdAt      DateTime  @default(now())
 

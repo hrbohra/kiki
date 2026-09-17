@@ -151,7 +151,7 @@ function WebListingCard({ listing, onPress }: { listing: Listing; onPress: () =>
       <View style={styles.cardBody}>
         <View style={styles.cardLine}>
           <Text style={styles.area}>{listing.area.split(',')[0]}</Text>
-          <Text style={styles.price}>£{listing.pricePerWeek} / week</Text>
+          <Text style={styles.price}>£{listing.pricePerNight} / night</Text>
         </View>
         <ReachPill deg={deg} />
         <Text style={styles.tags} numberOfLines={1}>{listing.tags.slice(0, 3).join(' · ')}</Text>

@@ -8,7 +8,7 @@ export interface CreateTripInput {
   kind: string;
   fromDay: number;
   toDay: number;
-  budgetPerWeek: number;
+  budgetPerNight: number;
   idempotencyKey?: string;
 }
 
@@ -32,7 +32,7 @@ export class TripsService {
           fromDay: input.fromDay,
           toDay: input.toDay,
           nights,
-          budgetPerWeek: input.budgetPerWeek,
+          budgetPerNight: input.budgetPerNight,
         },
       });
     });

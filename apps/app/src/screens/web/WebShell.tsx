@@ -19,7 +19,7 @@ const TABS: { key: WebPage; label: string }[] = [
   { key: 'requests', label: 'Requests' },
   { key: 'community', label: 'Community' },
   { key: 'guestbook', label: 'Guest book' },
-  { key: 'trips', label: 'Away' },
+  { key: 'trips', label: 'Trips' },
   { key: 'messages', label: 'Messages' },
   { key: 'me', label: 'Me' },
 ];

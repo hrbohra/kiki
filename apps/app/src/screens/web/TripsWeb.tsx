@@ -13,9 +13,9 @@ import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
 
-/** Away — reframed from receipt to loop-closing: a stay is where trust gets made, so the
- *  page asks for it back. "Looking for a Kikier" is your place while you are gone; writing the
- *  owed entry closes the loop on the stays you took. */
+/** Trips — reframed from receipt to loop-closing: a stay is where trust gets made, so the
+ *  page asks for it back. "Dates away" is your place while you are gone; writing the owed
+ *  entry closes the loop on the stays you took. */
 export function TripsWeb() {
   const navigation = useNavigation<RootNav>();
   const created = useCreatedTrip();
@@ -29,26 +29,26 @@ export function TripsWeb() {
 
   return (
     <View style={{ gap: 20 }}>
-      <Text style={styles.h1}>Away</Text>
+      <Text style={styles.h1}>Trips</Text>
 
       <View style={styles.cols}>
         <View style={styles.main}>
           <View style={styles.sectionRow}>
-            <Text style={styles.h2}>Looking for a Kikier</Text>
+            <Text style={styles.h2}>Dates away</Text>
             <View style={{ flex: 1 }} />
-            <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>List my place while I’m away</Text></Pressable>
+            <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Add a new trip</Text></Pressable>
           </View>
           {created ? (
-            <TripRow name={created.name} meta={`${created.dates} · ${fmtWeeks(created.weeks)} · £${created.budget} / week`} pill="No offers yet" tone="neutral" onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })} />
+            <TripRow name={created.name} meta={`${created.dates} · ${fmtWeeks(created.weeks)} · £${created.budget} / night`} pill="No offers yet" tone="neutral" onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })} />
           ) : null}
-          <TripRow name={ITALY_TRIP.name} meta={`${ITALY_TRIP.dates} · ${fmtWeeks(ITALY_TRIP.weeks)} · £${ITALY_TRIP.budget} / week`} pill={italyCount} tone="brand" onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })} />
+          <TripRow name={ITALY_TRIP.name} meta={`${ITALY_TRIP.dates} · ${fmtWeeks(ITALY_TRIP.weeks)} · £${ITALY_TRIP.budget} / night`} pill={italyCount} tone="brand" onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })} />
 
           <Text style={[styles.h2, { marginTop: 18 }]}>Coming up</Text>
           <View style={[styles.trip, WEB_SHADOW]}>
             <Image source={emmaListing ? photoFor(emmaListing.id) : undefined} style={styles.tripPhoto} resizeMode="cover" />
             <View style={styles.tripBody}>
               <Text style={styles.tripTitle}>{emmaListing?.title} · De Beauvoir</Text>
-              <Text style={styles.tripDates}>{relRange(21, 28)} · 4 weeks · £{emmaListing?.pricePerWeek} / week</Text>
+              <Text style={styles.tripDates}>{relRange(21, 28)} · 4 weeks · £{emmaListing?.pricePerNight} / night</Text>
               <View style={styles.credit}>
                 <Avatar id="bella" name="Nina" tint={world.memberById('bella').avatarColor} size={22} />
                 <Text style={styles.creditText}>Nina made this match.</Text>

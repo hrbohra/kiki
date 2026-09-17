@@ -167,7 +167,7 @@ function RoomPanel({ hostId, perspective, navigation }: { hostId: string; perspe
         <View style={[styles.card, styles.roomCard]}>
           {listing ? <Image source={photoFor(listing.id)} style={styles.roomPhoto} resizeMode="cover" /> : null}
           <View style={styles.roomBody}>
-            <Text style={styles.roomRate}>£{listing?.pricePerWeek ?? 0} / week · {listing?.kind} · {listing?.area}</Text>
+            <Text style={styles.roomRate}>£{listing?.pricePerNight ?? 0} / night · {listing?.kind} · {listing?.area}</Text>
             <Text style={styles.roomDesc}>{detail.roomDescription}</Text>
 
             <Text style={styles.eyebrow}>WHAT'S HERE</Text>

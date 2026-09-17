@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 
 import type { Trip } from '../domain/trips';
 
-// Session-only store for a stretch away the user posts from "List my place while I’m away". One at a time, lost on reload
+// Session-only store for a trip the user posts from "Add a new trip". One at a time, lost on reload
 // (matches the handoff's stated scope). Kept out of navigation params so the Trips list can show
 // the created card without threading it through every screen.
 

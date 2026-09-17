@@ -25,7 +25,7 @@ export interface Trip {
   icon: string;
   dates: string;
   weeks: number;
-  budget: number; // GBP per week — what would cover the rent
+  budget: number; // GBP per night — what would cover the rent, in the unit Kiki prices in
   offers: TripOffer[];
 }
 
@@ -35,18 +35,18 @@ export const TRIP_KINDS = ['Beach', 'Mountains', 'Party', 'Work', 'Art', 'Food']
 /** The fixtured stretch away, exercising both offer variants: Kai (5/6 weeks, benchmark note,
  *  one-week gap) and Sara (3/6, no note, three-week gap). */
 export const ITALY_TRIP: Trip = {
-  id: 'italy', name: 'Italy for Mum’s 60th', icon: 'Beach', dates: '07 Jun - 19 Jul', weeks: 6, budget: 300,
+  id: 'italy', name: 'Italy for Mum’s 60th', icon: 'Beach', dates: '07 Jun - 19 Jul', weeks: 6, budget: 45,
   offers: [
     {
       id: 'sam', name: 'Kai Gowen', country: 'NZ', avatarTint: '#5B7DB1', isNew: true, sent: 'Sent 1 day ago',
       matches: 3, facts: ['Male, 26', 'Founding Operations @Kiki', 'Grew up in Auckland'],
-      weeks: 5, total: 1500, requested: '14 Jun - 19 Jul',
+      weeks: 5, total: 1575, requested: '14 Jun - 19 Jul',
       note: 'Based on similar Kikis right now, 5 of 6 weeks is more than most people are getting for this seasonality!',
     },
     {
       id: 'sara', name: 'Sara Foster', country: 'AU', avatarTint: '#B15B93', isNew: true, sent: 'Sent 4 days ago',
       matches: 1, facts: ['Female, 34', 'Occupational Therapist', 'Grew up in Perth'],
-      weeks: 3, total: 900, requested: '07 - 28 Jun', note: '',
+      weeks: 3, total: 945, requested: '07 - 28 Jun', note: '',
     },
   ],
 };
@@ -76,7 +76,7 @@ export function fmtWeeks(weeks: number): string {
 export interface OfferView extends TripOffer {
   weeksLabel: string;
   totalLabel: string;
-  perWeekLabel: string;
+  perNightLabel: string;
   matchesLabel: string;
   pct: number;
   yours: string;
@@ -88,14 +88,14 @@ export interface OfferView extends TripOffer {
   gapLine: string;
 }
 
-/** Derive an offer's display fields against the stretch away — coverage %, per-week rate, gap copy. */
+/** Derive an offer's display fields against the stretch away — coverage %, per-night rate, gap copy. */
 export function offerView(o: TripOffer, trip: Trip): OfferView {
   const gap = trip.weeks - o.weeks;
   return {
     ...o,
     weeksLabel: `${fmtWeeks(o.weeks).replace(/ weeks?$/, '')} of your ${fmtWeeks(trip.weeks)}`,
     totalLabel: `£${o.total.toFixed(2)}`,
-    perWeekLabel: `£${Math.round(o.total / o.weeks)} / week`,
+    perNightLabel: `£${Math.round(o.total / (o.weeks * 7))} / night`,
     matchesLabel: `${o.matches} Kiki ${o.matches === 1 ? 'match' : 'matches'}`,
     pct: Math.round((o.weeks / trip.weeks) * 100),
     yours: trip.dates,

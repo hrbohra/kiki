@@ -21,7 +21,7 @@ interface Draft {
 
 /** Defaults relative to today so the form never opens on a date in the past. */
 const isoInDays = (d: number) => { const t = new Date(); t.setDate(t.getDate() + d); return t.toISOString().slice(0, 10); };
-const DRAFT_DEFAULT: Draft = { name: '', start: isoInDays(35), end: isoInDays(77), budget: '300', icon: TRIP_KINDS[0] };
+const DRAFT_DEFAULT: Draft = { name: '', start: isoInDays(35), end: isoInDays(77), budget: '45', icon: TRIP_KINDS[0] };
 
 /** List your place while you are away: Kikiers come to you. Weeks and total are derived, never
  *  typed; a live preview shows exactly what a Kikier will see; posting builds the listing and
@@ -32,14 +32,14 @@ export function PlanTripWeb() {
   const patch = (p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p }));
 
   const weeks = weeksBetween(draft.start, draft.end);
-  const total = weeks ? `£${Math.round(weeks * Number(draft.budget || 0))}` : '—';
+  const total = weeks ? `£${Math.round(weeks * 7 * Number(draft.budget || 0))}` : '—';
   const named = draft.name.trim().length > 0;
   const valid = weeks >= 1 && named;
   const blockedWhy = !named ? 'Say where you’re off to first.' : 'Kiki stays are a week or longer.';
 
   const previewName = draft.name.trim() || 'Away';
   const previewMeta = weeks >= 1
-    ? `${shortDate(draft.start)} - ${shortDate(draft.end)} · ${fmtWeeks(weeks)} · £${draft.budget} / week`
+    ? `${shortDate(draft.start)} - ${shortDate(draft.end)} · ${fmtWeeks(weeks)} · £${draft.budget} / night`
     : 'Kiki stays are a week or longer';
 
   const post = () => {
@@ -59,7 +59,7 @@ export function PlanTripWeb() {
         <View style={styles.col}>
           <View style={styles.titleRow}>
             <Pressable style={styles.back} onPress={() => navigation.goBack()} accessibilityLabel="Back"><Text style={styles.backGlyph}>←</Text></Pressable>
-            <Text style={styles.title}>List my place while I’m away</Text>
+            <Text style={styles.title}>Add a new trip</Text>
           </View>
           <Text style={styles.intro}>Say when you’re away and what would cover your rent. Kikiers within your network come to you — you don’t apply to them.</Text>
 
@@ -77,7 +77,7 @@ export function PlanTripWeb() {
               </Field>
             </View>
 
-            <Field label="What covers your rent, per week">
+            <Field label="What covers your rent, per night">
               <View style={styles.budgetWell}>
                 <Text style={styles.budgetSign}>£</Text>
                 <TextInput value={draft.budget} onChangeText={(v) => patch({ budget: v.replace(/[^0-9]/g, '') })} keyboardType="numeric" style={styles.budgetInput} />

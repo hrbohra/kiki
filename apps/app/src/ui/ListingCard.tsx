@@ -60,7 +60,7 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
         </View>
         <View style={styles.imagePills}>
           <View style={styles.imagePill}><Text style={styles.pillKind}>{listing.kind}</Text></View>
-          <View style={styles.imagePill}><Text style={styles.pillPrice}>£{listing.pricePerWeek} / week</Text></View>
+          <View style={styles.imagePill}><Text style={styles.pillPrice}>£{listing.pricePerNight} / night</Text></View>
         </View>
         <Text style={styles.tagLine} numberOfLines={1}>{listing.tags.slice(0, 3).join('  ·  ')}</Text>
       </View>
