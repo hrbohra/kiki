@@ -148,7 +148,8 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
             <Avatar id={host.id} name={host.name} tint={host.avatarColor} country={host.country} size={34} />
             <View>
               <Text style={styles.primaryName}>{host.name} · {stayLength(req.nights)}</Text>
-              <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
+              {/* reading as the host, the stay is at YOUR place, so the price is yours */}
+              <Text style={styles.primaryPrice}>£{(perspective === 'host' && requestId ? world.listingForHost(world.viewerId) : listing)?.pricePerNight ?? 0} / night</Text>
             </View>
           </View>
           {perspective === 'host' && requestId ? (

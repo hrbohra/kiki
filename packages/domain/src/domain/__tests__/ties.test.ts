@@ -24,7 +24,7 @@ describe('tie weight', () => {
     expect(tieWeight(undefined).dashed).toBe(true);
   });
   it('says the fact, not the number', () => {
-    expect(tieReason({ from: 'a', to: 'b', stays: 2, sharedEvents: 1 })).toBe('Has stayed with you 2 times. One Kiki event together.');
+    expect(tieReason({ from: 'a', to: 'b', stays: 2, sharedEvents: 1 })).toBe('Has stayed with you twice. One Kiki event together.');
     expect(tieReason({ from: 'a', to: 'b', kind: 'invite' })).toBe('You brought them into Kiki.');
     expect(tieReason(undefined)).toBe('A direct connection of yours.');
   });

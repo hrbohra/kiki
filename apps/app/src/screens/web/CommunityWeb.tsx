@@ -87,7 +87,9 @@ function branchSummary(p: { hosted: number; stays: number; invited: number }): s
   if (p.hosted) parts.push(`Hosted ${p.hosted}`);
   if (p.invited) parts.push(`brought in ${p.invited} more`);
   if (p.stays) parts.push(`stayed ${p.stays === 1 ? 'once' : `${p.stays} times`}`);
-  return parts.length ? parts.join(', ') + '.' : 'Nothing yet, that’s normal.';
+  if (!parts.length) return 'Nothing yet, that’s normal.';
+  const line = parts.join(', ');
+  return line.charAt(0).toUpperCase() + line.slice(1) + '.';
 }
 
 function shortTrait(label: string): string {

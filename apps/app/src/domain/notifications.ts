@@ -29,11 +29,20 @@ export function buildNotices(inbox: InboxRequest[]): Notice[] {
 
   for (const r of inbox.filter((x) => x.state === 'pending')) {
     const story = world.trustStoryFor(r.guestId);
-    const mutual = story.rankedRoutes[0] && story.rankedRoutes[0].members.length > 2 ? story.rankedRoutes[0].members[1].name.split(' ')[0] : null;
+    const route = story.rankedRoutes[0]?.members ?? [];
+    const mutual = route.length > 2 ? route[1].name.split(' ')[0] : null;
+    // only a two-step mutual "vouches for" the guest; further out, say the distance and the way in
+    const how = !story.reachable
+      ? 'Nobody you know has met them. '
+      : story.direct
+        ? 'You know them yourself. '
+        : route.length === 3 && story.warm
+          ? `${mutual} vouches for ${first(r.guestId)}. `
+          : `${route.length - 1} steps from you, through ${mutual}. `;
     out.push({
       id: `req-${r.id}`, section: 'needs', memberId: r.guestId,
       title: `${first(r.guestId)} wants to stay ${stayLength(r.nights)}`,
-      body: `${mutual ? `${mutual} vouches for ${story.host.name.split(' ')[0]}. ` : story.reachable ? '' : 'Nobody you know has met them. '}£${(price * r.nights).toLocaleString('en-GB')} for the stay.`,
+      body: `${how}£${(price * r.nights).toLocaleString('en-GB')} for the stay.`,
       when: '2 hrs ago',
       action: { label: 'Read their trust page', to: { screen: 'Trust', hostId: r.guestId, requestId: r.id } },
       secondary: 'Later',

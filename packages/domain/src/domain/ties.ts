@@ -37,7 +37,7 @@ export function tieReason(v: Vouch | undefined): string {
   const parts: string[] = [];
   if (v?.kind === 'invite') parts.push('You brought them into Kiki.');
   if (v?.kind === 'friend') parts.push('A friend of yours.');
-  if (stays > 0) parts.push(`Has stayed with you ${stays === 1 ? 'once' : `${stays} times`}.`);
+  if (stays > 0) parts.push(`Has stayed with you ${stays === 1 ? 'once' : stays === 2 ? 'twice' : `${stays} times`}.`);
   if (events > 0) parts.push(events === 1 ? 'One Kiki event together.' : `${events} Kiki events together.`);
   if (!parts.length) parts.push('A direct connection of yours.');
   return parts.join(' ');

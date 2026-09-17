@@ -78,7 +78,7 @@ export function RouteGraph({ viewer, host, routes, otherPeople = [], nextRingCou
   return (
     <View>
       <Pressable onPress={cycle} accessibilityRole="button" accessibilityLabel={`Connection graph. ${reveal === 0 ? 'Tap to show your other people.' : reveal === 1 ? `Tap to show the ${nextRingCount} people who know ${host.name} that you don't.` : 'Tap to show routes only.'}`}>
-        <View style={{ width: '100%', aspectRatio: VB.w / VB.h }} onLayout={onLayout}>
+        <View style={{ width: '100%', maxWidth: 460, alignSelf: 'center', aspectRatio: VB.w / VB.h }} onLayout={onLayout}>
           {w > 0 ? (
             <>
               <Svg width={w} height={h} viewBox={`0 0 ${VB.w} ${VB.h}`} style={StyleSheet.absoluteFill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

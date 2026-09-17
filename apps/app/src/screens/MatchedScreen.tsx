@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../ui/Avatar';
 import { haptic } from '../ui/feedback';
@@ -33,19 +33,23 @@ export function MatchedScreen({ route, navigation }: StackProps<'Matched'>) {
   const first = guest.name.split(' ')[0];
   const total = (listing?.pricePerNight ?? 0) * nights;
 
-  const [lineW, setLineW] = useState(0);
   const land = useRef(new Animated.Value(reduced ? 1 : 0)).current;
   const draw = useRef(new Animated.Value(reduced ? 1 : 0)).current;
   useEffect(() => {
     if (reduced) { land.setValue(1); draw.setValue(1); haptic.success(); return; }
-    Animated.spring(land, { toValue: 1, damping: 14, stiffness: 160, mass: 0.9, useNativeDriver: false }).start(() => {
-      Animated.timing(draw, { toValue: 1, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start(({ finished }) => { if (finished) haptic.success(); });
-    });
+    Animated.spring(land, { toValue: 1, damping: 14, stiffness: 160, mass: 0.9, useNativeDriver: false }).start();
+    // The line starts on a clock, not on the spring's rest callback: a spring can take seconds to
+    // report "at rest" on the web, and the line must not wait on that.
+    const line = Animated.sequence([
+      Animated.delay(520),
+      Animated.timing(draw, { toValue: 1, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]);
+    line.start(({ finished }) => { if (finished) haptic.success(); });
+    return () => line.stop();
   }, [land, draw, reduced]);
 
   const done = () => navigation.popToTop();
   const open = (memberId: string) => navigation.navigate('Thread', { memberId });
-  const onLine = (e: LayoutChangeEvent) => setLineW(e.nativeEvent.layout.width);
   const avatarStyle = { opacity: land, transform: [{ scale: land.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }] };
 
   return (
@@ -60,9 +64,9 @@ export function MatchedScreen({ route, navigation }: StackProps<'Matched'>) {
           {/* the two of you, joined through the mutual */}
           <View style={styles.pair} accessible accessibilityLabel={mutual ? `You and ${first}, connected through ${mutual.name.split(' ')[0]}` : `You and ${first}`}>
             <Animated.View style={[styles.end, avatarStyle]}><Avatar id={viewer.id} name={viewer.name} tint={viewer.avatarColor} size={84} ring /></Animated.View>
-            <View style={styles.lineWrap} onLayout={onLine}>
+            <View style={styles.lineWrap}>
               <View style={styles.lineTrack} />
-              <Animated.View style={[styles.line, { width: draw.interpolate({ inputRange: [0, 1], outputRange: [0, lineW] }) }]} />
+              <Animated.View style={[styles.line, { width: draw.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }]} />
               {mutual ? (
                 <Animated.View style={[styles.mutual, avatarStyle]}>
                   <Avatar id={mutual.id} name={mutual.name} tint={mutual.avatarColor} size={44} ring />
@@ -74,7 +78,13 @@ export function MatchedScreen({ route, navigation }: StackProps<'Matched'>) {
           </View>
 
           <Text style={styles.headline} accessibilityRole="header">{first} stays at yours, {dateRange(startInDays, nights, { long: true })}.</Text>
-          <Text style={styles.sub}>{mutual ? `${mutual.name.split(' ')[0]}’s name is on this. So is Kiki’s. That’s the match.` : 'Kiki’s name is on this. That’s the match.'}</Text>
+          <Text style={styles.sub}>
+            {mutual && story.warm && story.degrees === 2
+              ? `${mutual.name.split(' ')[0]}’s name is on this. So is Kiki’s. That’s the match.`
+              : mutual
+                ? `${story.degrees} steps, through ${mutual.name.split(' ')[0]}. Kiki’s name is on this. That’s the match.`
+                : 'Kiki’s name is on this. That’s the match.'}
+          </Text>
 
           <View style={[styles.card, shadow.card]}>
             <Text style={styles.eyebrow}>WHAT HAPPENS NOW</Text>
