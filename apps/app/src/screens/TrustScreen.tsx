@@ -10,6 +10,7 @@ import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
 import { stayLength } from '../domain/stay';
+import { draftOptions, type DraftKind } from '@kiki/domain';
 import { useResponsive } from '../ui/useResponsive';
 import { PersonView } from './web/PersonView';
 import { PersonTabs } from '../ui/PersonTabs';
@@ -128,7 +129,11 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
             onRoute={() => navigation.navigate('Connection', { hostId })}
           />
         ) : (
-          <ColdBody story={story} host={host} copy={c} notify={notify} />
+          <ColdBody
+            story={story} host={host} copy={c} notify={notify}
+            options={draftOptions(perspective, req.nights)}
+            onDraft={(kind: DraftKind) => { haptic.select(); navigation.navigate('Thread', { memberId: hostId, draft: { kind, as: perspective, nights: req.nights } }); }}
+          />
         )}
       </ScrollView>
 
@@ -307,7 +312,7 @@ function WarmBody({ story, host, viewer, listing, guestBook, copy: c, whyOpen, s
 }
 
 // ---- Cold body -------------------------------------------------------------
-function ColdBody({ story, host, copy: c, notify }: any) {
+function ColdBody({ story, host, copy: c, options, onDraft }: any) {
   return (
     <>
       <View style={styles.card}>
@@ -353,11 +358,12 @@ function ColdBody({ story, host, copy: c, notify }: any) {
       <View style={styles.nextCard}>
         <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
         <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
-        {['Let us introduce you properly', 'Have a quick call before you say yes', `Offer them 1 night instead of ${3}`].map((t) => (
-          <Pressable key={t} style={({ pressed }) => [styles.nextRow, pressed && styles.nextRowPressed]} onPress={() => notify(t)}>
-            <Text style={styles.nextRowText}>{t} ›</Text>
+        {(options as { kind: DraftKind; label: string }[]).map((o) => (
+          <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && styles.nextRowPressed]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
+            <Text style={styles.nextRowText}>{o.label} ›</Text>
           </Pressable>
         ))}
+        <Text style={styles.nextFoot}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
       </View>
     </>
   );
@@ -375,9 +381,10 @@ function selectInferences(overlaps: Overlap[]): { claim: string; source: string 
     self_declared: 'You both typed that yourselves. We haven\'t checked it.',
     matched: 'An exact match on file.',
   };
+  const textSrc = { bio: 'Read out of your bios. Your own words; we only matched the topic.', guest_book: 'Read out of the guest book. We worked it out from what guests wrote.' } as const;
   return overlaps
     .filter((o) => o.kind === 'origin' || o.kind === 'education' || o.kind === 'event')
-    .map((o) => ({ claim: o.label.replace(/^You (both|were both)/, 'You $1'), source: src[o.provenance] }));
+    .map((o) => ({ claim: o.label.replace(/^You (both|were both)/, 'You $1'), source: o.source === 'bio' || o.source === 'guest_book' ? textSrc[o.source] : src[o.provenance] }));
 }
 
 function copy(p: P, host: string, names: string[], mutuals: number, hostedCount: number, direct = false) {
@@ -480,6 +487,7 @@ const styles = StyleSheet.create({
   nextRow: { backgroundColor: color.surface, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11 },
   nextRowPressed: { transform: [{ scale: 0.985 }], backgroundColor: color.dashedTint },
   nextRowText: { fontSize: 13.5, fontWeight: '600', color: color.textOnMint },
+  nextFoot: { fontSize: 12, lineHeight: 17, color: color.inkFaint, marginTop: 4 },
   // footer
   footer: { backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.hairline, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 22, gap: 8 },
   toast: { backgroundColor: color.ink, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11 },

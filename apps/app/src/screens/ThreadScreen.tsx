@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
-import { TRAIT_GLYPH } from '../ui/glyphs';
+import { TRAIT_GLYPH, Compose } from '../ui/glyphs';
 import { color, font, radius, space, shadow } from '../theme/tokens';
 import * as world from '../world';
 import { useSession } from '../api/session';
@@ -29,6 +29,11 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  // A Kiki-drafted message (cold-state card). It lands in the composer as text the member owns:
+  // they can edit it, clear it, or send it. The AI never sends.
+  const draftAsk = route.params.draft;
+  const [drafting, setDrafting] = useState(false);
+  const [drafted, setDrafted] = useState<null | 'live' | 'cached' | 'baked' | 'composed'>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const append = (m: ChatMessage) =>
@@ -62,11 +67,24 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages.length]);
 
+  useEffect(() => {
+    if (!draftAsk || !threadId) return;
+    let alive = true;
+    setDrafting(true);
+    api.ai.draft.query({ kind: draftAsk.kind, memberId: member.id, as: draftAsk.as, nights: draftAsk.nights })
+      .then((r) => { if (alive) { setText(r.text); setDrafted(r.source); } })
+      .catch(() => {})
+      .finally(() => { if (alive) setDrafting(false); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadId]);
+
   const onSend = async () => {
     const body = text.trim();
     if (!body || !threadId || sending) return;
     setSending(true);
     setText('');
+    setDrafted(null);
     tap('light');
     try {
       await api.messaging.send.mutate({ threadId, text: body });
@@ -117,9 +135,23 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
         )}
       </ScrollView>
 
+      {drafting || drafted ? (
+        <View style={styles.draftBar} accessibilityLiveRegion="polite">
+          <Compose size={16} color={color.textOnMint} accent={color.brand} />
+          <Text style={styles.draftNote}>
+            {drafting
+              ? 'Kiki is drafting this from what the graph can prove…'
+              : drafted === 'composed'
+                ? 'Drafted from the facts on file (no model was used). Edit it; nothing sends until you do.'
+                : `Drafted by Kiki’s AI${drafted === 'cached' ? ' (a saved run)' : ''} from what the graph can prove. Edit it; nothing sends until you do.`}
+          </Text>
+          {drafted ? <Pressable hitSlop={8} onPress={() => { setText(''); setDrafted(null); }} accessibilityRole="button"><Text style={styles.draftClear}>Clear</Text></Pressable> : null}
+        </View>
+      ) : null}
       <View style={styles.inputBar}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, drafted ? styles.inputDraft : null]}
+          multiline={!!drafted}
           value={text}
           onChangeText={setText}
           placeholder={`Message ${member.name}…`}
@@ -158,6 +190,10 @@ const styles = StyleSheet.create({
   empty: { ...font.body, textAlign: 'center', marginTop: space.xl },
   inputBar: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderTopWidth: 1, borderTopColor: color.hairline, backgroundColor: color.surface },
   input: { flex: 1, backgroundColor: color.bg, borderRadius: radius.pill, borderWidth: 1, borderColor: color.hairline, paddingHorizontal: space.lg, paddingVertical: 13, ...font.body, color: color.ink },
+  draftBar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: space.md, paddingVertical: 9, backgroundColor: color.brandTint, borderTopWidth: 1, borderTopColor: color.hairline },
+  draftNote: { flex: 1, fontSize: 12.5, lineHeight: 17, fontWeight: '600', color: color.textOnMint },
+  draftClear: { fontSize: 12.5, fontWeight: '700', color: color.textOnMint, textDecorationLine: 'underline' },
+  inputDraft: { borderRadius: 18, maxHeight: 180, paddingTop: 12 },
   send: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
   sendDisabled: { opacity: 0.4 },
   sendArrow: { color: '#FFFFFF', fontSize: 22, fontWeight: '700', marginTop: -2 },

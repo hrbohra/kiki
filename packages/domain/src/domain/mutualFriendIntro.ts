@@ -11,6 +11,7 @@
 // Instagram conversations) to generate the same message with real nuance — so the deterministic
 // output and the model prompt sit side by side, honestly labelled.
 
+import { dataBlock, DATA_RULE } from '../ai/task';
 import type { Overlap, Provenance, TraitKind, TrustStory } from './types';
 
 export interface IntroPart {
@@ -137,8 +138,8 @@ export function composeMutualFriendIntro(story: TrustStory): MutualFriendIntro {
 export function mutualFriendPrompt(story: TrustStory): string {
   const facts = {
     host: story.host.name,
-    overlaps: story.overlaps.map((o) => ({ kind: o.kind, fact: o.label, howWeKnow: o.provenance })),
-    mutuals: story.channels.map((c) => ({ name: c.voucher.name, vouch: c.note ?? null })),
+    overlaps: story.overlaps.map((o) => ({ kind: o.kind, fact: o.label, howWeKnow: o.provenance, foundIn: o.source ?? 'profile' })),
+    mutuals: story.channels.map((c) => ({ name: c.voucher.name, leftANote: !!c.note })),
     directlyKnown: story.direct,
     invitedBy: story.inviter?.member.name ?? null,
   };
@@ -150,5 +151,8 @@ export function mutualFriendPrompt(story: TrustStory): string {
     'friend texting, not a marketplace.',
     '',
     `FACTS (only use these):\n${JSON.stringify(facts, null, 2)}`,
+    // vouch notes are written by members: fenced as data, never as instructions
+    ...story.channels.filter((c) => !!c.note?.trim()).map((c) => dataBlock(`vouch note from ${c.voucher.name}`, c.note ?? '')),
+    DATA_RULE,
   ].join('\n');
 }

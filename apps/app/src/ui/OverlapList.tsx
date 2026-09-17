@@ -15,7 +15,12 @@ export function OverlapList({ overlaps }: { overlaps: Overlap[] }) {
         return (
           <View key={`${o.kind}-${i}`} style={styles.item}>
             <View style={styles.icon}><Glyph size={20} color={color.ink} accent={color.brand} /></View>
-            <Text style={styles.label}>{o.label}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>{o.label}</Text>
+              {o.source === 'bio' || o.source === 'guest_book' ? (
+                <Text style={styles.source}>{o.source === 'bio' ? 'Read out of your bios · your own words' : 'Read out of the guest book · we worked it out'}</Text>
+              ) : null}
+            </View>
           </View>
         );
       })}
@@ -36,6 +41,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
   },
   icon: { marginRight: space.md },
-  label: { ...font.body, color: color.ink, flex: 1, fontWeight: '600' },
+  label: { ...font.body, color: color.ink, fontWeight: '600' },
+  source: { fontSize: 11.5, color: color.inkFaint, marginTop: 2 },
   empty: { ...font.caption },
 });

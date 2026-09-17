@@ -8,7 +8,9 @@
 
 import { buildGraph, allShortestPaths, pairKey, type TrustGraph } from './domain/graph';
 import { buildConnectionStory } from './domain/connection';
-import { findOverlaps } from './domain/similarity';
+import { findOverlaps, type MemberTexts } from './domain/similarity';
+import { bundledBio } from './domain/profiles';
+import { bakedBio } from './domain/generated';
 import { tieInfo, tieWeight, rankRoutes, nextRingCount } from './domain/ties';
 import {
   members as fxMembers,
@@ -47,6 +49,8 @@ export interface WorldData {
   contributions: Contribution[];
   nowDay: number;
   viewerId: string;
+  /** Member-written bios by id. Optional: the bundled demo bios are used when a source has none. */
+  bios?: Record<string, string>;
 }
 
 /** The read model + selectors, computed from one graph and one guest-book roll-up. */
@@ -103,6 +107,22 @@ export function createWorld(data: WorldData): World {
   // One vouch per unordered pair; the stored direction carries the note and tie data.
   const vouchIndex = new Map<string, Vouch>(vouches.map((v) => [pairKey(v.from, v.to), v]));
 
+  // The free text similarity reads: a member's own bio, plus what was written about them — as a
+  // host (guest book) and as a guest. Memoised; it is asked for once per pair.
+  const guestReviewsBySubject = groupBy(guestReviews, (g) => g.subjectId);
+  const textCache = new Map<string, MemberTexts>();
+  function textsOf(memberId: string): MemberTexts {
+    const hit = textCache.get(memberId);
+    if (hit) return hit;
+    const bio = data.bios?.[memberId] ?? [bundledBio(memberId), bakedBio(memberId)].filter(Boolean).join(' ');
+    const texts: MemberTexts = {
+      bio: bio || undefined,
+      guestBook: [...(reviewsByHost.get(memberId) ?? []).map((r) => r.text), ...(guestReviewsBySubject.get(memberId) ?? []).map((g) => g.text)],
+    };
+    textCache.set(memberId, texts);
+    return texts;
+  }
+
   function memberById(id: string): Member {
     const m = memberIndex.get(id);
     if (!m) throw new Error(`unknown member ${id}`);
@@ -128,7 +148,7 @@ export function createWorld(data: WorldData): World {
   }
 
   function storyFor(hostId: string): ConnectionStory {
-    return buildConnectionStory(graph, viewerId, hostId);
+    return buildConnectionStory(graph, viewerId, hostId, textsOf);
   }
 
   function degreeToHost(hostId: string): number {
@@ -163,7 +183,7 @@ export function createWorld(data: WorldData): World {
     const viewer = memberById(viewerId);
     return members
       .filter((m) => m.id !== viewerId)
-      .map((m) => ({ member: m, overlaps: findOverlaps(viewer, m) }))
+      .map((m) => ({ member: m, overlaps: findOverlaps(viewer, m, { viewer: textsOf(viewerId), host: textsOf(m.id) }) }))
       .filter((x) => x.overlaps.length > 0)
       .sort((a, b) => b.overlaps.length - a.overlaps.length || a.member.name.localeCompare(b.member.name));
   }
@@ -181,7 +201,7 @@ export function createWorld(data: WorldData): World {
     const degrees = reachable ? routeIds[0].length - 1 : Infinity;
     const routes = routeIds.map((ids) => ids.map(memberById));
     const rankedRoutes: RouteView[] = rankRoutes(routeIds, weightBetween).map((r) => ({ members: r.ids.map(memberById), strengths: r.strengths, dashed: r.dashed, min: r.min }));
-    const overlaps = findOverlaps(memberById(viewerId), host);
+    const overlaps = findOverlaps(memberById(viewerId), host, { viewer: textsOf(viewerId), host: textsOf(hostId) });
 
     const channels: VouchChannel[] = [];
     const seen = new Set<string>();

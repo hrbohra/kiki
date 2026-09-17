@@ -13,14 +13,14 @@ A working build of Kiki, the invite-only sublet club, on its own stack
 ```
 packages/
   domain/      @kiki/domain — pure business logic: types, trust graph, similarity, geo, the
-               mutual-friend intro, the composed "world" read model. No IO, no UI. 49 unit tests.
+               mutual-friend intro, the composed "world" read model. No IO, no UI. 73 unit tests.
   api-client/  @kiki/api-client — the typed tRPC client, compiled against the API's exported
                contract, so a changed endpoint fails the build rather than the user.
   voice/       @kiki/voice — the plug-in port (and blueprint) for giving the AI Kiki's voice.
 apps/
   api/         NestJS backend — Postgres via Prisma, tRPC over HTTP + WebSocket, invite → OTP →
                rotating JWT auth, real-time messaging, media, the AI intro service, a demo reset.
-               Deployed on Render. 5 integration tests against a real database.
+               Deployed on Render. 6 integration tests against a real database.
   app/         One React Native (Expo) source for the native iOS app and the web: phone layouts
                and a wide desktop layout from the same screens. Exported to the web for the demo.
 ```
@@ -35,8 +35,8 @@ pnpm install
 cp .env.example .env               # DATABASE_URL etc.; the model key never enters the client
 pnpm build                         # domain + voice + api (refreshes the typed contract)
 pnpm typecheck
-pnpm --filter @kiki/domain test    # 49 tests, no database needed
-pnpm --filter @kiki/api test       # 5 integration tests against a real Postgres (DATABASE_URL)
+pnpm --filter @kiki/domain test    # 73 tests, no database needed
+pnpm --filter @kiki/api test       # 6 integration tests against a real Postgres (DATABASE_URL)
 pnpm --filter @kiki/app start      # native build via Expo Go, or `expo start --web`
 ```
 

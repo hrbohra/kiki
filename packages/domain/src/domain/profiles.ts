@@ -14,6 +14,15 @@ export interface ProfileDetail {
 }
 
 const DETAILS: Record<string, ProfileDetail> = {
+  you: {
+    bio: 'Product designer from Mount Eden, three years in London. Climbs most weeks, keeps far too many plants alive, and spends Saturdays at a ceramics class. Works from home a couple of days a week and is fussy about good coffee.',
+    memberSince: 'August 2026',
+    languages: ['English'],
+    responds: 'Usually within a day',
+    roomDescription: 'A whole one-bed in De Beauvoir, quiet and full of plants.',
+    amenities: ['Whole place', 'WFH desk', 'Fast Wi-Fi', 'Near tube'],
+    houseNotes: 'Water the plants and we’ll get on.',
+  },
   emma: {
     bio: 'Moved to London from Mount Eden two years ago and hasn’t looked back. Product designer by day, happiest on a bouldering wall or hunting down the quietest café to work from. Away most of September for a wedding back home — which is exactly why the room is free.',
     memberSince: 'July 2025',
@@ -69,6 +78,11 @@ const DETAILS: Record<string, ProfileDetail> = {
     houseNotes: 'Quiet building — please keep evenings calm.',
   },
 };
+
+/** The bio a member wrote, when the bundled demo world has one. Feeds similarity (text signals). */
+export function bundledBio(memberId: string): string | undefined {
+  return DETAILS[memberId]?.bio;
+}
 
 /** Rich profile detail for a host, with an honest fallback for anyone unfixtured. */
 export function profileDetail(memberId: string, area?: string): ProfileDetail {

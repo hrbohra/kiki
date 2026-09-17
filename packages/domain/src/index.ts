@@ -13,12 +13,15 @@ export * from './domain/mutualFriendIntro';
 export * from './domain/profiles';
 export * from './domain/requests';
 export * from './domain/trips';
+export * from './domain/stay';
 export * from './domain/guestRecords';
 export * from './domain/invite';
 export * from './domain/generated';
 export * from './seedWorld';
 
 export * from './pipeline/nlp';
+export * from './pipeline/textSignals';
+export * from './ai';
 export * from './pipeline/tiering';
 
 // The data-source-agnostic composition factory + its types, for building a World from any

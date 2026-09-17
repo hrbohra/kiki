@@ -3,15 +3,15 @@ import { View, Text, Animated, StyleSheet } from 'react-native';
 import { haptic } from './feedback';
 
 import { composeMutualFriendIntro, type IntroPart } from '../domain/mutualFriendIntro';
-import { generateIntroText } from '../demo/introLLM';
+import { useSession } from '../api/session';
 import { color, radius, shadow } from '../theme/tokens';
 import { Compose, Mutual, Vouch, TRAIT_GLYPH } from './glyphs';
 import * as world from '../world';
 
 /**
- * The mutual-friend introduction — Kiki's moat, rendered. The message is composed from the trust
- * graph's overlap data (deterministic today; a tone-trained model drops in behind the same shape
- * tomorrow). It reveals like a friend texting you the intro, then shows *why* it can say each
+ * The mutual-friend introduction — Kiki's moat, rendered. The deterministic composition paints
+ * first; the server's intro task (live model → saved run → baked → composed, see the API's
+ * AiRunner) replaces it, and the pill says which one spoke. It reveals like a friend texting you the intro, then shows *why* it can say each
  * thing (provenance) and *which* first-host anxieties it answers (uncertainty reduction, visible).
  */
 export function MutualFriendIntro({ hostId }: { hostId: string }) {
@@ -19,7 +19,8 @@ export function MutualFriendIntro({ hostId }: { hostId: string }) {
   const intro = composeMutualFriendIntro(story);
   const [writing, setWriting] = useState(true);
   const [paragraph, setParagraph] = useState(intro.paragraph);
-  const [live, setLive] = useState(false);
+  const { api } = useSession();
+  const [source, setSource] = useState<'live' | 'cached' | 'baked' | 'composed'>('composed');
   const fade = useRef(new Animated.Value(0)).current;
   const dots = useRef(new Animated.Value(0.35)).current;
 
@@ -37,12 +38,15 @@ export function MutualFriendIntro({ hostId }: { hostId: string }) {
     );
     loop.start();
     const started = Date.now();
-    generateIntroText(story).then(({ text, live: isLive }) => {
+    api.ai.intro.query({ hostId })
+      .then((r) => ({ text: r.text, source: r.source }))
+      .catch(() => ({ text: intro.paragraph, source: 'composed' as const }))
+      .then(({ text, source: from }) => {
       const wait = Math.max(0, 950 - (Date.now() - started));
       setTimeout(() => {
         if (!alive) return;
         setParagraph(text);
-        setLive(isLive);
+        setSource(from);
         setWriting(false);
         haptic.land(); // the answer lands — a single, meaningful tick
         loop.stop();
@@ -59,7 +63,7 @@ export function MutualFriendIntro({ hostId }: { hostId: string }) {
         <Text style={styles.title}>How you know {intro.greeting.split(' ')[0]}</Text>
         <View style={styles.draftPill}>
           <Compose size={16} color={color.textOnMint} accent={color.brand} />
-          <Text style={styles.draftText}>{live ? 'AI intro · live' : 'Draft intro'}</Text>
+          <Text style={styles.draftText}>{source === 'live' ? 'AI intro · live' : source === 'cached' ? 'AI intro · saved run' : source === 'baked' ? 'AI intro · baked' : 'Composed from the facts'}</Text>
         </View>
       </View>
 

@@ -119,6 +119,8 @@ export interface Overlap {
   kind: TraitKind;
   label: string; // "You both moved to London from New Zealand"
   provenance: Provenance; // how we know it — mandatory, so an unsourced inference can't render
+  /** Where the shared ground was found: typed profile facts, a bio, or what guests wrote. Absent = profile. */
+  source?: 'profile' | 'bio' | 'guest_book';
 }
 
 /** One shortest route viewer → host, with the measured weight of every hop (the ring graph draws these). */

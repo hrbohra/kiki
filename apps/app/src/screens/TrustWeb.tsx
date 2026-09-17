@@ -10,6 +10,7 @@ import { ConnectionRings } from '../ui/trust/ConnectionRings';
 import { photoFor } from '../ui/listingPhotos';
 import { relRange } from '../domain/relDates';
 import { stayLength } from '../domain/stay';
+import { draftOptions, type DraftKind } from '@kiki/domain';
 import { MutualFriendIntro } from '../ui/MutualFriendIntro';
 import { GuestColumn } from './web/GuestColumn';
 import { GraphModal } from './web/GraphModal';
@@ -131,7 +132,11 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
                 ) : story.direct ? (
                   <DirectCenter story={story} host={host} listing={listing} guestBook={guestBook} c={c} inferOpen={inferOpen} setInferOpen={setInferOpen} onRoute={() => setRouteOpen(true)} />
                 ) : (
-                  <ColdCenter story={story} host={host} notify={notify} />
+                  <ColdCenter
+                    story={story} host={host}
+                    options={draftOptions(reader ?? perspective, req.nights)}
+                    onDraft={(kind: DraftKind) => navigation.navigate('Thread', { memberId: hostId, draft: { kind, as: reader ?? perspective, nights: req.nights } })}
+                  />
                 )}
               </>
             )}
@@ -221,7 +226,7 @@ function DirectCenter({ story, host, listing, guestBook, c, inferOpen, setInferO
 }
 
 // ---- COLD ------------------------------------------------------------------
-function ColdCenter({ story, host, notify }: any) {
+function ColdCenter({ story, host, options, onDraft }: any) {
   const g = story.guestTrackRecord[0];
   return (
     <>
@@ -259,11 +264,12 @@ function ColdCenter({ story, host, notify }: any) {
         <View style={styles.nextCard}>
           <Text style={styles.nextTitle}>You don't have to decide on this today</Text>
           <Text style={styles.nextLead}>Plenty of good matches start out cold. A few things that help:</Text>
-          {['Let us introduce you properly', 'Have a quick call before you say yes', 'Offer them 1 night instead of 3'].map((t) => (
-            <Pressable key={t} style={({ pressed }) => [styles.nextRow, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => notify(t)}>
-              <Text style={styles.nextRowText}>{t} ›</Text>
+          {(options as { kind: DraftKind; label: string }[]).map((o) => (
+            <Pressable key={o.kind} style={({ pressed }) => [styles.nextRow, pressed && { transform: [{ scale: 0.99 }] }]} onPress={() => onDraft(o.kind)} accessibilityRole="button" accessibilityHint="Kiki drafts the message; you edit and send it">
+              <Text style={styles.nextRowText}>{o.label} ›</Text>
             </Pressable>
           ))}
+          <Text style={{ fontSize: 12.5, lineHeight: 18, color: color.inkFaint, marginTop: 6 }}>Kiki drafts the message from what it can prove about you both. You read it, change it, and send it yourself.</Text>
         </View>
       </View>
     </>
@@ -324,7 +330,8 @@ function DigestCell({ label, value, note }: { label: string; value: string; note
 }
 function inferences(overlaps: Overlap[]) {
   const src: Record<string, string> = { inferred: 'From our own event list. You might have met.', self_declared: "You both typed that yourselves. We haven't checked it.", matched: 'An exact match on file.' };
-  return overlaps.filter((o) => o.kind === 'origin' || o.kind === 'education' || o.kind === 'event').map((o) => ({ claim: o.label, source: src[o.provenance] }));
+  const textSrc = { bio: 'Read out of your bios. Your own words; we only matched the topic.', guest_book: 'Read out of the guest book. We worked it out from what guests wrote.' } as const;
+  return overlaps.filter((o) => o.kind === 'origin' || o.kind === 'education' || o.kind === 'event').map((o) => ({ claim: o.label, source: o.source === 'bio' || o.source === 'guest_book' ? textSrc[o.source] : src[o.provenance] }));
 }
 function gapRows(story: TrustStory, c: { gapRole: string }): string[] {
   const host = story.host.name;

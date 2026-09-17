@@ -14,6 +14,8 @@ export const listingsRouter = router({
     const world = await ctx.world.world();
     return world
       .allListings()
+      // your own place is not something you explore (the seeded viewer hosts one)
+      .filter((listing) => listing.hostId !== world.viewerId)
       .map((listing) => ({
         listing,
         host: world.hostOf(listing),

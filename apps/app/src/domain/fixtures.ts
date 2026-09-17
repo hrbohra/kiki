@@ -118,7 +118,7 @@ export const availableTags = TAGS;
 export const reviews: Review[] = [
   { id: 'r1', hostId: 'emma', authorId: 'bella', listingId: 'l-emma', day: 360, text: 'Maia was absolutely lovely and welcoming. The room was spotless and I felt so safe the whole stay. Would host her again in a heartbeat.' },
   { id: 'r2', hostId: 'emma', authorId: 'sophie', listingId: 'l-emma', day: 320, text: 'Such a warm, thoughtful host. Great communication and a really central location. Felt like a friend by the end.' },
-  { id: 'r3', hostId: 'emma', authorId: 'amy', listingId: 'l-emma', day: 280, text: 'Clean, comfortable and easy from start to finish. She looked after everything. A real gem.' },
+  { id: 'r3', hostId: 'emma', authorId: 'amy', listingId: 'l-emma', day: 280, text: 'Clean, comfortable and easy from start to finish. She looked after everything, and the plants alone are worth the visit. A real gem.' },
   { id: 'r4', hostId: 'emma', authorId: 'theo', listingId: 'l-emma', day: 150, text: 'Nice room and good location, though the wifi was a bit slow for working. Still a lovely stay overall.' },
 
   { id: 'r5', hostId: 'katelin', authorId: 'amy', listingId: 'l-katelin', day: 300, text: 'Katelin is so kind and generous. Spotless flat, responsive to every message, home away from home.' },

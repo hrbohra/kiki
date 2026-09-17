@@ -8,6 +8,7 @@ import type { GuestBookService } from '../writes/guestbook.service';
 import type { MessagingService } from '../messaging/messaging.service';
 import type { MediaService } from '../media/media.service';
 import type { IntroService } from '../ai/intro.service';
+import type { DraftService } from '../ai/draft.service';
 import type { Context } from './trpc';
 
 export interface ContextDeps {
@@ -19,6 +20,7 @@ export interface ContextDeps {
   messaging: MessagingService;
   media: MediaService;
   ai: IntroService;
+  drafts: DraftService;
 }
 
 /** HTTP context: resolves the user from the Authorization header. */

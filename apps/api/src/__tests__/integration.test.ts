@@ -16,6 +16,8 @@ import { InMemoryMessageBus } from '../messaging/message-bus';
 import { MediaService } from '../media/media.service';
 import { LocalDiskStorage } from '../media/storage';
 import { IntroService } from '../ai/intro.service';
+import { DraftService } from '../ai/draft.service';
+import { AiRunner } from '../ai/ai-runner.service';
 import { PromptComposer } from '../ai/prompt-composer';
 import { PromptInjectionVoiceProvider } from '../ai/voice.provider';
 import { GeminiProvider } from '../ai/llm.provider';
@@ -37,7 +39,9 @@ function buildDeps() {
   const guestbook = new GuestBookService(prisma, idem, world);
   const messaging = new MessagingService(prisma, world, new InMemoryMessageBus());
   const media = new MediaService(prisma, world, new LocalDiskStorage('.uploads', 'http://localhost:4000'));
-  const ai = new IntroService(prisma, world, new PromptComposer(new PromptInjectionVoiceProvider()), new GeminiProvider());
+  const runner = new AiRunner(prisma, new PromptComposer(new PromptInjectionVoiceProvider()), new GeminiProvider());
+  const ai = new IntroService(world, runner);
+  const drafts = new DraftService(prisma, world, runner);
   return {
     world,
     auth,
@@ -47,6 +51,7 @@ function buildDeps() {
     messaging,
     media,
     ai,
+    drafts,
   };
 }
 
@@ -83,6 +88,18 @@ describe('ai intro (offline fallback)', () => {
     const res = await caller(null).ai.intro({ hostId: 'emma' });
     expect(res.text.length).toBeGreaterThan(20);
     expect(['baked', 'composed', 'cached']).toContain(res.source);
+  });
+});
+
+describe('ai drafts (cold state)', () => {
+  it('drafts a message from the writer’s own vantage point, and only for a signed-in member', async () => {
+    await expect(caller(null).ai.draft({ kind: 'introduce', memberId: 'priya', as: 'host', nights: 14 })).rejects.toThrow();
+    const you = await (prisma as unknown as PrismaClient).user.findUniqueOrThrow({ where: { email: 'you@kiki.demo' } });
+    const res = await caller({ id: you.id, email: you.email }).ai.draft({ kind: 'shorter', memberId: 'priya', as: 'host', nights: 14 });
+    expect(res.task).toBe('draft.shorter');
+    expect(res.text).toContain('Priya');
+    expect(res.text.toLowerCase()).toContain('1 week');
+    expect(['live', 'cached', 'composed']).toContain(res.source);
   });
 });
 

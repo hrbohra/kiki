@@ -7,7 +7,8 @@ export type RootStackParamList = {
   HostProfile: { listingId: string };
   Connection: { hostId: string };
   GuestBook: { hostId: string };
-  Thread: { memberId: string };
+  /** draft: open the composer pre-filled with a Kiki-drafted message (the cold-state card). Nothing sends until the member does. */
+  Thread: { memberId: string; draft?: { kind: 'introduce' | 'call' | 'shorter'; as: 'host' | 'guest'; nights?: number } };
   /** as: who is reading (derived from the entry, not a toggle). requestId: set when a host opens a guest from Requests. */
   Trust: { hostId: string; as?: 'host' | 'guest'; requestId?: string };
   Onboard: undefined;

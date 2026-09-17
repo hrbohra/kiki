@@ -1,5 +1,5 @@
 import { buildGraph, pairKey, shortestPath, type TrustGraph } from './graph';
-import { findOverlaps } from './similarity';
+import { findOverlaps, type MemberTexts } from './similarity';
 import type { ConnectionStory, Member, Vouch } from './types';
 
 /**
@@ -13,6 +13,7 @@ export function buildConnectionStory(
   graph: TrustGraph,
   viewerId: string,
   hostId: string,
+  textsOf?: (memberId: string) => MemberTexts,
 ): ConnectionStory {
   const viewer = graph.members.get(viewerId);
   const host = graph.members.get(hostId);
@@ -21,7 +22,7 @@ export function buildConnectionStory(
   }
 
   const ids = shortestPath(graph, viewerId, hostId);
-  const overlaps = findOverlaps(viewer, host);
+  const overlaps = findOverlaps(viewer, host, textsOf ? { viewer: textsOf(viewerId), host: textsOf(hostId) } : undefined);
 
   if (!ids) {
     // No vouch chain yet: still show overlaps so a brand-new member isn't a dead end.
