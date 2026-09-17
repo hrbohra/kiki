@@ -13,6 +13,9 @@ build/
 .env.*
 !.env.example
 
+# generated club-sized world (regenerate with `pnpm --filter @kiki/api seed:world`)
+apps/api/import/world.seed.json
+
 # expo / rn
 .expo/
 web-build/

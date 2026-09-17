@@ -9,6 +9,7 @@
 import { buildGraph, allShortestPaths, pairKey, type TrustGraph } from './domain/graph';
 import { buildConnectionStory } from './domain/connection';
 import { findOverlaps } from './domain/similarity';
+import { tieInfo, tieWeight, rankRoutes, nextRingCount } from './domain/ties';
 import {
   members as fxMembers,
   vouches as fxVouches,
@@ -29,6 +30,7 @@ import type {
   Review,
   TieInfo,
   TrustStory,
+  RouteView,
   Vouch,
   VouchChannel,
 } from './domain/types';
@@ -156,18 +158,11 @@ export function createWorld(data: WorldData): World {
       .sort((a, b) => b.overlaps.length - a.overlaps.length || a.member.name.localeCompare(b.member.name));
   }
 
+  /** Measured tie strength (stays, events, how the tie came to exist, recency) — see ties.ts. */
   function tieOf(v: Vouch | undefined): TieInfo {
-    const stays = v?.stays ?? 0;
-    const events = v?.sharedEvents ?? 0;
-    const strength = Math.max(1, Math.min(3, stays + (events > 0 ? 1 : 0))) as 1 | 2 | 3;
-    const reason =
-      stays > 0
-        ? `Has stayed with you ${stays === 1 ? 'once' : `${stays} times`}.`
-        : events > 0
-          ? 'One Kiki event together.'
-          : 'A direct connection of yours.';
-    return { strength, reason };
+    return tieInfo(v, nowDay);
   }
+  const weightBetween = (a: string, b: string) => tieWeight(vouchIndex.get(pairKey(a, b)), nowDay);
 
   function trustStoryFor(hostId: string): TrustStory {
     const host = memberById(hostId);
@@ -175,6 +170,7 @@ export function createWorld(data: WorldData): World {
     const reachable = routeIds.length > 0;
     const degrees = reachable ? routeIds[0].length - 1 : Infinity;
     const routes = routeIds.map((ids) => ids.map(memberById));
+    const rankedRoutes: RouteView[] = rankRoutes(routeIds, weightBetween).map((r) => ({ members: r.ids.map(memberById), strengths: r.strengths, dashed: r.dashed, min: r.min }));
     const overlaps = findOverlaps(memberById(viewerId), host);
 
     const channels: VouchChannel[] = [];
@@ -221,6 +217,8 @@ export function createWorld(data: WorldData): World {
       directLink,
       channels,
       routes,
+      rankedRoutes,
+      nextRingCount: reachable ? nextRingCount(graph, viewerId, hostId) : 0,
       overlaps,
       consentNames: channels.map((c) => c.voucher.name),
       inviter,

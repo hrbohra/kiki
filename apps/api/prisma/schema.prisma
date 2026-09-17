@@ -96,6 +96,7 @@ model Vouch {
   consentToDisplay Boolean @default(false)
   stays            Int?
   sharedEvents     Int?
+  kind             String? // invite | event | friend | stay — how the tie came to exist
 
   from Member @relation("vouchFrom", fields: [fromId], references: [id], onDelete: Cascade)
   to   Member @relation("vouchTo", fields: [toId], references: [id], onDelete: Cascade)

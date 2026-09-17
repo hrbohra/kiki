@@ -85,15 +85,15 @@ export const members: Member[] = [
 // Undirected reachability; direction + note describe who vouched and why. Tie fields (stays,
 // sharedEvents) measure how well the VIEWER knows their direct connections — never a guess.
 export const vouches: Vouch[] = [
-  { from: 'you', to: 'bella', stays: 2, sharedEvents: 1 }, // Nina has stayed with you twice
+  { from: 'you', to: 'bella', stays: 2, sharedEvents: 1, kind: 'stay' }, // Nina has stayed with you twice
   { from: 'bella', to: 'emma', note: 'She put Iris up for a week and left the place spotless.', noteSubject: 'Iris', consentToDisplay: true },
-  { from: 'you', to: 'sophie', stays: 0, sharedEvents: 1 }, // one Kiki picnic together
+  { from: 'you', to: 'sophie', stays: 0, sharedEvents: 1, kind: 'event' }, // one Kiki picnic together
   { from: 'sophie', to: 'emma', consentToDisplay: true },
-  { from: 'you', to: 'amy' },
+  { from: 'you', to: 'amy', kind: 'invite' }, // you brought Amy in
   { from: 'amy', to: 'katelin', note: 'Amy stayed with Katelin last summer' },
   { from: 'katelin', to: 'ollie' },
-  { from: 'katelin', to: 'priya', note: 'Katelin brought Priya into Kiki', consentToDisplay: true },
-  { from: 'you', to: 'danica', note: 'You matched with Danica in April' },
+  { from: 'katelin', to: 'priya', note: 'Katelin brought Priya into Kiki', consentToDisplay: true, kind: 'invite' },
+  { from: 'you', to: 'danica', note: 'You matched with Danica in April', kind: 'stay' },
   { from: 'sophie', to: 'theo' },
   { from: 'theo', to: 'lena' },
   { from: 'bella', to: 'nate' },

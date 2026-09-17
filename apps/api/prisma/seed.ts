@@ -83,6 +83,7 @@ async function main(): Promise<void> {
         consentToDisplay: v.consentToDisplay ?? false,
         stays: v.stays ?? null,
         sharedEvents: v.sharedEvents ?? null,
+        kind: v.kind ?? null,
       },
     });
   }

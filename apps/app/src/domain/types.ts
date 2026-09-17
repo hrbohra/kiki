@@ -54,6 +54,10 @@ export interface Vouch {
   /** Tie-strength inputs — measured, never a guessed closeness score. */
   stays?: number; // times `from` has stayed with the viewer
   sharedEvents?: number; // Kiki events attended together
+  /** How the tie came to exist, when known: the invite that let someone in, an event, a friendship, a completed stay. */
+  kind?: 'invite' | 'event' | 'friend' | 'stay';
+  /** Day index the tie was last active (a stay ended, an event happened). Drives recency decay; absent = no decay. */
+  day?: number;
 }
 
 /** A listing a member is offering while away. */
@@ -115,6 +119,14 @@ export interface Overlap {
   provenance: Provenance; // how we know it — mandatory, so an unsourced inference can't render
 }
 
+/** One shortest route viewer → host, with the measured weight of every hop (the ring graph draws these). */
+export interface RouteView {
+  members: Member[]; // viewer … host
+  strengths: (1 | 2 | 3)[]; // per hop
+  dashed: boolean[]; // per hop: the tie exists but nothing is measured on it
+  min: number; // weakest hop — a chain is as strong as its weakest link
+}
+
 /** Strength of the viewer's tie to one of their direct connections (a vouching mutual). */
 export interface TieInfo {
   strength: 1 | 2 | 3; // measured from stays + shared events, never guessed
@@ -147,6 +159,8 @@ export interface TrustStory {
   directLink?: { note?: string; tie: TieInfo }; // your own tie to them, when direct
   channels: VouchChannel[]; // consenting vouching mutuals (the warm case)
   routes: Member[][]; // all shortest routes viewer → host (for the ring graph)
+  rankedRoutes: RouteView[]; // the same routes, weighted per hop and ranked (weakest hop, then total)
+  nextRingCount: number; // people who know the host that you don’t — shown as a count before it is drawn
   overlaps: Overlap[]; // shared facts, each with provenance
   consentNames: string[]; // names of members shown with consent
   inviter?: { member: Member; degrees: number }; // cold: the far member who let them in

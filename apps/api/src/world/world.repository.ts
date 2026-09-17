@@ -3,6 +3,7 @@ import {
   VIEWER_ID,
   WORLD_NOW_DAY,
   type Listing,
+  type Vouch,
   type WorldData,
 } from '@kiki/domain';
 import { PrismaService } from '../prisma/prisma.service';
@@ -66,6 +67,7 @@ export class WorldRepository {
         consentToDisplay: v.consentToDisplay,
         stays: v.stays ?? undefined,
         sharedEvents: v.sharedEvents ?? undefined,
+        kind: (v.kind ?? undefined) as Vouch['kind'],
       })),
       listings: listings.map((l) => ({
         id: l.id,

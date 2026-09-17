@@ -5,6 +5,7 @@
 export * from './domain/types';
 export * from './domain/fixtures';
 export * from './domain/graph';
+export * from './domain/ties';
 export * from './domain/connection';
 export * from './domain/similarity';
 export * from './domain/geo';
@@ -15,6 +16,7 @@ export * from './domain/trips';
 export * from './domain/guestRecords';
 export * from './domain/invite';
 export * from './domain/generated';
+export * from './seedWorld';
 
 export * from './pipeline/nlp';
 export * from './pipeline/tiering';

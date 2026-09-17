@@ -6,6 +6,7 @@
 //
 // PRIVACY: anonymise/strip PII BEFORE import for anything user-facing beyond what the product shows.
 // The corpus of conversations is NEVER imported here — it is voice-only (see VOICE_PIPELINE.md).
+// A club-sized synthetic file in this exact format comes from `pnpm --filter @kiki/api seed:world`.
 import { readFileSync } from 'node:fs';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -48,6 +49,7 @@ const VouchSchema = z.object({
   consentToDisplay: z.boolean().optional(),
   stays: z.number().int().optional(),
   sharedEvents: z.number().int().optional(),
+  kind: z.enum(['invite', 'event', 'friend', 'stay']).optional(),
 });
 
 const ReviewSchema = z.object({
@@ -59,11 +61,20 @@ const ReviewSchema = z.object({
   day: z.number().int(),
 });
 
+const GuestReviewSchema = z.object({
+  id: z.string(),
+  subjectId: z.string(),
+  authorId: z.string(),
+  text: z.string(),
+  day: z.number().int(),
+});
+
 const ImportSchema = z.object({
   members: z.array(MemberSchema).default([]),
   listings: z.array(ListingSchema).default([]),
   vouches: z.array(VouchSchema).default([]),
   reviews: z.array(ReviewSchema).default([]),
+  guestReviews: z.array(GuestReviewSchema).default([]),
 });
 
 async function main() {
@@ -101,7 +112,7 @@ async function main() {
   for (const v of parsed.vouches) {
     const data = {
       note: v.note ?? null, noteSubject: v.noteSubject ?? null,
-      consentToDisplay: v.consentToDisplay ?? false, stays: v.stays ?? null, sharedEvents: v.sharedEvents ?? null,
+      consentToDisplay: v.consentToDisplay ?? false, stays: v.stays ?? null, sharedEvents: v.sharedEvents ?? null, kind: v.kind ?? null,
     };
     await prisma.vouch.upsert({
       where: { fromId_toId: { fromId: v.from, toId: v.to } },
@@ -115,11 +126,17 @@ async function main() {
     await prisma.review.upsert({ where: { id: r.id }, update: data, create: { id: r.id, ...data } });
   }
 
+  for (const g of parsed.guestReviews) {
+    const data = { subjectId: g.subjectId, authorId: g.authorId, text: g.text, day: g.day };
+    await prisma.guestReview.upsert({ where: { id: g.id }, update: data, create: { id: g.id, ...data } });
+  }
+
   console.log('Import complete:', {
     members: parsed.members.length,
     listings: parsed.listings.length,
     vouches: parsed.vouches.length,
     reviews: parsed.reviews.length,
+    guestReviews: parsed.guestReviews.length,
   });
   await prisma.$disconnect();
 }
