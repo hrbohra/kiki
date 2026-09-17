@@ -33,7 +33,9 @@ export class GeminiProvider implements LlmProvider {
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: req.system }] },
             contents: [{ parts: [{ text: req.user }] }],
-            generationConfig: { temperature: 0.8, maxOutputTokens: 400 },
+            // Headroom matters: a reasoning model spends output tokens thinking before it writes, and a
+            // tight cap returns half a sentence. Tasks are short; the cap is only a ceiling.
+            generationConfig: { temperature: 0.8, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 512 } },
           }),
         },
       );
@@ -42,9 +44,15 @@ export class GeminiProvider implements LlmProvider {
         return null;
       }
       const data = (await res.json()) as {
-        candidates?: { content?: { parts?: { text?: string }[] } }[];
+        candidates?: { finishReason?: string; content?: { parts?: { text?: string }[] } }[];
       };
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      // A generation that hit the token ceiling is cut mid-thought: treat it as no answer, so the
+      // caller falls back, rather than handing a truncated sentence to the guard or the cache.
+      if (data.candidates?.[0]?.finishReason === 'MAX_TOKENS') {
+        this.log.warn('Gemini hit the output ceiling; treating as no answer.');
+        return null;
+      }
+      const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('').trim();
       return text && text.length > 0 ? text : null;
     } catch (err) {
       this.log.warn(`Gemini call failed: ${String(err)}`);

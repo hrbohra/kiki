@@ -40,7 +40,7 @@ export function buildDraftFacts(story: TrustStory, kind: DraftKind, as: DraftAs,
   const unknowns: string[] = [];
   if (!story.warm && !story.direct) unknowns.push('nobody the writer knows has met the recipient');
   if (!story.guestTrackRecord.length) unknowns.push('the recipient has no record as a guest on Kiki');
-  const memberText = story.guestTrackRecord.slice(0, 2).map((g) => ({ label: `guest-book entry by ${first(g.author.name)}`, text: g.text }));
+  const memberText = story.guestTrackRecord.slice(0, 2).map((g) => ({ label: `guest-book entry: what ${first(g.author.name)}, a past host, wrote about ${first(story.host.name)} as a guest`, text: g.text }));
   return {
     kind,
     as,
@@ -51,7 +51,9 @@ export function buildDraftFacts(story: TrustStory, kind: DraftKind, as: DraftAs,
     sharedGround: story.overlaps.slice(0, 3).map((o) => asWe(o.label)),
     trackRecordCount: story.guestTrackRecord.length,
     stay: nights ? stayLength(nights) : null,
-    shorter: nights ? stayLength(shorterStay(nights)) : null,
+    // a fact the task does not need is a fact the model will find a use for: only the
+    // shorter-stay draft is told there is a shorter stay
+    shorter: nights && kind === 'shorter' ? stayLength(shorterStay(nights)) : null,
     unknowns,
     memberText,
   };
@@ -120,7 +122,7 @@ function composeFor(f: DraftFacts): string {
 }
 
 function draftTask(kind: DraftKind): AiTask<DraftFacts> {
-  return { id: `draft.${kind}`, version: 1, instructions: instructionsFor(kind), prompt: promptFor, guard: guardFor, compose: composeFor };
+  return { id: `draft.${kind}`, version: 2, instructions: instructionsFor(kind), prompt: promptFor, guard: guardFor, compose: composeFor };
 }
 
 export const DRAFT_TASKS: Record<DraftKind, AiTask<DraftFacts>> = {

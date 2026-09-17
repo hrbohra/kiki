@@ -152,7 +152,12 @@ export function mutualFriendPrompt(story: TrustStory): string {
     '',
     `FACTS (only use these):\n${JSON.stringify(facts, null, 2)}`,
     // vouch notes are written by members: fenced as data, never as instructions
-    ...story.channels.filter((c) => !!c.note?.trim()).map((c) => dataBlock(`vouch note from ${c.voucher.name}`, c.note ?? '')),
+    `The person being introduced is ${story.host.name}. Name them. Nobody else mentioned below is being introduced.`,
+    // a note can mention a third person ("She put Iris up for a week"): say so, or the model introduces Iris
+    ...story.channels.filter((c) => !!c.note?.trim()).map((c) => dataBlock(
+      `vouch note from ${c.voucher.name} about ${story.host.name}${c.noteSubject ? `. It mentions ${c.noteSubject}, who is a different person from ${story.host.name}` : ''}`,
+      c.note ?? '',
+    )),
     DATA_RULE,
   ].join('\n');
 }
