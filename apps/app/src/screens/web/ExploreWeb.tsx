@@ -90,8 +90,8 @@ export function ExploreWeb() {
           </View>
         ) : (
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No homes match those filters.</Text>
-            <Text style={styles.emptyHint}>Turn one off to widen the search.</Text>
+            <Text style={styles.emptyText}>Nobody within three steps is listing anything like that.</Text>
+            <Text style={styles.emptyHint}>Turn a filter off to widen the search, or invite a friend and the map grows.</Text>
             <Pressable style={styles.clearBtn} onPress={() => { setConnected(false); setTags(new Set()); setVibes(new Set()); }}><Text style={styles.clearBtnText}>Clear filters</Text></Pressable>
           </View>
         )

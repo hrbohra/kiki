@@ -58,6 +58,16 @@ export function RequestsIcon({ color, size = 22 }: IconProps) {
   );
 }
 
+/** Notifications — bell. */
+export function BellIcon({ color, size = 22 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M6 16 v-5 a6 6 0 0 1 12 0 v5 l1.5 2 H4.5 z" {...common} stroke={color} />
+      <Path d="M10 20 a2 2 0 0 0 4 0" {...common} stroke={color} />
+    </Svg>
+  );
+}
+
 /** Me — bust. */
 export function MeIcon({ color, size = 22 }: IconProps) {
   return (

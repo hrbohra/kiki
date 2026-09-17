@@ -10,6 +10,7 @@ import { useResponsive } from '../../ui/useResponsive';
 import { useSession } from '../../api/session';
 import { useWorldRefresh } from '../../api/world-provider';
 import { INVITE, ONBOARD_FACTS, ONBOARD_STEPS } from '../../domain/invite';
+import { COVERS } from '../../domain/covers';
 import { setOnboarded } from '../../demo/onboarding';
 import { color } from '../../theme/tokens';
 import * as world from '../../world';
@@ -23,9 +24,9 @@ const FACT_GLYPH: Record<OnboardFactKind, ComponentType<GlyphProps>> = {
 import type { RootNav } from '../../navigation';
 
 /**
- * First-run invite / onboarding. Four steps, and the governing idea is that the invite is a
- * person, not a code — so the inviter leads, and the honest step (what this costs you) is given
- * the same weight as the welcome. Reachable again from the Me page's "How you got in" card.
+ * First-run invite / onboarding. Five steps, and the governing idea is that the invite is a
+ * person, not a code — so the inviter leads, the honest step (what this costs you) is given the
+ * same weight as the welcome, and what Kiki carries follows it in the same card grammar. Reachable again from the Me page's "How you got in" card.
  */
 export function OnboardingWeb() {
   const navigation = useNavigation<RootNav>();
@@ -136,6 +137,21 @@ export function OnboardingWeb() {
                   ))}
                 </View>
               </View>
+            ) : step === 3 ? (
+              <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
+                <Text style={styles.eyebrow}>{COVERS.eyebrow}</Text>
+                <Text style={styles.h1}>{COVERS.title}</Text>
+                <Text style={styles.body}>{COVERS.sub}</Text>
+                <View style={{ gap: 12, alignSelf: 'stretch' }}>
+                  {COVERS.items.map((c) => (
+                    <View key={c.title} style={styles.coverCard}>
+                      <Text style={styles.coverTitle}>{c.title}</Text>
+                      <Text style={styles.coverBody}>{c.body}</Text>
+                    </View>
+                  ))}
+                </View>
+                <Text style={styles.footNote}>{COVERS.footnote}</Text>
+              </View>
             ) : (
               <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <View style={styles.doneCircle}><Loop size={24} color={color.brand} opacity={1} strokeWidth={9} /></View>
@@ -230,6 +246,9 @@ const styles = StyleSheet.create({
   stakeRule: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: color.caveat },
   stakeText: { fontSize: 15, lineHeight: 22, color: color.ink },
 
+  coverCard: { backgroundColor: color.surface, borderRadius: 22, padding: 16, borderWidth: 1, borderColor: color.hairline, alignSelf: 'stretch', gap: 4 },
+  coverTitle: { fontSize: 16, fontWeight: '700', color: color.ink },
+  coverBody: { fontSize: 14, lineHeight: 20, color: color.inkSoft },
   doneCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.brandTint, alignItems: 'center', justifyContent: 'center' },
   statList: { alignSelf: 'stretch', gap: 10 },
   statRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },

@@ -66,6 +66,16 @@ export interface World {
   viewerFriendNames(exclude?: string[]): string[];
   peopleLikeYou(): { member: Member; overlaps: Overlap[] }[];
   trustStoryFor(hostId: string): TrustStory;
+  /** The viewer's invite branch, depth 1: who they brought in, with what each has done since. */
+  inviteBranch(): InviteBranchEntry[];
+}
+
+export interface InviteBranchEntry {
+  member: Member;
+  hosted: number;
+  stays: number;
+  invited: number; // people who came in through them
+  tier: MemberStanding['tier'];
 }
 
 function groupBy<T, K>(items: T[], key: (t: T) => K): Map<K, T[]> {
@@ -226,6 +236,19 @@ export function createWorld(data: WorldData): World {
     };
   }
 
+  function inviteBranch(): InviteBranchEntry[] {
+    const count = (id: string, kind: Contribution['kind']) => (contributionsByMember.get(id) ?? []).filter((c) => c.kind === kind).length;
+    return vouches
+      .filter((v) => v.kind === 'invite' && v.from === viewerId && memberIndex.has(v.to))
+      .map((v) => ({
+        member: memberById(v.to),
+        hosted: count(v.to, 'hosted'),
+        stays: count(v.to, 'stayed'),
+        invited: vouches.filter((x) => x.kind === 'invite' && x.from === v.to).length,
+        tier: standingOf(v.to).tier,
+      }));
+  }
+
   return {
     viewerId,
     graph,
@@ -242,6 +265,7 @@ export function createWorld(data: WorldData): World {
     viewerFriendNames,
     peopleLikeYou,
     trustStoryFor,
+    inviteBranch,
   };
 }
 
@@ -272,5 +296,6 @@ export const leaderboard = demo.leaderboard;
 export const viewerFriendNames = demo.viewerFriendNames;
 export const peopleLikeYou = demo.peopleLikeYou;
 export const trustStoryFor = demo.trustStoryFor;
+export const inviteBranch = demo.inviteBranch;
 
 export type { Contribution };

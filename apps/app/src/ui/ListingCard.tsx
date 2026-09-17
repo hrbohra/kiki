@@ -37,6 +37,7 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
     <PressableScale
       onPress={onOpen}
       accessibilityRole="button"
+      accessibilityLabel={`${listing.title}, ${listing.area.split(',')[0]}, ${stripText.replace(/^Vouched for by/, 'vouched for by').replace(/^You know/, 'you know')}, £${listing.pricePerNight} a night`}
       style={[styles.card, shadow.card]}
     >
       <View style={styles.header}>

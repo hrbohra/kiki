@@ -3,6 +3,7 @@ import { View, ActivityIndicator, Text, Pressable, StyleSheet } from 'react-nati
 import type { WorldData } from '@kiki/domain';
 import { useSession } from './session';
 import { setWorldData, isReady } from '../world';
+import { members, vouches, listings, reviews, guestReviews, contributions, WORLD_NOW_DAY, VIEWER_ID } from '../domain/fixtures';
 import { color, font, space } from '../theme/tokens';
 
 interface WorldCtx {
@@ -12,12 +13,16 @@ interface WorldCtx {
 
 const Ctx = createContext<WorldCtx | null>(null);
 
-/** Loads the world snapshot from the API once (per signed-in member) and feeds it into the world
- *  facade, then renders the app. `refresh()` re-pulls after a write so reads reflect it. */
+/** Feeds the world facade and renders the app. The bundled seed paints immediately (Explore is on
+ *  screen well inside a second from a cold tab); the live API snapshot replaces it as soon as it
+ *  arrives, and `refresh()` re-pulls after a write so reads reflect it. */
 export function WorldProvider({ children }: { children: ReactNode }) {
   const { api, signOut } = useSession();
   const [version, setVersion] = useState(0);
-  const [ready, setReadyState] = useState(isReady());
+  const [ready, setReadyState] = useState(() => {
+    if (!isReady()) setWorldData({ members, vouches, listings, reviews, guestReviews, contributions, nowDay: WORLD_NOW_DAY, viewerId: VIEWER_ID });
+    return true;
+  });
   const [failed, setFailed] = useState(false);
 
   const refresh = useCallback(async () => {

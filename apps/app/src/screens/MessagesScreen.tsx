@@ -38,7 +38,7 @@ export function MessagesScreen() {
         {rows === null ? (
           <View style={styles.loading}><ActivityIndicator color={color.brand} /></View>
         ) : rows.length === 0 ? (
-          <Text style={styles.empty}>No conversations yet.</Text>
+          <Text style={styles.empty}>Threads appear when a mutual vouches.</Text>
         ) : (
           rows.map((t) => {
             const m = t.other;

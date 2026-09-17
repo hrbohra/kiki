@@ -57,7 +57,12 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
   const decide = async (decision: 'accept' | 'decline') => {
     if (!requestId) return;
     if (decision === 'accept') haptic.success(); else haptic.tap();
-    try { await api.requests.decide.mutate({ requestId, decision }); } finally { navigation.goBack(); }
+    try {
+      await api.requests.decide.mutate({ requestId, decision });
+      if (decision === 'accept') { navigation.replace('Matched', { guestId: hostId, startInDays: story.warm ? 4 : 18, nights: req.nights }); return; }
+    } finally {
+      if (decision !== 'accept') navigation.goBack();
+    }
   };
 
   const names = story.channels.map((c) => c.voucher.name);

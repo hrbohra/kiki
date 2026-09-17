@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Loop } from '../../ui/Loop';
 import { Avatar } from '../../ui/Avatar';
@@ -12,6 +13,8 @@ import { TripsWeb } from './TripsWeb';
 import { MessagesWeb } from './MessagesWeb';
 import { MeWeb } from './MeWeb';
 import { useSession } from '../../api/session';
+import { BellIcon } from '../../ui/TabIcons';
+import type { RootNav } from '../../navigation';
 
 export type WebPage = 'explore' | 'requests' | 'community' | 'guestbook' | 'trips' | 'messages' | 'me';
 const TABS: { key: WebPage; label: string }[] = [
@@ -31,6 +34,7 @@ const TABS: { key: WebPage; label: string }[] = [
  */
 export function WebShell() {
   const [page, setPage] = useState<WebPage>('explore');
+  const navigation = useNavigation<RootNav>();
   const viewer = world.memberById(world.viewerId);
   const { api } = useSession();
   const [needsReply, setNeedsReply] = useState(0);
@@ -61,6 +65,10 @@ export function WebShell() {
             ))}
           </View>
           <View style={{ flex: 1 }} />
+          <Pressable style={styles.bell} onPress={() => navigation.navigate('Notifications')} accessibilityRole="button" accessibilityLabel={`Notifications, ${needsReply + 1} need you`}>
+            <BellIcon color={color.inkSoft} size={22} />
+            <View style={styles.bellBadge}><Text style={styles.badgeText}>{needsReply + 1}</Text></View>
+          </Pressable>
           <Pressable style={styles.you} onPress={() => setPage('me')} accessibilityRole="button" accessibilityLabel="You">
             <Avatar id={viewer.id} name={viewer.name} tint={viewer.avatarColor} size={30} />
           </Pressable>
@@ -98,6 +106,8 @@ const styles = StyleSheet.create({
   tabTextActiveGold: { fontWeight: '700', color: color.gold },
   badge: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 5, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
   badgeText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
+  bell: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', marginRight: 4 },
+  bellBadge: { position: 'absolute', top: 2, right: 0, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
   you: {},
   scroll: { paddingBottom: 96 },
   shell: { maxWidth: 1560, width: '100%', alignSelf: 'center', paddingHorizontal: 40, paddingTop: 36 },

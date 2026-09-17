@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Animated, Easing, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { color } from '../theme/tokens';
+import { useReducedMotion } from './useReducedMotion';
 
 /**
  * Two motion primitives from the Sep 2 / Sep 3 handoffs ("The list assembles itself"):
@@ -14,14 +15,17 @@ import { color } from '../theme/tokens';
  */
 export function Reveal({ index = 0, children, style }: { index?: number; children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const t = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
   useEffect(() => {
+    // Reduced Motion: a plain fade in place, no stagger, no rise
+    if (reduced) { Animated.timing(t, { toValue: 1, duration: 120, useNativeDriver: true }).start(); return; }
     const delay = Math.min(index, 9) * 110;
     const anim = Animated.spring(t, { toValue: 1, delay, damping: 16, stiffness: 170, mass: 0.9, useNativeDriver: true });
     anim.start();
     return () => anim.stop();
-  }, [t, index]);
+  }, [t, index, reduced]);
   return (
-    <Animated.View style={[style, { opacity: t, transform: [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) }, { scale: t.interpolate({ inputRange: [0, 1], outputRange: [0.985, 1] }) }] }]}>
+    <Animated.View style={[style, { opacity: t, transform: reduced ? [] : [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) }, { scale: t.interpolate({ inputRange: [0, 1], outputRange: [0.985, 1] }) }] }]}>
       {children}
     </Animated.View>
   );
@@ -29,8 +33,9 @@ export function Reveal({ index = 0, children, style }: { index?: number; childre
 
 export function Halo({ on, size, children }: { on: boolean; size: number; children: ReactNode }) {
   const t = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
   useEffect(() => {
-    if (!on) return;
+    if (!on || reduced) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(t, { toValue: 1, duration: 2100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
@@ -39,8 +44,10 @@ export function Halo({ on, size, children }: { on: boolean; size: number; childr
     );
     loop.start();
     return () => loop.stop();
-  }, [on, t]);
+  }, [on, t, reduced]);
   if (!on) return <>{children}</>;
+  // Reduced Motion: the one-step signal stays, as a still ring
+  if (reduced) return <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}><View pointerEvents="none" style={[styles.halo, { width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, opacity: 0.22 }]} />{children}</View>;
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View

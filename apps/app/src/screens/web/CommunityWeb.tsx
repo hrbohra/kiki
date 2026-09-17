@@ -4,6 +4,7 @@ import { Avatar } from '../../ui/Avatar';
 import { TierBadge } from '../../ui/TierBadge';
 import { WEB_SHADOW } from './webBits';
 import { color, radius } from '../../theme/tokens';
+import { plural } from '../../domain/format';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
 
@@ -12,6 +13,8 @@ export function CommunityWeb() {
   const navigation = useNavigation<RootNav>();
   const similar = world.peopleLikeYou();
   const board = world.leaderboard();
+  const branch = world.inviteBranch();
+  const branchStays = branch.reduce((n, p) => n + p.stays + p.hosted, 0);
   const open = (memberId: string) => {
     const l = world.listingForHost(memberId);
     if (l) navigation.navigate('HostProfile', { listingId: l.id });
@@ -37,6 +40,22 @@ export function CommunityWeb() {
             ))}
           </View>
           <Text style={styles.foot}>Shared facts, not a compatibility score.</Text>
+
+          <Text style={[styles.h2, { marginTop: 28 }]}>Who you brought in</Text>
+          <View style={[styles.card, WEB_SHADOW]}>
+            <Text style={styles.branchMeta}>{branch.length ? `${plural(branch.length, 'person', 'people')} · ${plural(branchStays, 'stay')}` : 'Nobody yet. The invite tree is the graph’s backbone.'}</Text>
+            {branch.map((p) => (
+              <Pressable key={p.member.id} onPress={() => open(p.member.id)} style={[styles.row, styles.divider]} accessibilityRole="button" accessibilityLabel={`${p.member.name}. ${branchSummary(p)} ${p.tier}.`}>
+                <Avatar id={p.member.id} name={p.member.name} tint={p.member.avatarColor} country={p.member.country} size={40} />
+                <View style={styles.meta}>
+                  <Text style={styles.name}>{p.member.name.split(' ')[0]}</Text>
+                  <Text style={styles.trait}>{branchSummary(p)}</Text>
+                </View>
+                <View style={[styles.tierChip, p.tier === 'Newcomer' && styles.tierChipNew]}><Text style={[styles.tierChipText, p.tier === 'Newcomer' && styles.tierChipTextNew]}>{p.tier === 'Newcomer' ? 'New' : p.tier}</Text></View>
+              </Pressable>
+            ))}
+            <Text style={styles.branchFoot}>Your name is on each of them. When they host well, it shows up here and on your standing.</Text>
+          </View>
         </View>
 
         {/* Giving back — leaderboard kept */}
@@ -45,25 +64,30 @@ export function CommunityWeb() {
           <View style={[styles.card, WEB_SHADOW]}>
             {board.slice(0, 8).map((s, i) => {
               const m = world.memberById(s.memberId);
-              const top3 = s.rank <= 3;
               return (
-                <Pressable key={s.memberId} onPress={() => open(s.memberId)} style={[styles.row, i > 0 && styles.divider]}>
-                  <Text style={[styles.rank, top3 && styles.rankTop]}>{s.rank}</Text>
+                <Pressable key={s.memberId} onPress={() => open(s.memberId)} style={[styles.row, i > 0 && styles.divider]} accessibilityRole="button" accessibilityLabel={`${m.id === world.viewerId ? 'You' : m.name}, ${s.tier}`}>
                   <Avatar id={m.id} name={m.name} tint={m.avatarColor} country={m.country} size={40} />
                   <View style={styles.meta}>
                     <Text style={styles.name}>{m.id === world.viewerId ? 'You' : m.name}</Text>
                     <TierBadge standing={s} inline />
                   </View>
-                  <View style={styles.scoreCol}><Text style={styles.score}>{s.score}</Text><Text style={styles.scoreLabel}>points</Text></View>
                 </Pressable>
               );
             })}
           </View>
-          <Text style={styles.foot}>Ranked by giving back — hosting, vouching, referring, showing up. Recent counts more.</Text>
+          <Text style={styles.foot}>Hosting, vouching, referring, showing up. Recent counts more; nobody is ranked.</Text>
         </View>
       </View>
     </View>
   );
+}
+
+function branchSummary(p: { hosted: number; stays: number; invited: number }): string {
+  const parts: string[] = [];
+  if (p.hosted) parts.push(`Hosted ${p.hosted}`);
+  if (p.invited) parts.push(`brought in ${p.invited} more`);
+  if (p.stays) parts.push(`stayed ${p.stays === 1 ? 'once' : `${p.stays} times`}`);
+  return parts.length ? parts.join(', ') + '.' : 'Nothing yet, that’s normal.';
 }
 
 function shortTrait(label: string): string {
@@ -84,10 +108,11 @@ const styles = StyleSheet.create({
   countTile: { alignItems: 'center', backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 6 },
   countNum: { fontSize: 17, fontWeight: '700', color: color.textOnMint },
   countLabel: { fontSize: 10, fontWeight: '700', color: color.textOnMint },
-  rank: { width: 22, textAlign: 'center', fontSize: 15, fontWeight: '700', color: color.inkFaint },
-  rankTop: { color: '#C98A2B' },
-  scoreCol: { alignItems: 'flex-end' },
-  score: { fontSize: 16, fontWeight: '700', color: color.ink },
-  scoreLabel: { fontSize: 10, fontWeight: '700', color: color.inkFaint },
+  tierChip: { backgroundColor: color.brandTint, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
+  tierChipNew: { backgroundColor: color.hairlineSoft },
+  tierChipText: { fontSize: 11, fontWeight: '700', color: color.textOnMint },
+  tierChipTextNew: { color: color.inkFaint },
+  branchMeta: { fontSize: 13, fontWeight: '600', color: color.inkFaint, paddingTop: 14 },
+  branchFoot: { fontSize: 12.5, lineHeight: 18, color: color.inkFaint, paddingVertical: 12 },
   foot: { fontSize: 12.5, color: color.inkFaint, marginTop: 10 },
 });

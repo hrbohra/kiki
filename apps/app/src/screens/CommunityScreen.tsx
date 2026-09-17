@@ -3,14 +3,17 @@ import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'rea
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
 import { color, font, radius, space, shadow } from '../theme/tokens';
+import { plural } from '../domain/format';
 import * as world from '../world';
 import type { RootNav } from '../navigation';
 
-/** Community tab: similarity ("people like you") + the contribution leaderboard. */
+/** Community tab: similarity ("people like you"), who you brought in, and giving back — tiers as words, no rank. */
 export function CommunityScreen() {
   const navigation = useNavigation<RootNav>();
   const similar = world.peopleLikeYou();
   const board = world.leaderboard();
+  const branch = world.inviteBranch();
+  const branchStays = branch.reduce((n, p) => n + p.stays + p.hosted, 0);
 
   const openMember = (memberId: string) => {
     const listing = world.listingForHost(memberId);
@@ -40,23 +43,35 @@ export function CommunityScreen() {
           ))}
         </View>
 
-        <Text style={styles.section}>Top contributors</Text>
-        <Text style={styles.lead}>Ranked by giving back — hosting, vouching, referring, showing up. Recent counts more.</Text>
+        <Text style={styles.section}>Who you brought in</Text>
+        <Text style={styles.lead}>{branch.length ? `${plural(branch.length, 'person', 'people')} · ${plural(branchStays, 'stay')}` : 'Nobody yet. The invite tree is the graph’s backbone.'}</Text>
+        {branch.length ? (
+          <View style={[styles.card, shadow.card]}>
+            {branch.map((p, i) => (
+              <Pressable key={p.member.id} onPress={() => openMember(p.member.id)} style={[styles.row, i > 0 && styles.rowDivider]} accessibilityRole="button" accessibilityLabel={`${p.member.name}. ${branchSummary(p)} ${p.tier}.`}>
+                <Avatar id={p.member.id} name={p.member.name} tint={p.member.avatarColor} country={p.member.country} size={40} />
+                <View style={styles.rowMeta}>
+                  <Text style={styles.name}>{p.member.name.split(' ')[0]}</Text>
+                  <Text style={styles.trait}>{branchSummary(p)}</Text>
+                </View>
+                <View style={[styles.tierChip, p.tier === 'Newcomer' && styles.tierChipNew]}><Text style={[styles.tierChipText, p.tier === 'Newcomer' && styles.tierChipTextNew]}>{p.tier === 'Newcomer' ? 'New' : p.tier}</Text></View>
+              </Pressable>
+            ))}
+            <Text style={styles.branchFoot}>Your name is on each of them. When they host well, it shows up here and on your standing.</Text>
+          </View>
+        ) : null}
+
+        <Text style={styles.section}>Giving back</Text>
+        <Text style={styles.lead}>Hosting, vouching, referring, showing up. Recent counts more; nobody is ranked.</Text>
         <View style={[styles.card, shadow.card]}>
           {board.slice(0, 8).map((s, i) => {
             const m = world.memberById(s.memberId);
-            const top3 = s.rank <= 3;
             return (
-              <Pressable key={s.memberId} onPress={() => openMember(s.memberId)} style={[styles.row, i > 0 && styles.rowDivider]}>
-                <Text style={[styles.rank, top3 && styles.rankTop]}>{s.rank}</Text>
+              <Pressable key={s.memberId} onPress={() => openMember(s.memberId)} style={[styles.row, i > 0 && styles.rowDivider]} accessibilityRole="button" accessibilityLabel={`${m.id === world.viewerId ? 'You' : m.name}, ${s.tier}`}>
                 <Avatar id={m.id} name={m.name} tint={m.avatarColor} country={m.country} size={38} />
                 <View style={styles.rowMeta}>
                   <Text style={styles.name}>{m.id === world.viewerId ? 'You' : m.name}</Text>
                   <TierBadge standing={s} inline />
-                </View>
-                <View style={styles.scoreCol}>
-                  <Text style={styles.score}>{s.score}</Text>
-                  <Text style={styles.scoreLabel}>points</Text>
                 </View>
               </Pressable>
             );
@@ -65,6 +80,15 @@ export function CommunityScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+
+function branchSummary(p: { hosted: number; stays: number; invited: number }): string {
+  const parts: string[] = [];
+  if (p.hosted) parts.push(`Hosted ${p.hosted}`);
+  if (p.invited) parts.push(`brought in ${p.invited} more`);
+  if (p.stays) parts.push(`stayed ${p.stays === 1 ? 'once' : `${p.stays} times`}`);
+  return parts.length ? parts.join(', ') + '.' : 'Nothing yet, that’s normal.';
 }
 
 const styles = StyleSheet.create({
@@ -82,9 +106,9 @@ const styles = StyleSheet.create({
   inCommon: { alignItems: 'center', backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 6 },
   inCommonNum: { fontSize: 18, fontWeight: '700', color: color.textOnMint },
   inCommonLabel: { fontSize: 10, fontWeight: '700', color: color.textOnMint },
-  rank: { width: 22, textAlign: 'center', fontSize: 15, fontWeight: '700', color: color.inkFaint },
-  rankTop: { color: '#C98A2B' },
-  scoreCol: { alignItems: 'flex-end' },
-  score: { fontSize: 16, fontWeight: '700', color: color.ink },
-  scoreLabel: { fontSize: 10, fontWeight: '700', color: color.inkFaint },
+  tierChip: { backgroundColor: color.brandTint, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 4 },
+  tierChipNew: { backgroundColor: color.hairlineSoft },
+  tierChipText: { fontSize: 11, fontWeight: '700', color: color.textOnMint },
+  tierChipTextNew: { color: color.inkFaint },
+  branchFoot: { fontSize: 12.5, lineHeight: 18, color: color.inkFaint, paddingVertical: 12 },
 });

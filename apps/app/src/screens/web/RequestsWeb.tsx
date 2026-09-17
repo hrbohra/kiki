@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { useResponsive } from '../../ui/useResponsive';
 import { Avatar } from '../../ui/Avatar';
 import { ReachPill, WEB_SHADOW } from './webBits';
@@ -41,8 +41,11 @@ export function RequestsWeb() {
   const decide = async (id: string, decision: 'accept' | 'decline') => {
     if (decision === 'accept') haptic.success(); else haptic.tap();
     setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, state: decision === 'accept' ? 'accepted' : 'declined' } : x)) ?? null);
+    const item = items?.find((x) => x.id === id);
     try {
       await api.requests.decide.mutate({ requestId: id, decision });
+      // the match moment: a full screen, not a toast (17 Sep handoff)
+      if (decision === 'accept' && item) navigation.navigate('Matched', { guestId: item.guestId, startInDays: 4, nights: item.nights });
     } finally {
       load();
     }
@@ -61,9 +64,9 @@ export function RequestsWeb() {
       <View style={styles.cols}>
         <View style={styles.list}>
           {items === null ? (
-            <View style={styles.loading}><ActivityIndicator color={color.brand} /></View>
+            <View style={{ gap: 14 }}>{[0, 1, 2].map((i) => <View key={i} style={styles.skeleton} />)}</View>
           ) : visible.length === 0 ? (
-            <Text style={styles.empty}>No requests right now.</Text>
+            <Text style={styles.empty}>Nobody’s asked yet. Everyone within two steps of you can see your dates.</Text>
           ) : (
             visible.map((r) => (
               <RequestCard
@@ -152,6 +155,7 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
 }
 
 const styles = StyleSheet.create({
+  skeleton: { height: 132, borderRadius: 22, backgroundColor: color.hairlineSoft },
   h1: { fontSize: 30, fontWeight: '700', letterSpacing: -0.6, color: color.ink },
   sub: { fontSize: 14, color: color.inkFaint, marginTop: 4 },
   cols: { flexDirection: 'row', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },

@@ -29,5 +29,6 @@ export const ONBOARD_STEPS = [
   { key: 'claim', label: 'Your invite' },
   { key: 'facts', label: 'What you bring' },
   { key: 'stakes', label: 'What this costs you' },
+  { key: 'covers', label: 'What Kiki carries' },
   { key: 'done', label: 'Done' },
 ] as const;

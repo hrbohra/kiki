@@ -35,15 +35,16 @@ export function MeScreen() {
         <View style={[styles.hero, shadow.card]}>
           <Avatar id={me.id} name={me.name} tint={me.avatarColor} country={me.country} size={76} ring ringColor={color.gold} />
           <Text style={styles.name}>You</Text>
-          <TierBadge standing={standing} showRank gold />
+          <TierBadge standing={standing} gold />
         </View>
 
         <View style={styles.tiles}>
           <Tile value={`${standing.score}`} label="points" />
-          <Tile value={`#${standing.rank}`} label={`of ${cohort}`} />
+          <Tile value={standing.tier} label="standing" />
           <Tile value={`${similarCount}`} label="like you" />
         </View>
         <Text style={styles.decay}>Recent contributions count for more — your standing reflects the last few months, not all time.</Text>
+        <Text style={styles.decay}>You are “you” in a seeded world: everyone here is invented, and the backend behind them is real.</Text>
 
         <View style={[styles.card, shadow.card]}>
           <FactsEditor traits={me.traits} />

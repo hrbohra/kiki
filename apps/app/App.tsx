@@ -19,6 +19,8 @@ import { TrustScreen } from './src/screens/TrustScreen';
 import { OnboardScreen } from './src/screens/OnboardScreen';
 import { TripOffersScreen } from './src/screens/TripOffersScreen';
 import { PlanTripScreen } from './src/screens/PlanTripScreen';
+import { MatchedScreen } from './src/screens/MatchedScreen';
+import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { color, shadow } from './src/theme/tokens';
 import { TAB_ICON } from './src/ui/TabIcons';
 import { useResponsive } from './src/ui/useResponsive';
@@ -123,6 +125,8 @@ function AppInner() {
             <Stack.Screen name="Onboard" component={OnboardScreen} />
             <Stack.Screen name="TripOffers" component={TripOffersScreen} />
             <Stack.Screen name="PlanTrip" component={PlanTripScreen} />
+            <Stack.Screen name="Matched" component={MatchedScreen} options={{ gestureEnabled: false }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
           </Stack.Navigator>
         </NavigationContainer>
         <ResetDemoButton />

@@ -37,3 +37,4 @@ export const leaderboard: World['leaderboard'] = () => w().leaderboard();
 export const viewerFriendNames: World['viewerFriendNames'] = (exclude) => w().viewerFriendNames(exclude);
 export const peopleLikeYou: World['peopleLikeYou'] = () => w().peopleLikeYou();
 export const trustStoryFor: World['trustStoryFor'] = (id) => w().trustStoryFor(id);
+export const inviteBranch: World['inviteBranch'] = () => w().inviteBranch();

@@ -66,6 +66,7 @@ export function DemoEntry() {
               </Pressable>
             )}
             {demoAvailable && <Text style={styles.noFriction}>No account, no email. One tap and you're in as a seeded member.</Text>}
+            {demoAvailable && <Text style={styles.seeded}>A seeded world: every person and place in it is invented.</Text>}
             <Pressable onPress={() => { tap('light'); setMode('email'); }} style={styles.linkBtn}>
               <Text style={styles.linkText}>Sign in with a real invite instead</Text>
             </Pressable>
@@ -117,6 +118,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.85, transform: [{ scale: 0.985 }] },
   disabled: { opacity: 0.5 },
   primaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  seeded: { ...font.caption, color: color.inkFaint, textAlign: 'center', marginTop: -4, opacity: 0.85 },
   noFriction: { ...font.caption, color: color.inkFaint, textAlign: 'center', marginTop: 10 },
   linkBtn: { paddingVertical: 10, alignItems: 'center' },
   linkText: { ...font.body, color: color.brand, fontWeight: '700' },

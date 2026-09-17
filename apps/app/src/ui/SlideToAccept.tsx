@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Text, View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { color, radius } from '../theme/tokens';
 import { haptic } from './feedback';
+import { useReducedMotion } from './useReducedMotion';
 
 /**
  * Slide-to-accept — the Requests decision control from the Sep 2 / Sep 3 handoffs ("weight on the
@@ -27,6 +28,18 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
   maxRef.current = max;
   const crossed = useRef(false);
   const committedRef = useRef(false);
+  const reduced = useReducedMotion();
+  const reducedRef = useRef(false);
+  reducedRef.current = reduced;
+  /** VoiceOver double-tap and Reduced Motion both land here: commit without the drag. */
+  const commitNow = () => {
+    if (committedRef.current) return;
+    committedRef.current = true;
+    setCommitted(true);
+    x.setValue(maxRef.current);
+    haptic.success();
+    onCommit();
+  };
 
   useEffect(() => {
     if (!committed) return;
@@ -61,7 +74,7 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
         if (p >= COMMIT_AT) {
           committedRef.current = true;
           setCommitted(true);
-          Animated.timing(x, { toValue: m, duration: 160, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
+          Animated.timing(x, { toValue: m, duration: reducedRef.current ? 0 : 160, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
           haptic.success();
           onCommit();
         } else {
@@ -85,7 +98,9 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
       style={[styles.track, committed && styles.trackCommitted]}
       accessibilityRole="adjustable"
       accessibilityLabel={committed ? `Accepted ${name}` : `${label} ${name}`}
-      accessibilityHint="Drag the knob to the right to accept"
+      accessibilityHint="Drag the knob to the right, or double-tap to match"
+      accessibilityActions={[{ name: 'activate', label: 'Match' }]}
+      onAccessibilityAction={(e) => { if (e.nativeEvent.actionName === 'activate') commitNow(); }}
     >
       {!committed ? <Animated.View pointerEvents="none" style={[styles.fill, { width: fillW }]} /> : null}
       <Animated.Text style={[styles.label, committed ? styles.labelCommitted : { opacity: labelOpacity }]}>

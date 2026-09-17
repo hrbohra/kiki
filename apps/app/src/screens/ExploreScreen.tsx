@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, ScrollView, Pressable, StyleSheet, SafeAreaView } from 'react-native';
 import { Reveal } from '../ui/motion';
@@ -11,6 +11,8 @@ import { color, font, radius, space } from '../theme/tokens';
 import { availableTags } from '../domain/fixtures';
 import * as world from '../world';
 import { useWorldVersion } from '../api/world-provider';
+import { useSession } from '../api/session';
+import { BellIcon } from '../ui/TabIcons';
 import type { Listing } from '../domain/types';
 import type { RootNav } from '../navigation';
 
@@ -26,6 +28,14 @@ export function ExploreScreen() {
   const [tags, setTags] = useState<Set<string>>(new Set());
   const [connectedOnly, setConnectedOnly] = useState(false);
   const [selected, setSelected] = useState<Listing | null>(null);
+  // the bell counts only what needs you: pending requests + the entry you owe
+  const { api } = useSession();
+  const [needs, setNeeds] = useState(1);
+  useEffect(() => {
+    let alive = true;
+    api.requests.inbox.query().then((r) => { if (alive) setNeeds((r as { state: string }[]).filter((x) => x.state === 'pending').length + 1); }).catch(() => {});
+    return () => { alive = false; };
+  }, [api, version]);
 
   const toggleTag = (t: string) =>
     setTags((prev) => {
@@ -52,7 +62,13 @@ export function ExploreScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Text style={styles.h1}>Explore</Text>
+          <View style={styles.titleLeft}>
+            <Text style={styles.h1}>Explore</Text>
+            <Pressable style={styles.bell} onPress={() => { haptic.select(); navigation.navigate('Notifications'); }} accessibilityRole="button" accessibilityLabel={`Notifications, ${needs} need you`}>
+              <BellIcon color={color.ink} size={22} />
+              {needs > 0 ? <View style={styles.bellBadge}><Text style={styles.bellBadgeText}>{needs}</Text></View> : null}
+            </Pressable>
+          </View>
           <View style={styles.segment}>
             {(['homes', 'map'] as ViewMode[]).map((m) => (
               <Pressable key={m} onPress={() => { haptic.select(); setMode(m); }} style={[styles.segBtn, mode === m && styles.segActive]}>
@@ -122,7 +138,7 @@ export function ExploreScreen() {
 function EmptyState() {
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyText}>No homes match these filters yet.</Text>
+      <Text style={styles.emptyText}>Nobody within three steps is listing anything like that. Invite a friend and the map grows.</Text>
       <Text style={styles.emptyHint}>Tap a filter above to widen your search.</Text>
     </View>
   );
@@ -132,6 +148,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },
   header: { paddingTop: space.sm, paddingBottom: space.sm, gap: space.md },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.screen },
+  titleLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  bell: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  bellBadge: { position: 'absolute', top: 1, right: 1, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
+  bellBadgeText: { fontSize: 10, fontWeight: '700', color: '#FFFFFF' },
   h1: { ...font.display },
   segment: { flexDirection: 'row', backgroundColor: color.hairline, borderRadius: radius.pill, padding: 3 },
   segBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: radius.pill },

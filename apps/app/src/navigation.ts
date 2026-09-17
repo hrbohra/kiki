@@ -13,6 +13,9 @@ export type RootStackParamList = {
   Onboard: undefined;
   TripOffers: { tripId: 'italy' | 'created' };
   PlanTrip: undefined;
+  /** The match moment: shown once after slide-to-match, held until dismissed. */
+  Matched: { guestId: string; startInDays: number; nights: number };
+  Notifications: undefined;
 };
 
 export type RootTabParamList = {

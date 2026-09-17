@@ -34,10 +34,10 @@ export function MeWeb() {
         <View style={styles.col}>
           <Text style={styles.h2}>Your standing</Text>
           <View style={[styles.card, WEB_SHADOW]}>
-            <View style={styles.badgeRow}><TierBadge standing={standing} showRank gold /></View>
+            <View style={styles.badgeRow}><TierBadge standing={standing} gold /></View>
             <View style={styles.tiles}>
               <Tile value={`${standing.score}`} label="points" />
-              <Tile value={`#${standing.rank}`} label={`of ${cohort}`} />
+              <Tile value={standing.tier} label="standing" />
               <Tile value={`${similar}`} label="like you" />
             </View>
             <Text style={styles.foot}>Recent contributions count for more — your standing reflects the last few months.</Text>
