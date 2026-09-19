@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, Pressable, Text, StyleSheet } from 'react-native';
+import { Platform, Pressable, Text, View, StyleSheet } from 'react-native';
+import { Loop } from './src/ui/Loop';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -96,9 +97,11 @@ function AppInner() {
   const seen = hasOnboarded();
 
   if (!ready) {
+    // never a blank screen: the mark and the name while anything at all is pending
     return (
       <SafeAreaProvider>
         <StatusBar style="dark" />
+        <View style={styles.splash}><Loop size={54} /><Text style={styles.splashText}>Kiki</Text></View>
       </SafeAreaProvider>
     );
   }
@@ -144,6 +147,8 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  splash: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: color.bg },
+  splashText: { fontSize: 22, fontWeight: '700', color: color.ink },
   reset: {
     position: Platform.OS === 'web' ? ('fixed' as any) : 'absolute',
     right: 16, bottom: 16, zIndex: 100, opacity: 0.6,

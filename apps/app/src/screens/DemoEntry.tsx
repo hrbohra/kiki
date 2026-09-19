@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator, Animated as RNAnimated, Easing } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Loop } from '../ui/Loop';
@@ -11,7 +11,7 @@ import { useShake } from '../ui/useShake';
 /** The demo's front door: one tap in (frictionless), with the real invite + OTP flow one tap away
  *  for anyone who wants to see the security. In demo mode the code is shown on screen (no inbox). */
 export function DemoEntry() {
-  const { demoLogin, demoAvailable, requestOtp, verifyOtp } = useSession();
+  const { demoLogin, demoAvailable, requestOtp, verifyOtp, wakingSince } = useSession();
   const { style: shakeStyle, shake } = useShake();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +20,18 @@ export function DemoEntry() {
   const [invite, setInvite] = useState('');
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState<string | null>(null);
+  // After 1.5s of waiting the wait is named: the free tier is waking up, and here is how long it takes.
+  const [busySince, setBusySince] = useState<number | null>(null);
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!busy) { setSlow(false); return; }
+    const t = setTimeout(() => setSlow(true), 1500);
+    return () => clearTimeout(t);
+  }, [busy]);
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
+    setBusySince(Date.now());
     setError(null);
     try {
       await fn();
@@ -65,6 +74,7 @@ export function DemoEntry() {
                 {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>Enter the demo</Text>}
               </Pressable>
             )}
+            {busy && slow ? <WakeBar since={wakingSince ?? busySince ?? Date.now()} /> : null}
             {demoAvailable && <Text style={styles.noFriction}>No account, no email. One tap and you're in as a seeded member.</Text>}
             {demoAvailable && <Text style={styles.seeded}>A seeded world: every person and place in it is invented.</Text>}
             <Pressable onPress={() => { tap('light'); setMode('email'); }} style={styles.linkBtn}>
@@ -107,7 +117,29 @@ export function DemoEntry() {
   );
 }
 
+/** The wait, made visible: a bar that fills over the minute a cold free-tier server takes to wake,
+ *  with the elapsed seconds, so nobody stares at a spinner wondering whether it is broken. */
+function WakeBar({ since }: { since: number }) {
+  const fill = useRef(new RNAnimated.Value(0)).current;
+  const [elapsed, setElapsed] = useState(Math.round((Date.now() - since) / 1000));
+  useEffect(() => {
+    RNAnimated.timing(fill, { toValue: 0.94, duration: Math.max(1000, 60_000 - (Date.now() - since)), easing: Easing.out(Easing.quad), useNativeDriver: false }).start();
+    const t = setInterval(() => setElapsed(Math.round((Date.now() - since) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [fill, since]);
+  return (
+    <View style={styles.wake} accessibilityLiveRegion="polite" accessibilityLabel="Waking the server, this can take up to a minute the first time">
+      <View style={styles.wakeTrack}><RNAnimated.View style={[styles.wakeFill, { width: fill.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }]} /></View>
+      <Text style={styles.wakeText}>Waking the server · {elapsed}s. The demo runs on a free tier that sleeps when idle, so the first open can take up to a minute. Everything after this is instant.</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  wake: { width: '100%', gap: 8, marginTop: 4 },
+  wakeTrack: { height: 4, borderRadius: 2, backgroundColor: color.hairline, overflow: 'hidden' },
+  wakeFill: { height: 4, borderRadius: 2, backgroundColor: color.brand },
+  wakeText: { ...font.caption, color: color.inkSoft, textAlign: 'center', lineHeight: 18 },
   safe: { flex: 1, backgroundColor: color.bg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.screen, gap: 12, maxWidth: 420, width: '100%', alignSelf: 'center' },
   title: { ...font.display, marginTop: 8 },

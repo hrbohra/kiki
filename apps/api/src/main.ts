@@ -54,6 +54,15 @@ async function bootstrap(): Promise<void> {
   const express = app.getHttpAdapter().getInstance();
   express.use('/trpc', createExpressMiddleware({ router: appRouter, createContext: makeCreateContext(deps) }));
 
+  // Keep the free tier awake: Render spins the service down after 15 idle minutes, and the
+  // scheduled GitHub ping runs hours apart in practice. A request to our own public URL counts as
+  // inbound traffic. RENDER_EXTERNAL_URL is set by Render; locally this does nothing.
+  const selfUrl = process.env.RENDER_EXTERNAL_URL;
+  if (selfUrl) {
+    const knock = () => fetch(`${selfUrl}/health?keepalive=${Date.now()}`).catch(() => {});
+    setInterval(knock, 9 * 60 * 1000).unref();
+  }
+
   // Render (and most hosts) inject PORT; fall back to API_PORT / 4000 for local.
   const port = Number(process.env.PORT ?? process.env.API_PORT ?? 4000);
   await app.listen(port, '0.0.0.0');
