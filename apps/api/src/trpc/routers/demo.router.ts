@@ -12,6 +12,7 @@ export const demoRouter = router({
     if (!ctx.auth.demoEnabled()) throw new TRPCError({ code: 'FORBIDDEN', message: 'Demo reset is disabled.' });
     const requests = await ctx.requests.resetDemo();
     const traits = await ctx.world.resetDemoTraits();
-    return { ...requests, traits };
+    const houseItems = await ctx.houseList.restoreSeeded(['l-you']);
+    return { ...requests, traits, houseItems };
   }),
 });

@@ -1,4 +1,6 @@
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import { VIEWER_ID } from '@kiki/domain';
+import { HouseListEditor } from '../ui/HouseListEditor';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
@@ -15,6 +17,8 @@ import * as world from '../world';
 /** The viewer's own profile: identity, standing, and the facts that drive their matches. */
 export function MeScreen() {
   const me = world.memberById(world.viewerId);
+  // your own place: from the live snapshot, or the seeded demo place before it arrives
+  const myListingId = world.listingForHost(world.viewerId)?.id ?? (world.viewerId === VIEWER_ID ? 'l-you' : undefined);
   const standing = world.standingOf(me.id);
   const cohort = world.leaderboard().length;
   const similarCount = world.peopleLikeYou().length;
@@ -49,6 +53,12 @@ export function MeScreen() {
         <View style={[styles.card, shadow.card]}>
           <FactsEditor traits={me.traits} />
         </View>
+
+        {myListingId ? (
+          <View style={[styles.card, shadow.card]}>
+            <HouseListEditor listingId={myListingId} />
+          </View>
+        ) : null}
 
         {/* Demo-only affordance to replay the invite flow. Mobile only — on desktop the same action
             lives in the floating "Reset demo" pill, so we don't show it twice. */}

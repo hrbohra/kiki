@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { PrismaService } from '../prisma/prisma.service';
 import { IdempotencyService } from '../common/idempotency.service';
 import { actingMemberId } from '../common/actor';
+import { commitmentsProblem, type HouseItem } from '@kiki/domain';
 
 export interface CreateRequestInput {
   listingId: string;
@@ -10,6 +11,8 @@ export interface CreateRequestInput {
   toDay: number;
   message?: string;
   idempotencyKey?: string;
+  /** Ids of the listing's care items the guest agrees to look after. */
+  commitments?: string[];
 }
 
 @Injectable()
@@ -28,6 +31,14 @@ export class RequestsService {
       if (listing.hostId === guestId) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'You cannot request your own listing.' });
       }
+      // The house list's care items are commitments: a request agrees to every one, and nothing
+      // that isn't one. Stored as the text agreed to, so a later edit to the list can't change
+      // what this guest said yes to.
+      const items = (await this.prisma.houseItem.findMany({ where: { listingId: listing.id }, orderBy: { position: 'asc' } })) as unknown as HouseItem[];
+      const agreed = input.commitments ?? [];
+      const problem = commitmentsProblem(items, agreed);
+      if (problem) throw new TRPCError({ code: 'BAD_REQUEST', message: problem });
+      const commitments = items.filter((i) => i.section === 'care' && agreed.includes(i.id)).map((i) => i.text);
       const nights = Math.max(1, input.toDay - input.fromDay);
       return this.prisma.stayRequest.create({
         data: {
@@ -38,6 +49,7 @@ export class RequestsService {
           toDay: input.toDay,
           nights,
           message: input.message ?? null,
+          commitments,
         },
       });
     });
@@ -83,6 +95,8 @@ export class RequestsService {
   /** Demo only: put the seeded decision state back (Maia + Priya pending, Danica accepted) so the
    *  shared public demo always has a request to decide on. Mirrors prisma/seed.ts. */
   async resetDemo() {
+    // requests the demo visitor sent as a guest are theirs to try, not the next visitor's to find
+    await this.prisma.stayRequest.deleteMany({ where: { guestId: 'you' } });
     const pending = await this.prisma.stayRequest.updateMany({
       where: { hostId: 'you', guestId: { in: ['emma', 'priya'] } },
       data: { state: 'pending', decidedAt: null },

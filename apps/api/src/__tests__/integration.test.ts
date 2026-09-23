@@ -11,6 +11,7 @@ import { IdempotencyService } from '../common/idempotency.service';
 import { RequestsService } from '../writes/requests.service';
 import { TripsService } from '../writes/trips.service';
 import { GuestBookService } from '../writes/guestbook.service';
+import { HouseListService } from '../writes/houselist.service';
 import { MessagingService } from '../messaging/messaging.service';
 import { InMemoryMessageBus } from '../messaging/message-bus';
 import { MediaService } from '../media/media.service';
@@ -48,6 +49,7 @@ function buildDeps() {
     requests: new RequestsService(prisma, idem),
     trips: new TripsService(prisma, idem),
     guestbook,
+    houseList: new HouseListService(prisma),
     messaging,
     media,
     ai,
@@ -64,6 +66,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await deps.world.resetDemoTraits();
+  await deps.houseList.restoreSeeded();
+  await (prisma as unknown as PrismaClient).stayRequest.deleteMany({ where: { guestId: 'you' } });
   await (prisma as unknown as PrismaClient).stayRequest.deleteMany({ where: { message: 'integration-marker' } });
   await (prisma as unknown as PrismaClient).$disconnect();
 });
@@ -100,7 +104,7 @@ describe('ai drafts (cold state)', () => {
     expect(res.task).toBe('draft.shorter');
     expect(res.text).toContain('Priya');
     expect(res.text.toLowerCase()).toContain('1 week');
-    expect(['live', 'cached', 'composed']).toContain(res.source);
+    expect(['live', 'cached', 'baked']).toContain(res.source); // the demo member's cold card has a prepared draft
   });
 });
 
@@ -122,6 +126,8 @@ describe('writes (user-scoped, host-guarded)', () => {
       fromDay: 400,
       toDay: 403,
       message: 'integration-marker',
+      // a guest agrees to what they'd be looking after (Miso) before they can ask
+      commitments: (await deps.houseList.get('l-danica')).filter((i) => i.section === 'care').map((i) => i.id),
       idempotencyKey: `it-${Date.now()}`,
     });
     expect(req.state).toBe('pending');
@@ -161,5 +167,34 @@ describe('your facts (edit without side effects)', () => {
     expect(restored.overlaps.some(sharesOrigin)).toBe(true);
     const mine = await (prisma as unknown as PrismaClient).trait.findMany({ where: { memberId: 'you' } });
     expect(mine.map((t) => t.label)).not.toContain('Ponsonby');
+  });
+});
+
+describe('house list (rules, would-love, looking after)', () => {
+  it('is readable by anyone, editable only by the host, and its care items are commitments a request must agree to', async () => {
+    const you = await (prisma as unknown as PrismaClient).user.findUniqueOrThrow({ where: { email: 'you@kiki.demo' } });
+    const me = caller({ id: you.id, email: you.email });
+    await deps.houseList.restoreSeeded();
+
+    const danica = await caller(null).listings.houseList({ listingId: 'l-danica' });
+    expect(danica.filter((i) => i.section === 'care').map((i) => i.text)).toEqual(['Feed Miso morning and evening', 'Fresh water and a clean litter tray daily']);
+
+    // not your listing: you cannot edit it
+    await expect(me.listings.setHouseList({ listingId: 'l-danica', items: [] })).rejects.toThrow(/Only the host/);
+    // your own: you can
+    const mine = await me.listings.setHouseList({ listingId: 'l-you', items: [{ section: 'care', text: 'Feed the fish', kind: 'pet' }] });
+    expect(mine.map((i) => i.text)).toEqual(['Feed the fish']);
+
+    // asking to stay at Danica's without agreeing to look after Miso is refused
+    const care = danica.filter((i) => i.section === 'care').map((i) => i.id);
+    await expect(me.requests.create({ listingId: 'l-danica', fromDay: 420, toDay: 427, commitments: [care[0]] })).rejects.toThrow(/Agree to the one thing/);
+    // agreeing to both goes through, and the host's copy says what was agreed in words
+    const ok = await me.requests.create({ listingId: 'l-danica', fromDay: 420, toDay: 427, commitments: care });
+    expect(ok.commitments).toEqual(['Feed Miso morning and evening', 'Fresh water and a clean litter tray daily']);
+
+    // the demo reset puts your own list back and clears what the demo visitor asked for
+    await me.demo.reset();
+    expect((await caller(null).listings.houseList({ listingId: 'l-you' })).map((i) => i.text)).toContain('Water the monstera once a week');
+    expect(await (prisma as unknown as PrismaClient).stayRequest.count({ where: { guestId: 'you' } })).toBe(0);
   });
 });

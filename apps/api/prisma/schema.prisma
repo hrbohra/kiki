@@ -123,6 +123,7 @@ model Listing {
   host         Member        @relation(fields: [hostId], references: [id], onDelete: Cascade)
   reviews      Review[]
   stayRequests StayRequest[]
+  houseItems   HouseItem[]
 
   @@index([hostId])
   @@map("listings")
@@ -282,6 +283,8 @@ model StayRequest {
   toDay     Int
   nights    Int
   message   String?
+  /// Ids of the listing's care items the guest agreed to look after when asking.
+  commitments String[]   @default([])
   state     RequestState @default(pending)
   createdAt DateTime     @default(now())
   decidedAt DateTime?
@@ -395,4 +398,21 @@ model AiCache {
   createdAt  DateTime @default(now())
 
   @@map("ai_cache")
+}
+
+/// One line of a host's house list: a rule, something they'd love, or something the guest would
+/// look after. Kept apart from the trust graph on purpose; nothing here feeds degrees or overlaps.
+model HouseItem {
+  id        String @id
+  listingId String
+  section   String // "rule" | "love" | "care"
+  text      String
+  detail    String?
+  kind      String?
+  position  Int
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@map("house_items")
 }

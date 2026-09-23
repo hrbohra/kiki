@@ -17,6 +17,8 @@ export type RootStackParamList = {
   /** The match moment: shown once after slide-to-match, held until dismissed. */
   Matched: { guestId: string; startInDays: number; nights: number };
   Notifications: undefined;
+  /** Asking to stay: dates, the host's house list (care items ticked), a line, a real request. */
+  RequestStay: { listingId: string };
 };
 
 export type RootTabParamList = {

@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import { RequestStayScreen } from './src/screens/RequestStayScreen';
 import { Platform, Pressable, Text, View, StyleSheet } from 'react-native';
 import { Loop } from './src/ui/Loop';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -35,6 +36,12 @@ import type { RootStackParamList, RootTabParamList } from './src/navigation';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+// QA hook: with ?qa=1 in the URL the web build exposes its navigator, so an automated walk can open
+// every screen directly. Absent the flag nothing is attached, and native never sees it.
+if (Platform.OS === 'web' && typeof window !== 'undefined' && /[?&]qa=1\b/.test(window.location.search)) {
+  (window as unknown as { __kikiNav?: typeof navigationRef }).__kikiNav = navigationRef;
+}
 
 /** A muted, demo-only affordance to replay the invite flow from the top. Not product chrome.
  *  Desktop only — on mobile it would float over the bottom tab bar. */
@@ -130,6 +137,7 @@ function AppInner() {
             <Stack.Screen name="PlanTrip" component={PlanTripScreen} />
             <Stack.Screen name="Matched" component={MatchedScreen} options={{ gestureEnabled: false }} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="RequestStay" component={RequestStayScreen} />
           </Stack.Navigator>
         </NavigationContainer>
         <ResetDemoButton />

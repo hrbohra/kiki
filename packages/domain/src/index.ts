@@ -12,6 +12,7 @@ export * from './domain/geo';
 export * from './domain/mutualFriendIntro';
 export * from './domain/profiles';
 export * from './domain/requests';
+export * from './domain/houseList';
 export * from './domain/trips';
 export * from './domain/stay';
 export * from './domain/guestRecords';

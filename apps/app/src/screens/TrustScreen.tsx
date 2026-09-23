@@ -168,7 +168,7 @@ export function TrustScreen({ route, navigation }: StackProps<'Trust'>) {
               <Text style={styles.declineLink}>Decline</Text>
             </Pressable>
           ) : (
-            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={() => { const l = world.listingForHost(hostId); if (l && perspective === 'guest') navigation.navigate('RequestStay', { listingId: l.id }); else navigation.navigate('Thread', { memberId: hostId }); }}>
               <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
             </Pressable>
           )}

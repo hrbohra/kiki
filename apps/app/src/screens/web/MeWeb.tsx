@@ -1,4 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
+import { VIEWER_ID } from '@kiki/domain';
+import { HouseListEditor } from '../../ui/HouseListEditor';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Avatar } from '../../ui/Avatar';
 import { TierBadge } from '../../ui/TierBadge';
@@ -16,6 +18,7 @@ export function MeWeb() {
   const navigation = useNavigation<RootNav>();
   useWorldVersion(); // re-render when your facts change
   const me = world.memberById(world.viewerId);
+  const myListingId = world.listingForHost(world.viewerId)?.id ?? (world.viewerId === VIEWER_ID ? 'l-you' : undefined);
   const standing = world.standingOf(me.id);
   const cohort = world.leaderboard().length;
   const similar = world.peopleLikeYou().length;
@@ -64,6 +67,12 @@ export function MeWeb() {
           <View style={[styles.card, WEB_SHADOW]}>
             <FactsEditor traits={me.traits} title="Your facts" compact />
           </View>
+
+          {myListingId ? (
+            <View style={[styles.card, WEB_SHADOW]}>
+              <HouseListEditor listingId={myListingId} />
+            </View>
+          ) : null}
 
           <View style={styles.consentCard}>
             <View style={styles.caveatStrip} />

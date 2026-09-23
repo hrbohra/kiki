@@ -10,6 +10,7 @@ export const requestsRouter = router({
         fromDay: z.number().int(),
         toDay: z.number().int(),
         message: z.string().max(1000).optional(),
+        commitments: z.array(z.string().max(120)).max(20).optional(),
         idempotencyKey: z.string().optional(),
       }),
     )

@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView, Image, StyleSheet, SafeAreaView } from 'react-native';
+import { HouseList, useHouseList } from '../ui/HouseList';
 import { ordinal } from '../domain/format';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
@@ -36,6 +37,7 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
   const standing = world.standingOf(host.id);
   const { summary } = world.guestBookOf(host.id);
   const detail = profileDetail(host.id, listing.area);
+  const { items: houseItems } = useHouseList(listing.id);
   const bio = bakedBio(host.id) ?? detail.bio;
   const mutuals = trust.channels.length;
 
@@ -85,8 +87,9 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
           <Text style={styles.subEyebrow}>WHAT'S HERE</Text>
           <View style={styles.chips}>{detail.amenities.map((a) => <Chip key={a} label={a} readOnly />)}</View>
           <View style={styles.notes}>
-            <Text style={styles.notesTitle}>House notes</Text>
-            <Text style={styles.notesText}>{detail.houseNotes}</Text>
+            <Text style={styles.notesTitle}>The house list</Text>
+            <HouseList items={houseItems} />
+            <Text style={styles.notesQuote}>“{detail.houseNotes}” — {host.name}</Text>
           </View>
           <Text style={styles.caption}>Photos are the host's own. We don't stage or retouch them.</Text>
         </View>
@@ -171,9 +174,14 @@ export function HostProfileScreen(props: StackProps<'HostProfile'>) {
               <Text style={styles.primaryPrice}>£{listing.pricePerNight} / night · {listing.area.split(',')[0]}</Text>
             </View>
           </View>
-          <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={go(() => navigation.navigate('Thread', { memberId: host.id }))} accessibilityRole="button">
-            <Text style={styles.primaryBtnText}>Message {host.name}</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Pressable style={({ pressed }) => [styles.quietBtn, pressed && styles.primaryPressed]} onPress={go(() => navigation.navigate('Thread', { memberId: host.id }))} accessibilityRole="button" accessibilityLabel={`Message ${host.name}`}>
+              <Text style={styles.quietBtnText}>Message</Text>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryPressed]} onPress={go(() => navigation.navigate('RequestStay', { listingId: listing.id }))} accessibilityRole="button">
+              <Text style={styles.primaryBtnText}>Ask to stay</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -223,6 +231,7 @@ const styles = StyleSheet.create({
   notes: { backgroundColor: color.screen, borderRadius: 12, padding: 12, paddingHorizontal: 14, gap: 4 },
   notesTitle: { fontSize: 13, fontWeight: '700', color: color.ink },
   notesText: { fontSize: 13.5, lineHeight: 20, color: color.inkSoft },
+  notesQuote: { fontSize: 13, lineHeight: 19, fontStyle: 'italic', color: color.inkSoft, marginTop: 4 },
 
   facts: { gap: 6, borderTopWidth: 1, borderTopColor: color.hairlineSoft, paddingTop: 10 },
   factRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
@@ -240,6 +249,8 @@ const styles = StyleSheet.create({
   primaryName: { fontSize: 14, fontWeight: '600', color: color.ink },
   primaryPrice: { fontSize: 12.5, color: color.inkFaint },
   primaryBtn: { backgroundColor: color.brand, borderRadius: 12, paddingHorizontal: 20, paddingVertical: 13, ...shadow.brand },
+  quietBtn: { borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, borderWidth: 1, borderColor: color.hairline, backgroundColor: color.surface },
+  quietBtnText: { color: color.ink, fontSize: 15, fontWeight: '700' },
   primaryPressed: { transform: [{ scale: 0.97 }], backgroundColor: color.brandDark },
   primaryBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
 });

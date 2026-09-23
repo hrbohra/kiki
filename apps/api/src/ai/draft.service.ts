@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TRPCError } from '@trpc/server';
-import { buildDraftFacts, createWorld, DRAFT_TASKS, type AiResult, type DraftAs, type DraftKind } from '@kiki/domain';
+import { bakedDraft, buildDraftFacts, createWorld, DRAFT_TASKS, VIEWER_ID, type AiResult, type DraftAs, type DraftKind } from '@kiki/domain';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorldService } from '../world/world.service';
 import { actingMemberId } from '../common/actor';
@@ -39,6 +39,9 @@ export class DraftService {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Unknown member.' });
     }
     const facts = buildDraftFacts(story, input.kind, input.as, input.nights);
-    return this.runner.run(DRAFT_TASKS[input.kind], facts, { caller: `draft:${userId}` });
+    // The demo member's cold cards have prepared drafts, written from these same facts and held to
+    // the same guard; they are the rung between a saved run and the plain template.
+    const baked = me === VIEWER_ID ? bakedDraft(input.memberId, input.kind, input.as, input.nights) : undefined;
+    return this.runner.run(DRAFT_TASKS[input.kind], facts, { caller: `draft:${userId}`, baked });
   }
 }

@@ -9,6 +9,7 @@ import { appRouter } from './trpc/app.router';
 import { WorldService } from './world/world.service';
 import { AuthService } from './auth/auth.service';
 import { RequestsService } from './writes/requests.service';
+import { HouseListService } from './writes/houselist.service';
 import { TripsService } from './writes/trips.service';
 import { GuestBookService } from './writes/guestbook.service';
 import { MessagingService } from './messaging/messaging.service';
@@ -44,6 +45,7 @@ async function bootstrap(): Promise<void> {
     requests: app.get(RequestsService),
     trips: app.get(TripsService),
     guestbook: app.get(GuestBookService),
+    houseList: app.get(HouseListService),
     messaging: app.get(MessagingService),
     media: app.get(MediaService),
     ai: app.get(IntroService),

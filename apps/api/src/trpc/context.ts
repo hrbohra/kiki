@@ -5,6 +5,7 @@ import type { AuthService } from '../auth/auth.service';
 import type { RequestsService } from '../writes/requests.service';
 import type { TripsService } from '../writes/trips.service';
 import type { GuestBookService } from '../writes/guestbook.service';
+import type { HouseListService } from '../writes/houselist.service';
 import type { MessagingService } from '../messaging/messaging.service';
 import type { MediaService } from '../media/media.service';
 import type { IntroService } from '../ai/intro.service';
@@ -17,6 +18,7 @@ export interface ContextDeps {
   requests: RequestsService;
   trips: TripsService;
   guestbook: GuestBookService;
+  houseList: HouseListService;
   messaging: MessagingService;
   media: MediaService;
   ai: IntroService;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { HouseList, useHouseList } from '../../ui/HouseList';
 import { View, Text, Pressable, Image, ScrollView, StyleSheet } from 'react-native';
 import { Avatar } from '../../ui/Avatar';
 import { Chip } from '../../ui/Chip';
@@ -94,6 +95,7 @@ function ProfilePanel({ hostId, perspective, navigation, onOpenTrust }: { hostId
   const host = world.memberById(hostId);
   const listing = world.listingForHost(hostId);
   const detail = profileDetail(hostId, listing?.area);
+  const { items: houseItems } = useHouseList(listing?.id);
   const story = world.storyFor(hostId);
   const channelCount = world.trustStoryFor(hostId).channels.length;
   const { summary } = world.guestBookOf(hostId);
@@ -157,6 +159,7 @@ function RoomPanel({ hostId, perspective, navigation }: { hostId: string; perspe
   const host = world.memberById(hostId);
   const listing = world.listingForHost(hostId);
   const detail = profileDetail(hostId, listing?.area);
+  const { items: houseItems } = useHouseList(listing?.id);
 
   return (
     <>
@@ -174,11 +177,15 @@ function RoomPanel({ hostId, perspective, navigation }: { hostId: string; perspe
             <View style={styles.tags}>{detail.amenities.map((a) => <Chip key={a} label={a} readOnly />)}</View>
 
             <View style={styles.houseNotes}>
-              <Text style={styles.houseNotesTitle}>House notes</Text>
-              <Text style={styles.houseNotesText}>{detail.houseNotes}</Text>
+              <Text style={styles.houseNotesTitle}>The house list</Text>
+              <HouseList items={houseItems} />
+              <Text style={[styles.houseNotesText, { fontStyle: 'italic', marginTop: 6 }]}>“{detail.houseNotes}” — {host.name}</Text>
             </View>
 
-            <Pressable style={styles.cta} onPress={() => navigation.navigate('Thread', { memberId: hostId })}><Text style={styles.ctaText}>Message {host.name}</Text></Pressable>
+            <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+              {listing ? <Pressable style={styles.cta} onPress={() => navigation.navigate('RequestStay', { listingId: listing.id })}><Text style={styles.ctaText}>Ask to stay</Text></Pressable> : null}
+              <Pressable style={[styles.cta, styles.ctaQuiet]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}><Text style={[styles.ctaText, styles.ctaQuietText]}>Message {host.name}</Text></Pressable>
+            </View>
             <Text style={styles.roomNote}>Photos are the host's own. We don't stage or retouch them.</Text>
           </View>
         </View>
@@ -292,7 +299,9 @@ const styles = StyleSheet.create({
   houseNotes: { backgroundColor: color.screen, borderRadius: 12, padding: 14, gap: 4 },
   houseNotesTitle: { fontSize: 13.5, fontWeight: '700', color: color.ink },
   houseNotesText: { fontSize: 14, lineHeight: 21, color: color.inkSoft },
-  cta: { backgroundColor: color.brand, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 2 },
+  cta: { backgroundColor: color.brand, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 22, alignItems: 'center', marginTop: 2, flexGrow: 1 },
+  ctaQuiet: { backgroundColor: color.surface, borderWidth: 1, borderColor: color.hairline },
+  ctaQuietText: { color: color.ink },
   ctaText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   roomNote: { fontSize: 12.5, color: color.inkFaint },
 });

@@ -1,4 +1,5 @@
-import { router, publicProcedure } from '../trpc';
+import { z } from 'zod';
+import { router, publicProcedure, protectedProcedure } from '../trpc';
 
 /** Explore: listings sorted by how close the host is to the viewer, never by price. */
 export const listingsRouter = router({
@@ -24,4 +25,22 @@ export const listingsRouter = router({
       }))
       .sort((a, b) => a.degrees - b.degrees || a.listing.pricePerNight - b.listing.pricePerNight);
   }),
+
+  /** A listing's house list: rules, things the host would love, things a guest would look after. */
+  houseList: publicProcedure
+    .input(z.object({ listingId: z.string().max(80) }))
+    .query(({ ctx, input }) => ctx.houseList.get(input.listingId)),
+
+  /** The host replaces their own house list. */
+  setHouseList: protectedProcedure
+    .input(z.object({
+      listingId: z.string().max(80),
+      items: z.array(z.object({
+        section: z.enum(['rule', 'love', 'care']),
+        text: z.string().trim().min(2).max(120),
+        detail: z.string().trim().max(160).optional(),
+        kind: z.enum(['pet', 'plants', 'post', 'home', 'quiet', 'people']).optional(),
+      })).max(24),
+    }))
+    .mutation(({ ctx, input }) => ctx.houseList.set(ctx.user.id, input.listingId, input.items)),
 });

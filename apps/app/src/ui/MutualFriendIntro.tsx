@@ -63,7 +63,7 @@ export function MutualFriendIntro({ hostId }: { hostId: string }) {
         <Text style={styles.title}>How you know {intro.greeting.split(' ')[0]}</Text>
         <View style={styles.draftPill}>
           <Compose size={16} color={color.textOnMint} accent={color.brand} />
-          <Text style={styles.draftText}>{source === 'live' ? 'AI intro · live' : source === 'cached' ? 'AI intro · saved run' : source === 'baked' ? 'AI intro · baked' : 'Composed from the facts'}</Text>
+          <Text style={styles.draftText}>{source === 'live' ? 'AI intro · live' : source === 'cached' ? 'AI intro · saved run' : source === 'baked' ? 'AI intro · prepared' : 'Composed from the facts'}</Text>
         </View>
       </View>
 

@@ -101,7 +101,7 @@ export function TrustWeb({ hostId, navigation, embedded, perspective: extPerspec
                   <Text style={styles.primaryName}>{host.name} · {stayLength(req.nights)}</Text>
                   <Text style={styles.primaryPrice}>£{listing?.pricePerNight ?? 0} / night</Text>
                 </View>
-                <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => navigation.navigate('Thread', { memberId: hostId })}>
+                <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => { const l = world.listingForHost(hostId); if (l && (reader ?? perspective) === 'guest') navigation.navigate('RequestStay', { listingId: l.id }); else navigation.navigate('Thread', { memberId: hostId }); }}>
                   <Text style={styles.primaryBtnText}>{c.ctaLabel}</Text>
                 </Pressable>
               </View>

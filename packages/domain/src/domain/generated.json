@@ -2,12 +2,12 @@
   "model": "gemini-3.6-flash",
   "generatedAt": "2026-09-10T00:44:01.785Z",
   "intros": {
-    "emma": "You and Maia share a strong set of common ground: you both moved to London from Mount Eden, studied in Paris in 2017, boulder at Blok Shoreditch, and were at the Dalston picnic in June. You are connected just two steps away through Sophie and Nina, who noted that Maia put Iris up for a week and left the place spotless. Beyond these shared experiences and mutual ties, further details about her stay history are not yet known.",
-    "katelin": "You and Katelin both studied in Paris in 2017, giving you a clear piece of shared ground. However, you are connected through two steps with no direct mutual friends listed to vouch for her, so little else is known about her hosting style yet.",
-    "danica": "You and Danica share a connection through bouldering at Blok Shoreditch. Although you are just one step away from her, there are currently no mutual friends listed who can vouch for her directly, so her personal track record in the network is not yet known.",
-    "ollie": "You and Ollie do not have any shared ground surfaced yet, and you are three steps apart on the network with no mutual friends to vouch for them. Because there are no shared connections or common traits listed, details about how you might align beyond the basic listing information are not yet known.",
-    "nate": "You and Nate both moved to London from Mount Eden, giving you a shared origin right from the start. Although you are two steps away on the network, there are currently no mutual friends to vouch for him directly, so further details about his hosting style are not yet known.",
-    "priya": "You do not have any surfaced shared ground with Priya, and there are no mutual friends available to vouch for her, though she is three steps away in your network. Because there are no direct connections or shared interests on record, not much is known yet about how you might align."
+    "emma": "You and Maia have a lot in common: you both moved to London from Mount Eden, studied in Paris in 2017, boulder at Blok Shoreditch, both mention design, and you were both at the Dalston picnic in June. She is two steps from you, and Nina and Sophie both know her. Nina left a note too: she once put someone up for a week and left the place spotless.",
+    "katelin": "You and Katelin both studied in Paris in 2017, and you both mention working from home, so your days might look alike. Nobody you know can vouch for her directly yet; Amy brought her into Kiki. That is thin but honest, and a message before you decide will tell you more than this page can.",
+    "danica": "You already know Danica directly, so this is less an introduction than a reminder. You're both into bouldering at Blok Shoreditch and you both mention ceramics. No mutual is needed here: your own experience of her is the best evidence Kiki has.",
+    "ollie": "You and Ollie both mention New Zealand, which is a nice thing to find this far from home. He is three steps from you and nobody you know can vouch for him yet; Katelin brought him into Kiki. That is not a warning, just how little the graph can say so far, so a short call before you decide is worth it.",
+    "nate": "You and Nate both moved to London from Mount Eden, and you both mention design, climbing and good coffee, which is a lot of common ground for two people who haven't crossed paths. Nobody you know can vouch for him directly yet; Nina brought him into Kiki. Start with a message and see how it feels.",
+    "priya": "Kiki hasn't found shared ground between you and Priya yet, and nobody you know has met her. Katelin brought her into Kiki. Read her guest book as a guest before you decide: it is the one place where she has more to show than the people around you do."
   },
   "bios": {
     "emma": "I am Maia from New Zealand, now living in De Beauvoir after moving to London from Mount Eden and studying in Paris in 2017. I offer a quiet, female-only room with a WFH desk near the tube, and I regularly boulder at Blok Shoreditch.",
@@ -42,5 +42,6 @@
       "Staying in Priya's room in Bermondsey was very convenient as it is central and right near the tube.",
       "Priya's space provided a comfortable female-only room for my visit to London."
     ]
-  }
+  },
+  "introsWrittenBy": "prepared from the current facts on 2026-09-23; served only when the live model is unavailable"
 }

@@ -11,6 +11,7 @@ import {
   bakedIntro,
   bakedBio,
   bakedGuestBook,
+  HOUSE_LISTS,
 } from '@kiki/domain';
 
 // Seeding is a one-off admin task — use the direct (non-pooled) connection, which is the
@@ -31,6 +32,7 @@ async function main(): Promise<void> {
   await prisma.contribution.deleteMany();
   await prisma.guestReview.deleteMany();
   await prisma.review.deleteMany();
+  await prisma.houseItem.deleteMany();
   await prisma.listing.deleteMany();
   await prisma.vouch.deleteMany();
   await prisma.trait.deleteMany();
@@ -198,7 +200,16 @@ async function main(): Promise<void> {
         listingId: 'l-you', hostId: 'you', guestId: r.guest,
         fromDay: r.fromDay, toDay: r.toDay, nights: r.toDay - r.fromDay, message: r.message,
         state: r.state, decidedAt: r.state === 'accepted' ? new Date() : null,
+        // each guest agreed to what they'd look after at yours when they asked
+        commitments: HOUSE_LISTS['l-you'].filter((i) => i.section === 'care').map((i) => i.text),
       },
+    });
+  }
+
+  // House lists: every seeded home's rules, things the host would love, things a guest would look after.
+  for (const [listingId, items] of Object.entries(HOUSE_LISTS)) {
+    await prisma.houseItem.createMany({
+      data: items.map((it, position) => ({ id: it.id, listingId, section: it.section, text: it.text, detail: it.detail ?? null, kind: it.kind ?? null, position })),
     });
   }
 

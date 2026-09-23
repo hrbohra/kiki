@@ -20,6 +20,8 @@ interface InboxItem {
   nights: number;
   state: 'pending' | 'accepted' | 'declined';
   guest: Member;
+  /** What the guest agreed to look after, in the words of the house list when they asked. */
+  commitments?: string[];
 }
 
 /** Requests — the host's home screen, live from the API. Un-gamified: no timers, no reply-speed
@@ -125,6 +127,12 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
         </View>
         <Text style={styles.reqDates}>{stayLength(item.nights)}</Text>
         <Text style={styles.reqLine}>{line}</Text>
+        {item.commitments && item.commitments.length > 0 ? (
+          <View style={styles.agreed} accessibilityLabel={`Agreed to look after: ${item.commitments.join(', ')}`}>
+            <Text style={styles.agreedTitle}>✓ Agreed to look after</Text>
+            {item.commitments.map((c) => <Text key={c} style={styles.agreedLine}>{c}</Text>)}
+          </View>
+        ) : null}
         <View style={styles.reqFoot}>
           <Pressable onPress={onOpen}><Text style={styles.reqLink}>Read their trust page ›</Text></Pressable>
           <View style={{ flex: 1 }} />
@@ -155,6 +163,9 @@ function RequestCard({ item, onOpen, onDecide }: { item: InboxItem; onOpen: () =
 }
 
 const styles = StyleSheet.create({
+  agreed: { alignSelf: 'stretch', backgroundColor: color.screen, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, gap: 3, marginTop: 2 },
+  agreedTitle: { fontSize: 12.5, fontWeight: '700', color: color.textOnMint },
+  agreedLine: { fontSize: 13.5, lineHeight: 19, color: color.ink },
   skeleton: { height: 132, borderRadius: 22, backgroundColor: color.hairlineSoft },
   h1: { fontSize: 30, fontWeight: '700', letterSpacing: -0.6, color: color.ink },
   sub: { fontSize: 14, color: color.inkFaint, marginTop: 4 },
