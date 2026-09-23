@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ordinal } from '../domain/format';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { Halo } from './motion';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -66,9 +67,9 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
         <Text style={styles.tagLine} numberOfLines={1}>{listing.tags.slice(0, 3).join('  ·  ')}</Text>
       </View>
 
-      <View style={styles.strip}>
+      <View style={[styles.strip, !(story.reachable && story.degrees <= 2) && styles.stripFar]}>
         <Avatar id={stripPerson.id} name={stripPerson.name} tint={stripPerson.avatarColor} country={stripPerson.country} size={24} />
-        <Text style={styles.stripText} numberOfLines={1}>{stripText}</Text>
+        <Text style={[styles.stripText, !(story.reachable && story.degrees <= 2) && styles.stripTextFar]} numberOfLines={1}>{stripText}</Text>
         {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone="outline" /> : null}
       </View>
 
@@ -85,9 +86,6 @@ export function ListingCard({ listing, host, story, onOpen }: Props) {
   );
 }
 
-function ordinal(n: number): string {
-  return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
-}
 
 const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: color.hairline, padding: space.card, gap: space.md },
@@ -107,6 +105,9 @@ const styles = StyleSheet.create({
   tagLine: { position: 'absolute', bottom: 12, left: 12, right: 12, fontSize: 12, fontWeight: '700', color: '#FFFFFF', textShadowColor: 'rgba(31,41,43,0.45)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   strip: { flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: color.brandTint, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10 },
   stripText: { flex: 1, fontSize: 13, fontWeight: '700', color: color.textOnMint },
+  // Third degree and beyond: nobody in the chain can vouch, so the strip does not borrow mint.
+  stripFar: { backgroundColor: color.bg, borderWidth: 1, borderColor: color.hairline },
+  stripTextFar: { color: color.inkSoft },
   overlapRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   overlap: { fontSize: 13, fontWeight: '600', color: color.inkSoft, flex: 1 },
 });

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { ordinal, degreeTone } from '../domain/format';
+import { Skeleton } from '../ui/Skeleton';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { Avatar } from '../ui/Avatar';
 import { TrustPill } from '../ui/TrustPill';
 import { color, font, radius, space } from '../theme/tokens';
@@ -36,7 +38,7 @@ export function MessagesScreen() {
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>Messages</Text>
         {rows === null ? (
-          <View style={styles.loading}><ActivityIndicator color={color.brand} /></View>
+          <View style={{ gap: 10 }}>{[0, 1, 2, 3].map((k) => <Skeleton key={k} style={styles.skeletonRow} />)}</View>
         ) : rows.length === 0 ? (
           <Text style={styles.empty}>Threads appear when a mutual vouches.</Text>
         ) : (
@@ -49,7 +51,7 @@ export function MessagesScreen() {
                 <View style={styles.meta}>
                   <View style={styles.line}>
                     <Text style={styles.name}>{m.name}</Text>
-                    {Number.isFinite(degrees) ? <TrustPill label={`${degrees === 1 ? '1st' : degrees === 2 ? '2nd' : degrees + 'th'} degree`} tone="tint" /> : null}
+                    {Number.isFinite(degrees) ? <TrustPill label={`${ordinal(degrees)} degree`} tone={degreeTone(degrees)} /> : null}
                     {t.unread > 0 ? <View style={styles.unread}><Text style={styles.unreadText}>{t.unread}</Text></View> : null}
                   </View>
                   <Text style={styles.preview} numberOfLines={1}>
@@ -70,6 +72,8 @@ const styles = StyleSheet.create({
   body: { padding: space.lg, gap: space.sm },
   h1: { ...font.display, marginBottom: space.sm },
   loading: { paddingVertical: space.xl, alignItems: 'center' },
+  // Same loading grammar as Requests: placeholders shaped like the rows, never a lone spinner.
+  skeletonRow: { height: 74, borderRadius: 16 },
   empty: { ...font.body, color: color.inkSoft, textAlign: 'center', marginTop: space.xl },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: color.surface, borderRadius: radius.md, padding: space.md },
   meta: { flex: 1, gap: 3 },

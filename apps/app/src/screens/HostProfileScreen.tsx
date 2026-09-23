@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView, Image, StyleSheet, SafeAreaView } from 'react-native';
+import { ordinal } from '../domain/format';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
 import { TrustPill } from '../ui/TrustPill';
@@ -192,9 +193,6 @@ function cleanTrait(label: string): string {
   return label.replace(/^the /, '');
 }
 
-function ordinal(n: number): string {
-  return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
-}
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },

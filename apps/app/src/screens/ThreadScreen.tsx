@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ordinal } from '../domain/format';
 import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Avatar } from '../ui/Avatar';
 import { TierBadge } from '../ui/TierBadge';
@@ -23,7 +24,7 @@ export function ThreadScreen({ route, navigation }: StackProps<'Thread'>) {
   const story = world.storyFor(member.id);
   const standing = world.standingOf(member.id);
   const context = story.reachable
-    ? `${story.degrees === 1 ? 'Direct friend' : `${story.degrees}${story.degrees === 2 ? 'nd' : 'th'} degree`}${story.path[1] ? ` · via ${story.path[1].name}` : ''}`
+    ? `${story.degrees === 1 ? 'Direct friend' : `${ordinal(story.degrees)} degree`}${story.degrees >= 2 && story.path[1] ? ` · via ${story.path[1].name}` : ''}`
     : 'New connection';
 
   const [threadId, setThreadId] = useState<string | null>(null);

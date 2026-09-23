@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   track: {
     height: KNOB + PAD * 2, borderRadius: radius.pill, backgroundColor: color.bg, borderWidth: 1, borderColor: color.hairline,
     justifyContent: 'center', overflow: 'hidden', alignSelf: 'stretch',
+    userSelect: 'none',
   },
   trackCommitted: { backgroundColor: color.brand, borderColor: color.brand },
   fill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: color.brandTint },

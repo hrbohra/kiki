@@ -12,6 +12,26 @@ export function money(pounds: number): string {
   return `£${Math.abs(n).toLocaleString('en-GB')}`.replace('£', n < 0 ? '−£' : '£');
 }
 
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th, 21st. One implementation: the Messages list once said "3th". */
+export function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  const last = n % 10;
+  return `${n}${last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th'}`;
+}
+
+const STEP_WORDS: Record<number, string> = { 1: 'One step', 2: 'Two steps', 3: 'Three steps', 4: 'Four steps', 5: 'Five steps', 6: 'Six steps' };
+
+/** "One step from you", "Three steps from you": the same phrase on every screen. */
+export function stepsFromYou(deg: number): string {
+  return `${STEP_WORDS[deg] ?? `${deg} steps`} from you`;
+}
+
+/** A degree pill borrows mint only when someone in the chain can vouch (1st and 2nd degree). */
+export function degreeTone(deg: number): 'tint' | 'outline' {
+  return Number.isFinite(deg) && deg <= 2 ? 'tint' : 'outline';
+}
+
 /** One word for one thing, the plural for anything else: plural(2, 'offer') → "2 offers". */
 export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`;

@@ -144,7 +144,7 @@ function Entry({ review }: { review: Review }) {
         <Avatar id={author.id} name={author.name} tint={author.avatarColor} country={author.country} size={32} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.author}>{author.name}</Text>
-          <Text style={styles.authorDeg}>{self ? 'You wrote this' : deg === 1 ? 'You know them directly' : deg === 2 ? 'Two steps from you' : deg === 3 ? 'Three steps away' : 'Outside your circle'}</Text>
+          <Text style={styles.authorDeg}>{self ? 'You wrote this' : deg === 1 ? 'You know them directly' : deg === 2 ? 'Two steps from you' : deg === 3 ? 'Three steps from you' : 'Outside your circle'}</Text>
         </View>
         <View style={[styles.sentChip, { borderColor: chipColor }]}>
           <Text style={[styles.sentChipText, { color: chipColor }]}>{sentiment}</Text>

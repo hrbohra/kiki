@@ -1,4 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ordinal, degreeTone } from '../domain/format';
 import { Avatar } from './Avatar';
 import { TrustPill } from './TrustPill';
 import { Loop } from './Loop';
@@ -31,7 +32,7 @@ export function ListingPreview({ listing, host, story, onOpen }: Props) {
           <Text style={styles.title}>{listing.title}</Text>
           <Text style={styles.area}>{listing.area} · £{listing.pricePerNight}/night</Text>
         </View>
-        {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone="tint" /> : null}
+        {story.reachable ? <TrustPill label={`${ordinal(story.degrees)} degree`} tone={degreeTone(story.degrees)} /> : null}
       </View>
 
       <View style={styles.banner}>
@@ -46,9 +47,6 @@ export function ListingPreview({ listing, host, story, onOpen }: Props) {
   );
 }
 
-function ordinal(n: number): string {
-  return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
-}
 
 const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: radius.xl, padding: space.card, gap: space.md },

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { stepsFromYou } from '../../domain/format';
 import { color, radius } from '../../theme/tokens';
 
 /** Card elevation used across the web pages (no border — teal/brick strips stay the only edges). */
@@ -10,10 +11,7 @@ export const WEB_SHADOW = {
 export function reachText(deg: number): string {
   if (!Number.isFinite(deg)) return 'Not connected yet';
   if (deg <= 0) return 'This is you';
-  if (deg === 1) return 'One step from you';
-  if (deg === 2) return 'Two steps from you';
-  if (deg === 3) return 'Three steps away';
-  return `${deg} steps away`;
+  return stepsFromYou(deg);
 }
 
 export function ReachPill({ deg }: { deg: number }) {

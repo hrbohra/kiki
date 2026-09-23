@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import { ordinal } from '../domain/format';
 import { RouteGraph } from '../ui/RouteGraph';
 import { RouteList } from '../ui/RouteList';
 import { OverlapList } from '../ui/OverlapList';
@@ -118,9 +119,6 @@ export function ConnectionScreen({ route, navigation }: StackProps<'Connection'>
 
 const WORDS: Record<number, string> = { 1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six' };
 
-function ordinal(n: number): string {
-  return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`;
-}
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.bg },

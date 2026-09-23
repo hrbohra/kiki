@@ -58,7 +58,7 @@ export function RequestsWeb() {
     <View style={{ gap: 20 }}>
       <View>
         <Text style={styles.h1}>Requests</Text>
-        <Text style={styles.sub}>People asking to stay in your place. {needs} need{needs === 1 ? 's' : ''} a reply.</Text>
+        <Text style={styles.sub}>People asking to stay in your place.{items === null ? '' : ` ${needs} need${needs === 1 ? 's' : ''} a reply.`}</Text>
       </View>
 
       <View style={styles.cols}>
