@@ -85,10 +85,12 @@ Take the most Kiki-specific screen: a guest opens a host's **Trust page**.
    client and server never disagree about who is two steps from whom.
 
 4. **The one thing the app cannot do alone is the introduction.** The Trust page calls
-   `ai.intro`. [`intro.service.ts`](./apps/api/src/ai/intro.service.ts) builds the facts from the
-   live graph with `mutualFriendPrompt` and hands the `introTask` to the `AiRunner`
-   ([section 6](#6-the-ai-layer)). The reply carries `source: 'live' | 'cached' | 'baked' | 'composed'`,
-   and the screen shows it.
+   `ai.intro`. [`intro.service.ts`](./apps/api/src/ai/intro.service.ts) reads the facts from the
+   live graph with `world.trustStoryFor(hostId)` and hands that story and `INTRO_TASK` to the
+   `AiRunner` ([section 6](#6-the-ai-layer)); the task owns the wording, through the
+   `mutualFriendPrompt` the `PromptComposer` calls
+   ([`introTask.ts`](./packages/domain/src/ai/introTask.ts)). The reply carries
+   `source: 'live' | 'cached' | 'baked' | 'composed'`, and the screen shows it.
 
 5. **The client is typed all the way.** [`apps/api/src/contract.ts`](./apps/api/src/contract.ts)
    exports the router type only; `@kiki/api-client` is compiled against it; the app's call sites are
@@ -313,7 +315,7 @@ Why it exists: at 14 members "two steps from you" is the normal case; at 5,000 w
 invite tree it is rare, and every screen that says "two steps" had to be designed against that.
 The measured shape (`worldStats`, `reachFrom`):
 
-- median degree 5;
+- 5 vouch ties for the median member;
 - about 1% of the club within two steps of a random member, 6–7% within three, nearly two-thirds
   five or more away;
 - roughly a dozen of 819 hosts within two steps.
@@ -388,5 +390,5 @@ service. The consequences, and what they would cost Kiki to undo:
 | No Xcode, no dev-client | every dependency is Expo Go-safe; no custom native modules; the map is SVG + gradient + Reanimated, not Skia | nothing: it also gives one implementation for native and web |
 | Free-tier API that sleeps | wake bar in the app, self-ping on the server, a session that never blocks on the network | remove the ping; keep the non-blocking session, it is good anyway |
 | No AWS or Terraform | Render blueprint, Neon Postgres, blob storage port | rebind the ports; the app does not change |
-| Git Bash on Windows | `MSYS_NO_PATHCONV=1` in the web export script, because Git Bash rewrote `/try/app` into a Windows path | nothing |
+| Git Bash on Windows | `MSYS_NO_PATHCONV=1` around the showcase repo's export step, because Git Bash rewrote its `/try/app` base path into a Windows path; this repo's `export:web` needs no flag | nothing |
 | Solo, in evenings | the showcase and the design record exist so a reviewer needs neither a phone nor a walkthrough | nothing |

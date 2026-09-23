@@ -80,7 +80,7 @@ city". Every entry below is a consequence of that sentence or a measurement that
 ### 11. Generate a 5,000-member world before designing the graph screens
 - **Obvious build:** design against the 14-member demo world, where "two steps from you" is the normal case.
 - **Why it breaks the premise:** the premise only holds if there is a route. At club scale I did not know how often there is one, and neither did the demo.
-- **Done instead:** a deterministic generator grows an invite tree from a founder's first hundred coffees, events, friendships and completed matches, and measures reach from random members. Median degree 5; about 1% of the club within two steps; 6–7% at three; nearly two-thirds five or more away; roughly a dozen of 819 hosts within two steps.
+- **Done instead:** a deterministic generator grows an invite tree from a founder's first hundred coffees, events, friendships and completed matches, and measures reach from random members. Five vouch ties for the median member; about 1% of the club within two steps; 6–7% at three; nearly two-thirds five or more away; roughly a dozen of 819 hosts within two steps.
 - **Consequences:** three steps became the working unit for copy and drawing; similarity from bios and guest books entered the product (12); the imported-ties table shows a contacts step is worth more than any ranking work. A test pins the shape so a friendlier generator fails CI.
 - **Proof:** `packages/domain/src/seedWorld.ts`, `packages/domain/src/__tests__/seedWorld.test.ts`, `apps/api/import/measure-imported-ties.ts`; the system chapter of the record.
 

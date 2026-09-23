@@ -33,11 +33,12 @@ names the obvious build for every one.
 **2. Where I did not know, I measured.** In a 14-member demo world "two steps from you" is the
 normal case. I generated a 5,000-member club from Kiki's own invite mechanics
 ([`packages/domain/src/seedWorld.ts`](./packages/domain/src/seedWorld.ts)) and found the truth:
-median degree 5, about 1% of the club within two steps, 6–7% at three, nearly two-thirds five or
-more away. That number reshaped the graph screens, put similarity from bios and guest books into
-the product, and says a contacts-import step is worth more than any ranking work.
+the median member holds 5 vouch ties, yet only about 1% of the club sits within two steps, 6–7%
+within three, and nearly two-thirds are five or more steps away. That shape reshaped the graph
+screens, put similarity from bios and guest books into the product, and says a contacts-import
+step is worth more than any ranking work.
 
-| Ties added per member | Median degree | Club at 2 steps | Club at 3 steps | Hosts within 2 steps |
+| Ties added per member | Median ties per member | Club at 2 steps | Club at 3 steps | Hosts within 2 steps |
 |---|---|---|---|---|
 | 0 | 5 | 1.0% | 7.0% | 12 |
 | 4 | 9 | 2.2% | 20.3% | 25 |
@@ -217,8 +218,8 @@ cp .env.example .env               # DATABASE_URL etc.; the model key never ente
 pnpm build                         # domain + voice + api (refreshes the typed contract)
 pnpm typecheck
 pnpm --filter @kiki/domain test    # 75 tests, no database needed
+pnpm --filter @kiki/api migrate    # apply migrations to your database (before the API tests)
 pnpm --filter @kiki/api test       # integration tests against a real Postgres (DATABASE_URL)
-pnpm --filter @kiki/api migrate    # apply migrations to your database
 pnpm --filter @kiki/api seed       # the 14-member demo world (resets demo data)
 pnpm --filter @kiki/api dev        # API with watch
 pnpm --filter @kiki/app start      # native via Expo Go, or `expo start --web`
@@ -232,7 +233,7 @@ read by the API only and never reaches a client bundle.
 ```bash
 pnpm --filter @kiki/api seed:world      # generate the 5,000-member world (deterministic seed)
 pnpm --filter @kiki/api measure:ties    # reproduce the imported-ties table above
-pnpm --filter @kiki/api import:data     # import real rows through the same typed adapter (see import/sample.json)
+pnpm --filter @kiki/api import:data import/sample.json   # real rows through the same typed adapter
 ```
 
 The import path is the same for the seed world and for real data: Kiki could point this at its own
