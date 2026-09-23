@@ -32,6 +32,12 @@ export class WorldService {
     return r;
   }
 
+  async resetDemoTraits(): Promise<number> {
+    const n = await this.repo.resetDemoTraits();
+    this.invalidate();
+    return n;
+  }
+
   invalidate(): void {
     this.cache = undefined;
   }

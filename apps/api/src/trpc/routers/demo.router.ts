@@ -10,6 +10,8 @@ import { router, protectedProcedure } from '../trpc';
 export const demoRouter = router({
   reset: protectedProcedure.mutation(async ({ ctx }) => {
     if (!ctx.auth.demoEnabled()) throw new TRPCError({ code: 'FORBIDDEN', message: 'Demo reset is disabled.' });
-    return ctx.requests.resetDemo();
+    const requests = await ctx.requests.resetDemo();
+    const traits = await ctx.world.resetDemoTraits();
+    return { ...requests, traits };
   }),
 });

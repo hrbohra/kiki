@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   VIEWER_ID,
+  members as SEED_MEMBERS,
   WORLD_NOW_DAY,
   type Listing,
   type Vouch,
@@ -33,6 +34,20 @@ export class WorldRepository {
     if (mine) return { ok: true, key: mine.key, on: true };
     await this.prisma.trait.create({ data: { memberId, kind: input.kind, key, label, provenance: 'self_declared' } });
     return { ok: true, key, on: true };
+  }
+
+  /** Demo only: put the shared demo member's facts back to the seed, so one visitor's edits
+   *  never change the overlaps (and the trust pages built on them) the next visitor sees. */
+  async resetDemoTraits(): Promise<number> {
+    const seed = SEED_MEMBERS.find((m) => m.id === VIEWER_ID);
+    if (!seed) return 0;
+    await this.prisma.$transaction([
+      this.prisma.trait.deleteMany({ where: { memberId: VIEWER_ID } }),
+      this.prisma.trait.createMany({
+        data: seed.traits.map((t) => ({ memberId: VIEWER_ID, kind: t.kind, key: t.key, label: t.label, provenance: t.provenance ?? 'self_declared' })),
+      }),
+    ]);
+    return seed.traits.length;
   }
 
   async load(): Promise<WorldData> {

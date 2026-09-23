@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, PanResponder, Text, View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { Animated, Easing, PanResponder, Platform, Text, View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { color, radius } from '../theme/tokens';
 import { haptic } from './feedback';
 import { useReducedMotion } from './useReducedMotion';
@@ -12,7 +12,10 @@ import { useReducedMotion } from './useReducedMotion';
  * success haptic fires, and `onCommit` runs. Release earlier and it springs home over 380ms.
  * After a commit it holds for 2.4s, then resets (or the parent unmounts it).
  *
- * Built on PanResponder + the core Animated API so it runs identically on native and web.
+ * Native uses PanResponder. The web uses the same pattern as the showcase's hand-written knob:
+ * pointerdown on the knob, pointermove / pointerup on the window, and `touch-action: none` so a
+ * phone browser never claims the drag as a scroll and cancels it halfway. Both paths feed the same
+ * move / release functions, so the easing, the commit point and the haptics are identical.
  */
 const KNOB = 48;
 const PAD = 4;
@@ -31,6 +34,39 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
   const reduced = useReducedMotion();
   const reducedRef = useRef(false);
   reducedRef.current = reduced;
+  /** The gesture handlers are created once; read the latest onCommit through a ref so a commit
+   *  after a re-render never calls a stale callback. */
+  const onCommitRef = useRef(onCommit);
+  onCommitRef.current = onCommit;
+  const home = () => Animated.timing(x, { toValue: 0, duration: 380, easing: Easing.bezier(0.16, 0.8, 0.24, 1), useNativeDriver: Platform.OS !== 'web' }).start();
+  const moveTo = (dx: number) => {
+    const m = maxRef.current;
+    if (m <= 0) return;
+    const raw = Math.min(m, Math.max(0, dx));
+    const eased = m * Math.pow(raw / m, EASE_POW);
+    x.setValue(eased);
+    const p = eased / m;
+    if (p >= COMMIT_AT && !crossed.current) { crossed.current = true; haptic.heavy(); }
+    if (p < COMMIT_AT && crossed.current) crossed.current = false;
+  };
+  const releaseAt = (dx: number) => {
+    const m = maxRef.current;
+    const raw = Math.min(m, Math.max(0, dx));
+    const p = m > 0 ? Math.pow(raw / m, EASE_POW) : 0;
+    if (p >= COMMIT_AT) {
+      committedRef.current = true;
+      setCommitted(true);
+      Animated.timing(x, { toValue: m, duration: reducedRef.current ? 0 : 160, easing: Easing.out(Easing.quad), useNativeDriver: Platform.OS !== 'web' }).start();
+      haptic.success();
+      onCommitRef.current();
+    } else {
+      home();
+    }
+  };
+  const moveRef = useRef(moveTo);
+  moveRef.current = moveTo;
+  const releaseRef = useRef(releaseAt);
+  releaseRef.current = releaseAt;
   /** VoiceOver double-tap and Reduced Motion both land here: commit without the drag. */
   const commitNow = () => {
     if (committedRef.current) return;
@@ -38,7 +74,7 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
     setCommitted(true);
     x.setValue(maxRef.current);
     haptic.success();
-    onCommit();
+    onCommitRef.current();
   };
 
   useEffect(() => {
@@ -47,7 +83,7 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
       committedRef.current = false;
       crossed.current = false;
       setCommitted(false);
-      Animated.timing(x, { toValue: 0, duration: 380, easing: Easing.bezier(0.16, 0.8, 0.24, 1), useNativeDriver: true }).start();
+      home();
     }, 2400);
     return () => clearTimeout(t);
   }, [committed, x]);
@@ -57,35 +93,57 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
       onStartShouldSetPanResponder: () => !committedRef.current,
       onMoveShouldSetPanResponder: (_e, g) => !committedRef.current && Math.abs(g.dx) > 2,
       onPanResponderGrant: () => { haptic.select(); },
-      onPanResponderMove: (_e, g) => {
-        const m = maxRef.current;
-        if (m <= 0) return;
-        const raw = Math.min(m, Math.max(0, g.dx));
-        const eased = m * Math.pow(raw / m, EASE_POW);
-        x.setValue(eased);
-        const p = eased / m;
-        if (p >= COMMIT_AT && !crossed.current) { crossed.current = true; haptic.heavy(); }
-        if (p < COMMIT_AT && crossed.current) crossed.current = false;
-      },
-      onPanResponderRelease: (_e, g) => {
-        const m = maxRef.current;
-        const raw = Math.min(m, Math.max(0, g.dx));
-        const p = m > 0 ? Math.pow(raw / m, EASE_POW) : 0;
-        if (p >= COMMIT_AT) {
-          committedRef.current = true;
-          setCommitted(true);
-          Animated.timing(x, { toValue: m, duration: reducedRef.current ? 0 : 160, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
-          haptic.success();
-          onCommit();
-        } else {
-          Animated.timing(x, { toValue: 0, duration: 380, easing: Easing.bezier(0.16, 0.8, 0.24, 1), useNativeDriver: true }).start();
-        }
-      },
-      onPanResponderTerminate: () => {
-        Animated.timing(x, { toValue: 0, duration: 380, easing: Easing.bezier(0.16, 0.8, 0.24, 1), useNativeDriver: true }).start();
-      },
+      onPanResponderMove: (_e, g) => moveRef.current(g.dx),
+      onPanResponderRelease: (_e, g) => releaseRef.current(g.dx),
+      onPanResponderTerminate: () => releaseRef.current(0),
     }),
   ).current;
+
+  /** Web: the showcase knob's pattern, on the real DOM node. */
+  const knobRef = useRef<View>(null);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const el = knobRef.current as unknown as HTMLElement | null;
+    if (!el || typeof el.addEventListener !== 'function') return;
+    let startX: number | null = null;
+    const move = (e: PointerEvent) => { if (startX !== null) moveRef.current(e.clientX - startX); };
+    const up = (e: PointerEvent) => {
+      if (startX === null) return;
+      const dx = e.clientX - startX;
+      startX = null;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      releaseRef.current(dx);
+    };
+    const cancel = () => {
+      startX = null;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      releaseRef.current(0);
+    };
+    const down = (e: PointerEvent) => {
+      if (committedRef.current || e.button > 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      startX = e.clientX;
+      haptic.select();
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', cancel);
+    };
+    el.style.touchAction = 'none';
+    el.style.cursor = 'grab';
+    el.style.userSelect = 'none';
+    el.addEventListener('pointerdown', down);
+    return () => {
+      el.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+    };
+  }, []);
 
   const onLayout = (e: LayoutChangeEvent) => setTrackW(e.nativeEvent.layout.width);
   // The fill trails the knob so the "yes" grows under your thumb.
@@ -106,7 +164,7 @@ export function SlideToAccept({ name, onCommit, label = 'Slide to match' }: { na
       <Animated.Text style={[styles.label, committed ? styles.labelCommitted : { opacity: labelOpacity }]}>
         {committed ? `Yes — ${name}'s in` : label}
       </Animated.Text>
-      <Animated.View {...pan.panHandlers} style={[styles.knob, committed && styles.knobCommitted, { transform: [{ translateX: x }] }]}>
+      <Animated.View ref={knobRef} {...(Platform.OS === 'web' ? {} : pan.panHandlers)} style={[styles.knob, committed && styles.knobCommitted, { transform: [{ translateX: x }] }]}>
         <Text style={[styles.glyph, committed && styles.glyphCommitted]}>{committed ? '✓' : '›'}</Text>
       </Animated.View>
     </View>

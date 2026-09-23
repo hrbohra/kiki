@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { haptic } from '../../ui/feedback';
 import { Avatar } from '../../ui/Avatar';
 import { Loop } from '../../ui/Loop';
-import { Hometown, Studied, Climb, Work } from '../../ui/glyphs';
+import { Hometown, Studied, Climb, Work, TRAIT_GLYPH } from '../../ui/glyphs';
 import { WEB_SHADOW } from './webBits';
 import { useResponsive } from '../../ui/useResponsive';
 import { useSession } from '../../api/session';
@@ -14,13 +14,48 @@ import { COVERS } from '../../domain/covers';
 import { setOnboarded } from '../../demo/onboarding';
 import { color } from '../../theme/tokens';
 import * as world from '../../world';
-import type { OnboardFactKind } from '../../domain/invite';
 import type { GlyphProps } from '../../ui/glyphs';
 import type { ComponentType } from 'react';
 
-const FACT_GLYPH: Record<OnboardFactKind, ComponentType<GlyphProps>> = {
-  hometown: Hometown, studied: Studied, climb: Climb, work: Work,
+import type { TraitKind } from '../../domain/types';
+
+/** Onboarding facts use the same kinds as the Me page's facts editor, so an edit here and an
+ *  edit there are the same write. */
+const FACT_GLYPH: Record<TraitKind, ComponentType<GlyphProps>> = {
+  origin: Hometown, education: Studied, interest: Climb, work: Work, event: TRAIT_GLYPH.event,
 };
+const ONBOARD_KIND = { hometown: 'origin', studied: 'education', climb: 'interest', work: 'work' } as const;
+const ADD_KINDS: { kind: TraitKind; label: string; sub: string; hint: string }[] = [
+  { kind: 'origin', label: 'Hometown', sub: 'Where you moved from', hint: 'e.g. Mount Eden' },
+  { kind: 'education', label: 'Studied', sub: 'Where you studied', hint: 'Where, and the year' },
+  { kind: 'work', label: 'Work', sub: 'What you do', hint: 'e.g. Product design' },
+  { kind: 'interest', label: 'Interest', sub: 'Something you do', hint: 'A gym, a sport, a hobby' },
+  { kind: 'event', label: 'Event', sub: 'Something you went to', hint: 'e.g. a festival, a run club' },
+];
+
+/** A fact as the person is shaping it. `saved` is the label already on the profile (from the
+ *  invite), so an edit retires the old wording instead of leaving both behind. */
+interface DraftFact { id: string; kind: TraitKind; label: string; sub: string; on: boolean; saved?: string }
+
+const SUB: Record<TraitKind, string> = {
+  origin: 'Where you moved from', education: 'Where you studied', interest: 'Something you do', work: 'What you do', event: 'Something you went to',
+};
+
+/** Start from what is actually on the profile, not from a script: your own stored facts, shown
+ *  on, with their exact stored wording (so turning one off really removes it), then the invite's
+ *  suggestions for any kind you have nothing for, shown off. Facts Kiki inferred are not yours to
+ *  edit here; the Me page lists them, labelled. */
+function initialFacts(): DraftFact[] {
+  const mine = (world.memberById(world.viewerId)?.traits ?? []).filter((t) => (t.provenance ?? 'self_declared') === 'self_declared');
+  const stored: DraftFact[] = mine.map((t, i) => ({
+    id: `s${i}`, kind: t.kind, label: t.label, on: true, saved: t.label,
+    sub: ONBOARD_FACTS.find((f) => ONBOARD_KIND[f.kind] === t.kind)?.sub ?? SUB[t.kind],
+  }));
+  const suggested: DraftFact[] = ONBOARD_FACTS
+    .filter((f) => !mine.some((t) => t.kind === ONBOARD_KIND[f.kind]))
+    .map((f, i) => ({ id: `g${i}`, kind: ONBOARD_KIND[f.kind], label: f.label, sub: f.sub, on: false }));
+  return [...stored, ...suggested];
+}
 import type { RootNav } from '../../navigation';
 
 /**
@@ -33,20 +68,45 @@ export function OnboardingWeb() {
   const { isWide } = useResponsive();
   const { api } = useSession();
   const refreshWorld = useWorldRefresh();
-  const FACT_KIND = { hometown: 'origin', studied: 'education', climb: 'interest', work: 'work' } as const;
-  /** The toggles are real: each fact is written to (or removed from) your profile, so the
-   *  overlaps other people see change with them. */
+  const [step, setStep] = useState(0);
+  const [facts, setFacts] = useState<DraftFact[]>(initialFacts);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addKind, setAddKind] = useState<TraitKind>('interest');
+  const [addText, setAddText] = useState('');
+  /** Real writes: every fact is written to (or removed from) your profile, so the overlaps other
+   *  people see change with it. An edited fact retires its old wording first. */
   const syncFacts = () =>
-    Promise.all(ONBOARD_FACTS.map((f, i) => api.members.setTrait.mutate({ kind: FACT_KIND[f.kind], label: f.label, on: facts[i] }).catch(() => {})))
+    Promise.all(
+      facts.map(async (f) => {
+        if (f.saved && f.saved !== f.label) await api.members.setTrait.mutate({ kind: f.kind, label: f.saved, on: false }).catch(() => {});
+        await api.members.setTrait.mutate({ kind: f.kind, label: f.label, on: f.on }).catch(() => {});
+      }),
+    )
       .then(() => refreshWorld())
       .catch(() => {});
-  const [step, setStep] = useState(0);
-  const [facts, setFacts] = useState(ONBOARD_FACTS.map((f) => f.on));
+  const toggle = (id: string) => { haptic.select(); setFacts((p) => p.map((x) => (x.id === id ? { ...x, on: !x.on } : x))); };
+  const startEdit = (f: DraftFact) => { haptic.select(); setAdding(false); setEditing(f.id); setEditText(f.label); };
+  const commitEdit = () => {
+    const text = editText.trim().slice(0, 80);
+    if (text) setFacts((p) => p.map((f) => (f.id === editing ? { ...f, label: text, on: true } : f)));
+    setEditing(null);
+  };
+  const commitAdd = () => {
+    const text = addText.trim().slice(0, 80);
+    if (!text) return;
+    const k = ADD_KINDS.find((x) => x.kind === addKind) ?? ADD_KINDS[0];
+    haptic.success();
+    setFacts((p) => [...p, { id: `n${Date.now()}`, kind: addKind, label: text, sub: k.sub, on: true }]);
+    setAddText('');
+    setAdding(false);
+  };
   const inviter = world.memberById(INVITE.fromId);
   const last = ONBOARD_STEPS.length - 1;
   const done = () => { haptic.success(); setOnboarded(); navigation.popToTop(); };
   const nextLabel = step === 0 ? 'Accept the invite' : step === 1 ? 'Looks right' : 'I understand';
-  const sharedCount = facts.filter(Boolean).length;
+  const sharedCount = facts.filter((f) => f.on).length;
 
   return (
     <View style={styles.root}>
@@ -101,22 +161,90 @@ export function OnboardingWeb() {
             ) : step === 1 ? (
               <View style={[styles.card, styles.stepCard, !isWide && styles.stepCardPhone]}>
                 <Text style={styles.h1}>What you bring</Text>
-                <Text style={styles.body}>These are the facts we match you on. Share only what you want strangers to find you by — you can change any of it later, and we will always label what we worked out ourselves.</Text>
+                <Text style={styles.body}>These are the facts we match you on. Share only what you want strangers to find you by, and fix the wording if it isn’t quite you. You can change any of it later from your profile, and we will always label what we worked out ourselves.</Text>
                 <View style={{ gap: 10, alignSelf: 'stretch' }}>
-                  {ONBOARD_FACTS.map((f, i) => {
-                    const on = facts[i];
+                  {facts.map((f) => {
+                    const on = f.on;
                     const Glyph = FACT_GLYPH[f.kind];
-                    return (
-                      <Pressable key={f.label} onPress={() => { haptic.select(); setFacts((p) => p.map((v, j) => (j === i ? !v : v))); }} style={[styles.factRow, on ? styles.factOn : styles.factOff]}>
-                        <Glyph size={24} color={color.ink} accent={color.brand} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={[styles.factLabel, on && styles.factLabelOn]}>{f.label}</Text>
-                          <Text style={styles.factSub}>{f.sub}</Text>
+                    if (editing === f.id) {
+                      return (
+                        <View key={f.id} style={[styles.factRow, styles.factEditing]}>
+                          <Glyph size={24} color={color.ink} accent={color.brand} />
+                          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+                            <TextInput
+                              style={styles.factInput}
+                              value={editText}
+                              onChangeText={setEditText}
+                              onSubmitEditing={commitEdit}
+                              returnKeyType="done"
+                              maxLength={80}
+                              autoFocus
+                              accessibilityLabel={`Edit: ${f.sub}`}
+                            />
+                            <Text style={styles.factSub}>{f.sub}</Text>
+                          </View>
+                          <Pressable onPress={commitEdit} hitSlop={8} accessibilityRole="button" style={styles.factDone}>
+                            <Text style={styles.factDoneText}>Done</Text>
+                          </Pressable>
                         </View>
-                        <View style={[styles.check, on ? styles.checkOn : styles.checkOff]}>{on ? <Text style={styles.checkMark}>✓</Text> : null}</View>
-                      </Pressable>
+                      );
+                    }
+                    return (
+                      <View key={f.id} style={[styles.factRow, on ? styles.factOn : styles.factOff]}>
+                        <Pressable
+                          onPress={() => toggle(f.id)}
+                          style={styles.factToggle}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: on }}
+                          accessibilityLabel={`${f.label}, ${f.sub}`}
+                        >
+                          <Glyph size={24} color={color.ink} accent={color.brand} />
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={[styles.factLabel, on && styles.factLabelOn]}>{f.label}</Text>
+                            <Text style={styles.factSub}>{f.sub}</Text>
+                          </View>
+                        </Pressable>
+                        <Pressable onPress={() => startEdit(f)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Edit ${f.label}`} style={styles.factEdit}>
+                          <Text style={styles.factEditText}>Edit</Text>
+                        </Pressable>
+                        <Pressable onPress={() => toggle(f.id)} hitSlop={8} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                          <View style={[styles.check, on ? styles.checkOn : styles.checkOff]}>{on ? <Text style={styles.checkMark}>✓</Text> : null}</View>
+                        </Pressable>
+                      </View>
                     );
                   })}
+                  {adding ? (
+                    <View style={styles.addCard}>
+                      <View style={styles.kinds}>
+                        {ADD_KINDS.map((k) => (
+                          <Pressable key={k.kind} onPress={() => { haptic.select(); setAddKind(k.kind); }} style={[styles.kindChip, addKind === k.kind && styles.kindChipOn]} accessibilityRole="button" accessibilityState={{ selected: addKind === k.kind }}>
+                            <Text style={[styles.kindText, addKind === k.kind && styles.kindTextOn]}>{k.label}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <TextInput
+                        style={styles.factInput}
+                        value={addText}
+                        onChangeText={setAddText}
+                        placeholder={ADD_KINDS.find((k) => k.kind === addKind)?.hint}
+                        placeholderTextColor={color.inkFaint}
+                        onSubmitEditing={commitAdd}
+                        returnKeyType="done"
+                        maxLength={80}
+                        autoFocus
+                      />
+                      <View style={styles.addActions}>
+                        <Pressable onPress={() => { setAdding(false); setAddText(''); }} hitSlop={8} accessibilityRole="button"><Text style={styles.addCancel}>Cancel</Text></Pressable>
+                        <Pressable onPress={commitAdd} disabled={!addText.trim()} style={[styles.addSave, !addText.trim() && styles.addSaveOff]} accessibilityRole="button">
+                          <Text style={styles.addSaveText}>Add</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ) : (
+                    <Pressable onPress={() => { haptic.select(); setEditing(null); setAdding(true); }} hitSlop={8} accessibilityRole="button" style={{ alignSelf: 'flex-start' }}>
+                      <Text style={styles.addLink}>+ Add a fact</Text>
+                    </Pressable>
+                  )}
                 </View>
                 <Text style={styles.footNote}>{sharedCount} shared. A shared fact is not a safety signal — it is just something to open with.</Text>
               </View>
@@ -241,6 +369,25 @@ const styles = StyleSheet.create({
   checkOff: { backgroundColor: 'transparent', borderColor: color.hairline },
   checkMark: { fontSize: 12, fontWeight: '700', color: '#FFFFFF' },
   footNote: { fontSize: 12.5, lineHeight: 18, color: color.inkFaint },
+  factToggle: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  factEdit: { paddingVertical: 4, paddingHorizontal: 6 },
+  factEditText: { fontSize: 12.5, fontWeight: '700', color: color.textOnMint },
+  factEditing: { backgroundColor: color.surface, borderColor: color.brand },
+  factInput: { fontSize: 15, fontWeight: '700', color: color.ink, backgroundColor: color.bg, borderWidth: 1, borderColor: color.hairline, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, alignSelf: 'stretch' },
+  factDone: { backgroundColor: color.brand, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8 },
+  factDoneText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+  addLink: { fontSize: 14, fontWeight: '700', color: color.brand, paddingVertical: 4 },
+  addCard: { gap: 10, borderRadius: 14, borderWidth: 1, borderColor: color.hairline, backgroundColor: color.surface, padding: 14, alignSelf: 'stretch' },
+  kinds: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  kindChip: { borderWidth: 1, borderColor: color.hairline, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: color.surface },
+  kindChipOn: { borderColor: color.brand, backgroundColor: color.brandTint },
+  kindText: { fontSize: 12.5, fontWeight: '700', color: color.inkSoft },
+  kindTextOn: { color: color.textOnMint },
+  addActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 14 },
+  addCancel: { fontSize: 14, fontWeight: '600', color: color.inkFaint },
+  addSave: { backgroundColor: color.brand, borderRadius: 10, paddingHorizontal: 18, paddingVertical: 9 },
+  addSaveOff: { opacity: 0.45 },
+  addSaveText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
 
   stakeCard: { backgroundColor: color.bg, borderRadius: 14, padding: 16, paddingLeft: 21, overflow: 'hidden', alignSelf: 'stretch' },
   stakeRule: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: color.caveat },

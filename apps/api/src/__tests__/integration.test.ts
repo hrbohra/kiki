@@ -63,6 +63,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await deps.world.resetDemoTraits();
   await (prisma as unknown as PrismaClient).stayRequest.deleteMany({ where: { message: 'integration-marker' } });
   await (prisma as unknown as PrismaClient).$disconnect();
 });
@@ -131,5 +132,34 @@ describe('writes (user-scoped, host-guarded)', () => {
     // Host accepts.
     const decided = await caller(danUser).requests.decide({ requestId: req.id, decision: 'accept' });
     expect(decided.state).toBe('accepted');
+  });
+});
+
+describe('your facts (edit without side effects)', () => {
+  it('renaming a fact changes the overlaps it feeds, never the graph, and the demo reset restores it', async () => {
+    process.env.DEMO_MODE = '1';
+    const you = await (prisma as unknown as PrismaClient).user.findUniqueOrThrow({ where: { email: 'you@kiki.demo' } });
+    const me = caller({ id: you.id, email: you.email });
+    const sharesOrigin = (o: { kind: string; source?: string }) => o.kind === 'origin' && (o.source ?? 'profile') === 'profile';
+
+    await deps.world.resetDemoTraits();
+    const before = (await deps.world.world()).trustStoryFor('emma');
+    expect(before.overlaps.some(sharesOrigin)).toBe(true); // you and Maia both moved from Mount Eden
+
+    // The onboarding edit path: retire the old wording, save the new.
+    await me.members.setTrait({ kind: 'origin', label: 'Mount Eden', on: false });
+    await me.members.setTrait({ kind: 'origin', label: 'Ponsonby', on: true });
+    const after = (await deps.world.world()).trustStoryFor('emma');
+    expect(after.overlaps.some(sharesOrigin)).toBe(false); // the overlap followed the fact
+    expect(after.degrees).toBe(before.degrees); // the vouch graph did not move
+    expect(after.rankedRoutes.map((r) => r.members.map((m) => m.id).join('>'))).toEqual(
+      before.rankedRoutes.map((r) => r.members.map((m) => m.id).join('>')),
+    );
+
+    await me.demo.reset();
+    const restored = (await deps.world.world()).trustStoryFor('emma');
+    expect(restored.overlaps.some(sharesOrigin)).toBe(true);
+    const mine = await (prisma as unknown as PrismaClient).trait.findMany({ where: { memberId: 'you' } });
+    expect(mine.map((t) => t.label)).not.toContain('Ponsonby');
   });
 });

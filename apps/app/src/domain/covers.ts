@@ -10,7 +10,7 @@ export const COVERS = {
   items: [
     {
       title: 'If rent isn’t paid, Kiki pays it.',
-      body: 'You get the money on the date you were told. We sort it out with the guest afterwards, not you.',
+      body: 'That is what Kiki vouching for your guest means: if they don’t pay, you are still covered.',
     },
     {
       title: 'If something breaks, Kiki handles it.',
