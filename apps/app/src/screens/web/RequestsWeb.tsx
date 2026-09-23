@@ -186,10 +186,10 @@ const styles = StyleSheet.create({
   reqName: { fontSize: 17, fontWeight: '700', color: color.ink },
   statusPill: { borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6 },
   statusNeeds: { backgroundColor: color.brandTint },
-  statusWaiting: { backgroundColor: color.bg },
+  statusWaiting: { backgroundColor: color.brand }, // "Confirmed": solid, the one state TrustPill reserves solid for (matches Trips)
   statusText: { fontSize: 12.5, fontWeight: '700' },
   statusTextNeeds: { color: color.textOnMint },
-  statusTextWaiting: { color: color.inkFaint },
+  statusTextWaiting: { color: '#FFFFFF' },
   reqDates: { fontSize: 13.5, color: color.inkSoft },
   reqLine: { fontSize: 14.5, lineHeight: 21, color: color.ink },
   reqFoot: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: 2, gap: 12 },

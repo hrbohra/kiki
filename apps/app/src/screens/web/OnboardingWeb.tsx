@@ -112,8 +112,17 @@ export function OnboardingWeb() {
     <View style={styles.root}>
       <ScrollView contentContainerStyle={[styles.scroll, !isWide && styles.scrollPhone]} showsVerticalScrollIndicator={false}>
         <View style={[styles.shell, !isWide && styles.shellPhone]}>
-          {/* numbered rail */}
-          <View style={styles.rail}>
+          {/* numbered rail on wide screens; on a phone a slim progress bar, so the step itself is above the fold */}
+          {!isWide ? (
+            <View style={styles.progress}>
+              <View style={styles.wordmark}><Loop size={26} color={color.brand} opacity={1} strokeWidth={9} /><Text style={styles.brand}>Kiki</Text></View>
+              <View style={styles.segments} accessibilityRole="progressbar" accessibilityValue={{ min: 1, max: ONBOARD_STEPS.length, now: step + 1 }}>
+                {ONBOARD_STEPS.map((st, i) => <View key={st.key} style={[styles.segment, i <= step && styles.segmentOn]} />)}
+              </View>
+              <Text style={styles.progressLabel}>Step {step + 1} of {ONBOARD_STEPS.length} · {ONBOARD_STEPS[step].label}</Text>
+            </View>
+          ) : null}
+          <View style={[styles.rail, !isWide && { display: 'none' }]}>
             <View style={styles.wordmark}><Loop size={30} color={color.brand} opacity={1} strokeWidth={9} /><Text style={styles.brand}>Kiki</Text></View>
             {ONBOARD_STEPS.map((st, i) => {
               const reached = i <= step;
@@ -315,6 +324,11 @@ function Stat({ n, label }: { n: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
+  progress: { gap: 10, alignSelf: 'stretch', paddingTop: 4 },
+  segments: { flexDirection: 'row', gap: 6 },
+  segment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: color.hairline },
+  segmentOn: { backgroundColor: color.brand },
+  progressLabel: { fontSize: 13, fontWeight: '700', color: color.inkSoft },
   root: { flex: 1, backgroundColor: color.screen },
   scroll: { paddingVertical: 40, minHeight: '100%' },
   scrollPhone: { paddingVertical: 24 },

@@ -19,7 +19,7 @@ describe('house list', () => {
   it('a request must agree to every care item and nothing else', () => {
     const items = HOUSE_LISTS['l-danica'];
     const care = items.filter((i) => i.section === 'care').map((i) => i.id);
-    expect(commitmentsProblem(items, [])).toMatch(/all 2/);
+    expect(commitmentsProblem(items, [])).toMatch(/both things/);
     expect(commitmentsProblem(items, [care[0]])).toMatch(/one thing/);
     expect(commitmentsProblem(items, [...care, 'l-emma:care:1'])).toMatch(/not something/);
     expect(commitmentsProblem(items, [items[0].id, ...care])).toMatch(/not something/); // a rule is not a commitment

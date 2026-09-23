@@ -176,6 +176,7 @@ Three properties fall out of this shape:
   token; reuse of a rotated token revokes the whole family.
 - Persisted stay requests, trips and offers (including partial cover), guest-book entries.
 - Real-time messaging: persist, then fan out over WebSocket through the pub/sub port.
+- Asking to stay is a real request: the guest reads the host's house list (rules, things they would love, things they would look after), ticks each commitment, and the host's card says in words what was agreed. The app and the API share one rule.
 - Idempotency keys on writes, per-caller rate limits, a written threat model.
 - A seeded world with a one-tap demo login and a demo-only reset, so a shared demo is never stranded.
 - Cold-start handling for free-tier hosting: the app never blocks on the network, a wake bar

@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { RequestStayScreen } from './src/screens/RequestStayScreen';
 import { Platform, Pressable, Text, View, StyleSheet } from 'react-native';
@@ -33,6 +34,34 @@ import { SessionProvider, useSession } from './src/api/session';
 import { WorldProvider } from './src/api/world-provider';
 import type { RootStackParamList, RootTabParamList } from './src/navigation';
 
+/**
+ * Detail screens were built phone-first. On a desktop browser they stretched edge to edge (a
+ * 1440px-wide chat, a guest book with 1300px lines, Notifications stuck to the left), and the
+ * floating demo pill landed on the send button. On wide viewports they now sit in one centred
+ * reading column; on phones nothing changes.
+ */
+function withReadingColumn<P extends object>(Screen: ComponentType<P>, maxWidth = 760) {
+  function ReadingColumn(props: P) {
+    const { isWide } = useResponsive();
+    if (!isWide) return <Screen {...props} />;
+    return (
+      <View style={{ flex: 1, backgroundColor: color.screen, alignItems: 'center' }}>
+        <View style={{ flex: 1, width: '100%', maxWidth, backgroundColor: color.bg, borderLeftWidth: 1, borderRightWidth: 1, borderColor: color.hairlineSoft }}>
+          <Screen {...props} />
+        </View>
+      </View>
+    );
+  }
+  ReadingColumn.displayName = `ReadingColumn(${Screen.displayName ?? Screen.name ?? 'Screen'})`;
+  return ReadingColumn;
+}
+
+const ConnectionScreenCol = withReadingColumn(ConnectionScreen);
+const GuestBookScreenCol = withReadingColumn(GuestBookScreen);
+const ThreadScreenCol = withReadingColumn(ThreadScreen);
+const TripOffersScreenCol = withReadingColumn(TripOffersScreen);
+const MatchedScreenCol = withReadingColumn(MatchedScreen);
+const NotificationsScreenCol = withReadingColumn(NotificationsScreen);
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -128,15 +157,15 @@ function AppInner() {
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Tabs" component={Tabs} />
             <Stack.Screen name="HostProfile" component={HostProfileScreen} />
-            <Stack.Screen name="Connection" component={ConnectionScreen} />
-            <Stack.Screen name="GuestBook" component={GuestBookScreen} />
-            <Stack.Screen name="Thread" component={ThreadScreen} />
+            <Stack.Screen name="Connection" component={ConnectionScreenCol} />
+            <Stack.Screen name="GuestBook" component={GuestBookScreenCol} />
+            <Stack.Screen name="Thread" component={ThreadScreenCol} />
             <Stack.Screen name="Trust" component={TrustScreen} />
             <Stack.Screen name="Onboard" component={OnboardScreen} />
-            <Stack.Screen name="TripOffers" component={TripOffersScreen} />
+            <Stack.Screen name="TripOffers" component={TripOffersScreenCol} />
             <Stack.Screen name="PlanTrip" component={PlanTripScreen} />
-            <Stack.Screen name="Matched" component={MatchedScreen} options={{ gestureEnabled: false }} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Matched" component={MatchedScreenCol} options={{ gestureEnabled: false }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreenCol} />
             <Stack.Screen name="RequestStay" component={RequestStayScreen} />
           </Stack.Navigator>
         </NavigationContainer>

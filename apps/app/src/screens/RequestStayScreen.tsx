@@ -68,7 +68,7 @@ export function RequestStayScreen({ route, navigation }: StackProps<'RequestStay
               <Text style={styles.sentTitle}>{host.name} has your request.</Text>
               <Text style={styles.body}>
                 {careCount > 0
-                  ? `Alongside your dates, ${host.name} sees that you agreed to ${careCount === 1 ? 'the one thing' : `all ${careCount} things`} you’d be looking after. There is no timer on their answer.`
+                  ? `Alongside your dates, ${host.name} sees that you agreed to ${careCount === 1 ? 'the one thing' : careCount === 2 ? 'both things' : `all ${careCount} things`} you’d be looking after. There is no timer on their answer.`
                   : `There is no timer on ${host.name}’s answer. A message while they decide is always welcome.`}
               </Text>
               <View style={styles.actions}>

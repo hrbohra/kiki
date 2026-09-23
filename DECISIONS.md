@@ -164,6 +164,18 @@ city". Every entry below is a consequence of that sentence or a measurement that
 - **Done instead:** react-native-svg, a gradient and Reanimated for the map; every dependency Expo Go-safe; a react-native-web export so a reviewer needs no phone; the desktop layout is the same screens under a wide shell.
 - **Proof:** `apps/app/src/ui/LivingMap.tsx`, `apps/app/src/ui/useResponsive.ts`, `apps/app/App.tsx`.
 
+### 24. A house list, with commitments agreed before the key changes hands
+- **Obvious build:** a free-text "house rules" box on the listing.
+- **Why it breaks the premise:** it mixes what a host needs, what they would love and what a guest must look after into one paragraph nobody signs. The host finds out what a guest agreed to only when something goes wrong, which is the stranger problem Kiki exists to remove.
+- **Done instead:** three sections (rules, would love, looking after), stored per listing in their own table. A guest ticks each care item when asking; the app and the API run the same `commitmentsProblem` rule; the request stores the words agreed to, so a later edit cannot change them; the host's Requests card says what was agreed. The list sits beside the trust graph, never inside it.
+- **Proof:** `packages/domain/src/domain/houseList.ts` and its tests, `apps/api/src/writes/houselist.service.ts`, the integration test "house list", `apps/app/src/screens/RequestStayScreen.tsx`. Any host → Ask to stay.
+
+### 25. Prepared answers for when the live model is out
+- **Obvious build:** show a spinner and retry when the model fails, or fall straight back to a template.
+- **Why it breaks the premise:** a demo people try at once exhausts a free quota, and a mutual friend who goes quiet, or suddenly sounds like a form letter, reads as broken.
+- **Done instead:** a prepared rung in the ladder: 48 drafts and six intros written from the same facts the live task receives. A test holds every one to the live guard against its own facts. The thread paints a draft at once from the device and swaps in the live one only if the person has not started typing.
+- **Proof:** `packages/domain/src/ai/bakedDrafts.ts`, `packages/domain/src/__tests__/bakedAi.test.ts`.
+
 ---
 
 ## What I would decide differently with Kiki's data

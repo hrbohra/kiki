@@ -357,7 +357,7 @@ one, so the seed, the import adapter and the read model speak the same vocabular
 | Area | Models |
 |---|---|
 | People and trust | `Member`, `Trait`, `Vouch` (with `kind`: invite, friend, stay…), `Contribution`, `GuestReview`, `Review` |
-| Homes and stays | `Listing`, `StayRequest`, `Trip`, `TripOffer` |
+| Homes and stays | `Listing`, `StayRequest` (with the `commitments` a guest agreed to), `Trip`, `TripOffer`, `HouseItem` (a listing's rules, would-loves and care items; read on its own, never folded into the world snapshot) |
 | Accounts | `User`, `Invite`, `OtpToken`, `RefreshToken` |
 | Messaging | `Thread`, `Message` |
 | Infrastructure | `IdempotencyKey`, `AiCache` (keyed by hash of task id, version, system and user prompt), `GeneratedContent` (baked copy) |

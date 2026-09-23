@@ -51,7 +51,7 @@ export function commitmentsProblem(items: HouseItem[], agreed: string[]): string
   const unknown = agreed.filter((id) => !care.includes(id));
   if (unknown.length) return 'That is not something this host asked you to look after.';
   const missing = care.filter((id) => !agreed.includes(id));
-  if (missing.length) return missing.length === 1 ? 'Agree to the one thing you’d be looking after first.' : `Agree to all ${missing.length} things you’d be looking after first.`;
+  if (missing.length) return missing.length === 1 ? 'Agree to the one thing you’d be looking after first.' : missing.length === 2 ? 'Agree to both things you’d be looking after first.' : `Agree to all ${missing.length} things you’d be looking after first.`;
   return null;
 }
 
