@@ -101,7 +101,7 @@ export function offerView(o: TripOffer, trip: Trip): OfferView {
     weeksLabel: `${fmtWeeks(o.weeks).replace(/ weeks?$/, '')} of your ${fmtWeeks(trip.weeks)}`,
     totalLabel: `£${o.total.toLocaleString('en-GB')}`,
     perNightLabel: `£${Math.round(o.total / (o.weeks * 7))} / night`,
-    matchesLabel: `${o.matches} Kiki ${o.matches === 1 ? 'match' : 'matches'}`,
+    matchesLabel: o.matches > 0 ? `${o.matches} Kiki ${o.matches === 1 ? 'match' : 'matches'}` : 'New to Kiki stays',
     pct: Math.round((o.weeks / trip.weeks) * 100),
     yours: trip.dates,
     hasNote: !!o.note,

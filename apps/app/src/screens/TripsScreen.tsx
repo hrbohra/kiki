@@ -2,9 +2,10 @@ import { useNavigation } from '@react-navigation/native';
 import { View, Text, Pressable, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { TrustPill } from '../ui/TrustPill';
 import { Dates, Keys } from '../ui/glyphs';
-import { ITALY_TRIP, fmtWeeks } from '../domain/trips';
+import { fmtWeeks } from '../domain/trips';
 import { relRange } from '../domain/relDates';
-import { useCreatedTrip } from '../demo/createdTrip';
+import { useMyTrips } from '../api/trips';
+import { useSession } from '../api/session';
 import { color, font, radius, space, cardShadow } from '../theme/tokens';
 import type { RootNav } from '../navigation';
 
@@ -15,8 +16,9 @@ const past = [{ title: 'Danica’s Room · Tooting', detail: '3 weeks · £41 / 
 
 export function TripsScreen() {
   const navigation = useNavigation<RootNav>();
-  const created = useCreatedTrip();
-  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'person' : 'people'} can cover it`;
+  const { api } = useSession();
+  const { trips } = useMyTrips(api);
+  const canCover = (n: number) => `${n} ${n === 1 ? 'person' : 'people'} can cover it`;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -27,18 +29,13 @@ export function TripsScreen() {
           <Text style={styles.section}>Dates away</Text>
           <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Add a new trip</Text></Pressable>
         </View>
-        {created ? (
-          <Pressable style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })}>
+        {trips.map((t) => (
+          <Pressable key={t.id} style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: t.id })}>
             <View style={styles.thumb}><Dates size={30} color={color.ink} /></View>
-            <View style={styles.meta}><Text style={styles.title}>{created.name}</Text><Text style={styles.detail}>{created.dates} · {fmtWeeks(created.weeks)}</Text></View>
-            <View style={styles.neutralPill}><Text style={styles.neutralPillText}>No offers yet</Text></View>
+            <View style={styles.meta}><Text style={styles.title}>{t.name}</Text><Text style={styles.detail}>{t.dates} · {fmtWeeks(t.weeks)}</Text></View>
+            {t.offers.length > 0 ? <TrustPill label={canCover(t.offers.length)} tone="solid" /> : <View style={styles.neutralPill}><Text style={styles.neutralPillText}>No offers yet</Text></View>}
           </Pressable>
-        ) : null}
-        <Pressable style={[styles.tripCard, cardShadow]} onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })}>
-          <View style={styles.thumb}><Dates size={30} color={color.ink} /></View>
-          <View style={styles.meta}><Text style={styles.title}>{ITALY_TRIP.name}</Text><Text style={styles.detail}>{ITALY_TRIP.dates} · {fmtWeeks(ITALY_TRIP.weeks)}</Text></View>
-          <TrustPill label={italyCount} tone="solid" />
-        </Pressable>
+        ))}
 
         <Text style={styles.section}>Coming up</Text>
         <View style={[styles.tripCard, cardShadow]}>

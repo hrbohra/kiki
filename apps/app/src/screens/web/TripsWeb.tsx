@@ -6,9 +6,10 @@ import { Dates } from '../../ui/glyphs';
 import { photoFor } from '../../ui/listingPhotos';
 import { WEB_SHADOW } from './webBits';
 import { WriteEntryModal } from './WriteEntryModal';
-import { ITALY_TRIP, fmtWeeks } from '../../domain/trips';
+import { fmtWeeks } from '../../domain/trips';
 import { relRange } from '../../domain/relDates';
-import { useCreatedTrip } from '../../demo/createdTrip';
+import { useMyTrips } from '../../api/trips';
+import { useSession } from '../../api/session';
 import { color, radius } from '../../theme/tokens';
 import * as world from '../../world';
 import type { RootNav } from '../../navigation';
@@ -18,14 +19,15 @@ import type { RootNav } from '../../navigation';
  *  entry closes the loop on the stays you took. */
 export function TripsWeb() {
   const navigation = useNavigation<RootNav>();
-  const created = useCreatedTrip();
+  const { api } = useSession();
+  const { trips } = useMyTrips(api);
   const emma = world.memberById('emma');
   const danica = world.memberById('danica');
   const emmaListing = world.listingForHost('emma');
   const danicaListing = world.listingForHost('danica');
   const [written, setWritten] = useState(false);
   const [modal, setModal] = useState(false);
-  const italyCount = `${ITALY_TRIP.offers.length} ${ITALY_TRIP.offers.length === 1 ? 'person' : 'people'} can cover it`;
+  const canCover = (n: number) => `${n} ${n === 1 ? 'person' : 'people'} can cover it`;
 
   return (
     <View style={{ gap: 20 }}>
@@ -38,10 +40,9 @@ export function TripsWeb() {
             <View style={{ flex: 1 }} />
             <Pressable style={styles.planPill} onPress={() => navigation.navigate('PlanTrip')}><Text style={styles.planText}>Add a new trip</Text></Pressable>
           </View>
-          {created ? (
-            <TripRow name={created.name} meta={`${created.dates} · ${fmtWeeks(created.weeks)} · £${created.budget} / night`} pill="No offers yet" tone="neutral" onPress={() => navigation.navigate('TripOffers', { tripId: 'created' })} />
-          ) : null}
-          <TripRow name={ITALY_TRIP.name} meta={`${ITALY_TRIP.dates} · ${fmtWeeks(ITALY_TRIP.weeks)} · £${ITALY_TRIP.budget} / night`} pill={italyCount} tone="brand" onPress={() => navigation.navigate('TripOffers', { tripId: 'italy' })} />
+          {trips.map((t) => (
+            <TripRow key={t.id} name={t.name} meta={`${t.dates} · ${fmtWeeks(t.weeks)} · £${t.budget} / night`} pill={t.offers.length > 0 ? canCover(t.offers.length) : 'No offers yet'} tone={t.offers.length > 0 ? 'brand' : 'neutral'} onPress={() => navigation.navigate('TripOffers', { tripId: t.id })} />
+          ))}
 
           <Text style={[styles.h2, { marginTop: 18 }]}>Coming up</Text>
           <View style={[styles.trip, WEB_SHADOW]}>

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TRPCError } from '@trpc/server';
 import { PrismaService } from '../prisma/prisma.service';
 import { IdempotencyService } from '../common/idempotency.service';
 import { actingMemberId } from '../common/actor';
@@ -23,7 +24,8 @@ export class TripsService {
   async create(userId: string, input: CreateTripInput) {
     return this.idem.run(userId, input.idempotencyKey, async () => {
       const authorId = await actingMemberId(this.prisma, userId);
-      const nights = Math.max(1, input.toDay - input.fromDay);
+      if (input.toDay - input.fromDay < 7) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Kiki stays are a week or longer.' });
+      const nights = input.toDay - input.fromDay;
       return this.prisma.trip.create({
         data: {
           authorId,
@@ -36,6 +38,13 @@ export class TripsService {
         },
       });
     });
+  }
+
+  /** Demo only: trips the demo visitor posted (they have no offers) are theirs to try, not the next
+   *  visitor's to find. The seeded trip, which has offers, stays. */
+  async resetDemo(): Promise<number> {
+    const r = await this.prisma.trip.deleteMany({ where: { authorId: 'you', offers: { none: {} } } });
+    return r.count;
   }
 
   /** The traveller's own trips, with any offers. */

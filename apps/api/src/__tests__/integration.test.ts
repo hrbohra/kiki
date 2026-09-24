@@ -198,3 +198,25 @@ describe('house list (rules, would-love, looking after)', () => {
     expect(await (prisma as unknown as PrismaClient).stayRequest.count({ where: { guestId: 'you' } })).toBe(0);
   });
 });
+
+describe('trips (the weeks you are away)', () => {
+  it('posting is a real write, a stay under a week is refused, and the demo reset clears only what a visitor posted', async () => {
+    process.env.DEMO_MODE = '1';
+    const you = await (prisma as unknown as PrismaClient).user.findUniqueOrThrow({ where: { email: 'you@kiki.demo' } });
+    const me = caller({ id: you.id, email: you.email });
+
+    await expect(me.trips.create({ title: 'Too short', kind: 'Beach', fromDay: 450, toDay: 453, budgetPerNight: 40 })).rejects.toThrow(/week or longer/);
+    const posted = await me.trips.create({ title: 'integration-trip', kind: 'Mountains', fromDay: 450, toDay: 464, budgetPerNight: 40, idempotencyKey: `trip-${Date.now()}` });
+    expect(posted.nights).toBe(14);
+
+    const mine = await me.trips.mine();
+    expect(mine.map((t) => t.title)).toContain('integration-trip');
+    const seeded = mine.find((t) => t.title === 'Italy for Mum’s 60th');
+    expect(seeded?.offers.length).toBeGreaterThan(0);
+
+    await me.demo.reset();
+    const after = await me.trips.mine();
+    expect(after.map((t) => t.title)).not.toContain('integration-trip');
+    expect(after.map((t) => t.title)).toContain('Italy for Mum’s 60th');
+  });
+});

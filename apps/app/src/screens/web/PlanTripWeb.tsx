@@ -5,8 +5,9 @@ import { haptic } from '../../ui/feedback';
 
 import { color } from '../../theme/tokens';
 import { Dates } from '../../ui/glyphs';
-import { TRIP_KINDS, shortDate, weeksBetween, fmtWeeks, type Trip } from '../../domain/trips';
-import { setCreatedTrip } from '../../demo/createdTrip';
+import { TRIP_KINDS, shortDate, weeksBetween, fmtWeeks } from '../../domain/trips';
+import { postTrip } from '../../api/trips';
+import { useSession } from '../../api/session';
 import { WEB_SHADOW } from './webBits';
 
 import type { RootNav } from '../../navigation';
@@ -42,15 +43,24 @@ export function PlanTripWeb() {
     ? `${shortDate(draft.start)} - ${shortDate(draft.end)} · ${fmtWeeks(weeks)} · £${draft.budget} / night`
     : 'Kiki stays are a week or longer';
 
-  const post = () => {
-    const trip: Trip = {
-      id: 'created', name: draft.name.trim(), icon: draft.icon,
-      dates: `${shortDate(draft.start)} - ${shortDate(draft.end)}`,
-      weeks, budget: Number(draft.budget || 0), offers: [],
-    };
-    haptic.success();
-    setCreatedTrip(trip);
-    navigation.replace('TripOffers', { tripId: 'created' });
+  const { api } = useSession();
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
+  const idem = React.useRef(`trip-${Date.now().toString(36)}`).current;
+  /** A real write: the trip is on the server, survives a reload and is what Kikiers see. */
+  const post = async () => {
+    if (posting) return;
+    setPosting(true);
+    setPostError(null);
+    try {
+      const trip = await postTrip(api, { title: draft.name.trim(), kind: draft.icon, startIso: draft.start, endIso: draft.end, budgetPerNight: Number(draft.budget || 0), idempotencyKey: idem });
+      haptic.success();
+      navigation.replace('TripOffers', { tripId: trip.id });
+    } catch (e) {
+      setPostError(e instanceof Error && e.message ? e.message : 'That didn’t post. Try again in a moment.');
+    } finally {
+      setPosting(false);
+    }
   };
 
   return (
@@ -115,13 +125,14 @@ export function PlanTripWeb() {
 
           <View style={styles.actions}>
             {valid ? (
-              <Pressable style={styles.post} onPress={post}><Text style={styles.postText}>Post this trip</Text></Pressable>
+              <Pressable style={[styles.post, posting && { opacity: 0.6 }]} onPress={() => void post()} disabled={posting} accessibilityRole="button"><Text style={styles.postText}>{posting ? 'Posting…' : 'Post this trip'}</Text></Pressable>
             ) : (
               <>
                 <View style={styles.postDisabled}><Text style={styles.postDisabledText}>Post this trip</Text></View>
                 <Text style={styles.blockedWhy}>{blockedWhy}</Text>
               </>
             )}
+            {postError ? <Text style={styles.blockedWhy}>{postError}</Text> : null}
             <View style={{ flex: 1 }} />
             <Pressable onPress={() => navigation.goBack()}><Text style={styles.cancel}>Cancel</Text></Pressable>
           </View>

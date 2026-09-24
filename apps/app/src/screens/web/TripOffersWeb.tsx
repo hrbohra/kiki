@@ -5,8 +5,9 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Avatar } from '../../ui/Avatar';
 import { Dates, Standing } from '../../ui/glyphs';
 import { color } from '../../theme/tokens';
-import { ITALY_TRIP, offerView, fmtWeeks } from '../../domain/trips';
-import { useCreatedTrip } from '../../demo/createdTrip';
+import { offerView, fmtWeeks } from '../../domain/trips';
+import { useMyTrips, tripById } from '../../api/trips';
+import { useSession } from '../../api/session';
 import { WEB_SHADOW } from './webBits';
 import { OfferModal } from './OfferModal';
 
@@ -15,13 +16,15 @@ import type { RootNav } from '../../navigation';
 
 /** Your place while you are away, and the offers on it. The inverse of Requests — built around weeks
  *  coverage, since an offer is partial by default. Serves the fixtured trip or a just-created one. */
-export function TripOffersWeb({ tripId }: { tripId: 'italy' | 'created' }) {
+export function TripOffersWeb({ tripId }: { tripId: string }) {
   const navigation = useNavigation<RootNav>();
-  const created = useCreatedTrip();
-  const trip = tripId === 'created' && created ? created : ITALY_TRIP;
-  const offers = trip.offers.map((o) => offerView(o, trip));
+  const { api } = useSession();
+  const { trips } = useMyTrips(api);
+  const trip = tripById(tripId) ?? trips[0];
+  const offers = trip ? trip.offers.map((o) => offerView(o, trip)) : [];
   const [openOffer, setOpenOffer] = useState<string | null>(null);
   const active = offers.find((o) => o.id === openOffer) ?? null;
+  if (!trip) return <View style={styles.root} />;
 
   return (
     <View style={styles.root}>

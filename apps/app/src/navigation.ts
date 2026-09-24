@@ -12,7 +12,7 @@ export type RootStackParamList = {
   /** as: who is reading (derived from the entry, not a toggle). requestId: set when a host opens a guest from Requests. */
   Trust: { hostId: string; as?: 'host' | 'guest'; requestId?: string };
   Onboard: undefined;
-  TripOffers: { tripId: 'italy' | 'created' };
+  TripOffers: { tripId: string };
   PlanTrip: undefined;
   /** The match moment: shown once after slide-to-match, held until dismissed. */
   Matched: { guestId: string; startInDays: number; nights: number };

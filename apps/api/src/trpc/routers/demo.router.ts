@@ -13,6 +13,7 @@ export const demoRouter = router({
     const requests = await ctx.requests.resetDemo();
     const traits = await ctx.world.resetDemoTraits();
     const houseItems = await ctx.houseList.restoreSeeded(['l-you']);
-    return { ...requests, traits, houseItems };
+    const trips = await ctx.trips.resetDemo();
+    return { ...requests, traits, houseItems, trips };
   }),
 });
