@@ -13,10 +13,14 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "VOICE_PIPELINE.md"],
+  "files": [
+    "dist",
+    "VOICE_PIPELINE.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "tsup": "^8.3.5",
